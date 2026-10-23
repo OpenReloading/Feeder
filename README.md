@@ -12,8 +12,6 @@ Requirements: [Dev Container CLI](https://github.com/devcontainers/cli) and podm
 devcontainer up --docker-path podman --workspace-folder .
 ```
 
-This builds the container and creates `.venv` from `requirements.txt`.
-
 ## Build and test
 
 Run in the container (prefix `devcontainer exec --docker-path podman --workspace-folder .`):
@@ -22,7 +20,7 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 |---|---|
 | `.venv/bin/python build.py` | builds every part into `build/<name>.stl` and `.step`, then runs the tests |
 | `.venv/bin/python build.py --no-test` | builds only |
-| `.venv/bin/python build.py --assembly` | also `build/assembly/`: `feeder.step` (labelled part tree, opens in FreeCAD and Fusion), `feeder.3mf` (every part in place) and `viewer.html` (3D viewer with the assembly steps, works offline once three.js is cached in `build/.three/`). Screws, bolts, nuts, washers and heat-set inserts are included at nominal size. In the viewer each step's part moves in first, then its fasteners along their axes |
+| `.venv/bin/python build.py --assembly` | also `build/assembly/`: `feeder.step` (part tree), `feeder.3mf` and `viewer.html` (3D assembly steps with every fastener) |
 | `.venv/bin/python build.py --variants` | also `build/variants/<split>/` for each `body.split`: body parts and plate, with an `assembly/` folder |
 | `.venv/bin/python build.py --plates` | also `build/plates/<set>/` for each plate set: plate, exit insert, drop tube and hose adapter |
 | `.venv/bin/python -m pytest -q` | tests only |
@@ -37,7 +35,7 @@ The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenRe
 .venv/bin/mkdocs build --strict               # site/
 ```
 
-`.github/workflows/pages.yml` runs the tests, builds the guide and deploys `site/` to GitHub Pages on every push to `main` (pull requests build only). Deploy fails until the repository's Pages source is set to "GitHub Actions" (Settings, Pages).
+`.github/workflows/pages.yml` runs the tests, builds the guide and deploys `site/` to GitHub Pages on every push to `main` (pull requests build only).
 
 `build/<name>.stl` and `.step` are in the modelled orientation (assembly frame for the body). `build/print/<name>.stl` is each part as it goes on the bed (`feeder/printing.py`): flipped where it prints upside down, turned across the bed diagonal where it is wider than the bed.
 
@@ -97,17 +95,11 @@ Body splits (`body.split`), each fits a 256 mm bed:
 
 Plates, gate and exit insert follow the bowl, so a `one_piece` body needs its own. With `halves` the motor and the clutch stay concentric only as well as the halves are screwed together: tighten the post screws with both halves flat on a table.
 
-Slip torque (estimates for printed faces, friction 0.2 to 0.5, until tested on hardware):
-
-| Springs | Slip torque | Role |
-|---|---|---|
-| 6 | 0.84 to 2.10 Nm | the torque limit with the default PWM speed controller. With a current-limited motor driver it is the backstop behind that limit (`electronics.current_limit_torque`, 0.6 Nm) |
-
-Plate drag under 1 kg of brass (the 250 case design fill, friction 0.3, estimate): 0.24 Nm at 45 deg, 0.27 Nm at 38 deg (`layout.plate_drag_torque`).
+Slip torque with 6 springs: 0.84 to 2.10 Nm (estimate), the only torque limit for the gearbox. Plate drag under 250 cases: 0.24 Nm at 45 deg, 0.27 Nm at 38 deg (estimate, `layout.plate_drag_torque`).
 
 The knob screw is tightened once at assembly, until the knob sits on the clutch. The spring length, and with it the slip torque, then never changes.
 
-Plate change, no tools: twist the cap off, lift the plate off the ring hex, drop the next plate on, twist the cap on hand-tight. The cap holds the plate down against the tipping moment of the brass on the low side (0.59 Nm at 38 deg): about 23.8 N clamp at 1 Nm hand torque, 0.3 N over the 23.5 N the tipping test needs (`slip_clutch.cap_clamp_force`). The cap lifts if its preload is below 15.7 N: twice the 7.8 N reaction, since the reaction tips the cap about its low edge against the preload on the axis. That needs at least 0.6 Nm of twist at thread friction 0.5 (0.25 Nm at 0.2), firmer than a light hand-tight. All values are estimates, test on hardware.
+Plate change, no tools: twist the cap off, lift the plate off the ring hex, drop the next plate on, twist the cap on firmly by hand. It holds the plate down against the brass on the low side (`slip_clutch.cap_clamp_force`).
 
 ## Plate sets
 
@@ -121,7 +113,7 @@ One body and band take every plate: the exit shaft in the core holds any set's e
 | `large_pistol` | .40 S&W, .357 SIG, .45 ACP, .38 Super, 7.62x25, 10mm Auto | 8.60 | 15.19 | 29 | 200 | 12.79 |
 | `revolver` | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 127 | 13.66 |
 
-Groups: the fewest (4) that cover the table with one plate height each, every case at 0.34 to 0.40 of its length (the centre of mass estimate is 0.33 to 0.39) and at most 2.3 mm rim spread. The plate bottom must stay within a rim thickness of the deck, so length sets the groups. In a group plate the smallest rim gets up to 2.3 mm more play than the 3 mm of a one-case plate: more upside-down cases are possible, UNTESTED. A one-case plate (any key of `calibers.table`) is the tight option. Capacity counts the group's largest case. Rifle cases (laid down) and bullets need another exit and are not built.
+A group plate gives its smallest case up to 2.3 mm more play than a one-case plate, so more cases may go in upside down (untested). A one-case plate (any key of `calibers.table`) is the tight option. Capacity counts the group's largest case. Rifle cases and bullets need another exit and are not built.
 
 ## Hose and sensor
 
@@ -131,7 +123,7 @@ Groups: the fewest (4) that cover the table with one plate height each, every ca
 
 ## Tilt mount
 
-Yoke on the 4 M5 inserts of the body core, M10 pivot axis parallel to x, tube clamp on a vertical 25 mm tube (`mount.tube_shape` round or square). A tilt link joins a fork under the yoke (pin A) and a fork on the low side of the clamp block (pin B). Pivot, A and B form a triangle, so the body is held in both directions and cannot lift or flop. The weight moment turns the body toward a steeper tilt at every tilt of the range, so the link is always in compression and the pin play stays on one side. `test_mount` computes the centre of mass from the CAD volumes of the tilting parts (PLA fill 0.5 to 0.8, motor 0.32 to 0.5 kg, 0.15 kg unmodelled hardware at the exit side, with and without 1 kg of brass). The empty feeder at 38 deg is the worst case (-0.10 Nm), which sets `mount.pivot_depth` to 60 mm. The load checks use 3.25 kg at the plate top (with the wall extender). The nylon nut on the pivot bolt sets the pivot friction. Strength: `mount.push` (50 N, estimate) at any point of the rim top, in 8 horizontal directions and straight down, over the tilt span, must stay within `mount.layer_limit` (10 MPa equivalent stress across the printed layers, unverified) in the tongue stem and at the yoke ear roots. The worst case is a sideways push at the low rim at 62 deg: it twists the stem by about 13 Nm. The tongue is 22 x 24 mm (`mount.tongue_t`, `mount.tongue_w`, 9.3 MPa), and a web from the clamp block edges braces the stem up to the yoke ears.
+Yoke on the 4 M5 inserts of the body core, M10 pivot axis parallel to x, tube clamp on a vertical 25 mm tube (`mount.tube_shape` round or square). A tilt link joins a fork under the yoke (pin A) and a fork on the low side of the clamp block (pin B). The weight keeps the link in compression at every tilt, empty or full (`test_mount`, centre of mass from the CAD volumes). The nylon nut on the pivot bolt sets the pivot friction. `test_mount` also checks a 50 N push anywhere on the rim (`mount.push`) against the printed layer strength.
 
 Two links on the same pins (`mount.link_a`, `mount.link_b`). The link gets 1.1 to 1.2 mm shorter per degree steeper, so 0.1 mm of hole or print error moves the tilt by 0.1 deg at most:
 
