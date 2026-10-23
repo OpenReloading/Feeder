@@ -1,0 +1,398 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case Feeder Assembly</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one workbench column, viewer on top, controls and the numbered assembly sequence under it, side by side when wide */
+:root {
+  --bg: #eef1f0; --panel: #ffffff; --fg: #18211f; --muted: #5a6764; --line: #cfd7d4; --accent: #1f7a6d; --accent-fg: #ffffff;
+  --stage: #e3e8e6;
+  --f-display: "Saira Semi Condensed", "Arial Narrow", sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121817; --panel: #1a2220; --fg: #e3ebe8; --muted: #93a39f; --line: #2c3835; --accent: #4fc2ae; --accent-fg: #0d1513; --stage: #1d2624; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121817; --panel: #1a2220; --fg: #e3ebe8; --muted: #93a39f; --line: #2c3835; --accent: #4fc2ae; --accent-fg: #0d1513; --stage: #1d2624; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5 }
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 24px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px }
+header { display: grid; gap: 6px }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 4.5vw, 40px); line-height: 1.1; margin: 0; text-wrap: balance }
+header p { margin: 0; max-width: 68ch; color: var(--muted) }
+.specs { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums }
+.specs b { font-weight: 500; color: var(--fg) }
+.specs span { color: var(--muted) }
+.stage { position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 6px; height: clamp(360px, 62vh, 620px); overflow: hidden; touch-action: none }
+.stage canvas { display: block; width: 100%; height: 100% }
+.hint { position: absolute; left: 12px; bottom: 10px; font-family: var(--f-mono); font-size: 11px; color: var(--muted); pointer-events: none }
+.status { position: absolute; left: 12px; top: 10px; right: 12px; font-family: var(--f-display); font-weight: 500; font-size: 17px; pointer-events: none }
+.status small { display: block; font-family: var(--f-mono); font-size: 11px; color: var(--muted); font-weight: 400 }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-mono); color: var(--muted) }
+.lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 18px; align-items: start }
+@media (max-width: 760px) { .lower { grid-template-columns: minmax(0, 1fr) } }
+.controls { display: grid; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center }
+button { font: 500 14px var(--f-body); color: var(--fg); background: transparent; border: 1px solid var(--line); border-radius: 4px; padding: 7px 12px; cursor: pointer }
+button:hover { border-color: var(--accent) }
+button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); min-width: 84px }
+button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent) }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+input[type=range] { width: 100%; accent-color: var(--accent) }
+label.k { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase }
+.legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 12px; font-size: 13px; color: var(--muted) }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px }
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: s }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 8px; padding: 7px 10px; border-radius: 4px; cursor: pointer; color: var(--muted) }
+ol.steps li::before { content: counter(s, decimal-leading-zero); font-family: var(--f-mono); font-size: 12px; padding-top: 2px }
+ol.steps li b { display: block; font-weight: 500; color: var(--fg) }
+ol.steps li.done b { color: var(--fg) }
+ol.steps li.now { background: var(--panel); outline: 1px solid var(--accent) }
+ol.steps li.now::before { color: var(--accent) }
+ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono); font-size: 11px }
+.card { display: grid; gap: 8px; background: var(--panel); border: 1px solid var(--accent); border-radius: 6px; padding: 14px }
+.card h2 { font-family: var(--f-display); font-weight: 700; font-size: 22px; line-height: 1.2; margin: 0 }
+.card p { margin: 0; max-width: 90ch }
+.card small { font-family: var(--f-mono); font-size: 12px; color: var(--muted) }
+[hidden] { display: none !important }
+.note { font-size: 13px; color: var(--muted); max-width: 90ch; margin: 0 }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1>Case Feeder Assembly</h1>
+    <p id="intro"></p>
+    <div class="specs" id="specs"></div>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="loading" id="loading">Loading models…</div>
+    <div class="status" id="status"></div>
+    <div class="hint">Drag to orbit · scroll or pinch to zoom · right-drag to pan</div>
+  </div>
+
+  <section class="card" id="card" hidden aria-live="polite">
+    <label class="k" id="cardNo"></label>
+    <h2 id="cardTitle"></h2>
+    <p id="cardText"></p>
+    <small id="cardParts"></small>
+    <div class="row">
+      <button id="back">Back</button>
+      <button id="replay">Replay</button>
+      <button class="primary" id="next">Next</button>
+    </div>
+  </section>
+
+  <div class="lower">
+    <div class="controls">
+      <div class="row" role="group" aria-label="View">
+        <button id="modeFull" aria-pressed="true">Full animation</button>
+        <button id="modeStep" aria-pressed="false">Step by step</button>
+      </div>
+      <div class="row">
+        <button class="primary" id="play">Pause</button>
+        <button id="explode">Exploded</button>
+        <button id="assemble">Assembled</button>
+        <button id="cut" aria-pressed="false">Section cut</button>
+        <button id="tilt" aria-pressed="true">Tilted</button>
+      </div>
+      <div>
+        <label class="k" for="time">Assembly progress</label>
+        <input type="range" id="time" min="0" max="1000" value="0">
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <ol class="steps" id="steps"></ol>
+  </div>
+
+  <p class="note" id="note"></p>
+</div>
+
+<!-- LIBS -->
+<!-- DATA -->
+<script>
+(() => {
+  const INFO = window.FEEDER_INFO, MODELS = window.FEEDER_MODELS;
+  const S = INFO.springs, CS = INFO.cases;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const MATS = {
+    motor: { c: 0x4b5258, m: 0.3, r: 0.5, label: "Motor (envelope)" },
+    steel: { c: 0x7d858c, m: 0.7, r: 0.35, label: "Motor boss, D shaft" },
+    body:  { c: 0x8f9a96, label: "Body core" },
+    wall:  { c: 0x8f9a96, o: 0.35, label: "Wall arcs" },
+    gate:  { c: 0xa98be0, label: "Gate (wear)" },
+    exit:  { c: 0xbf4773, label: "Exit insert (wear)" },
+    alu:   { c: 0xc4cad0, m: 0.8, r: 0.3, label: "Pololu 2693 hub" },
+    tool:  { c: 0xe6c53a, label: "Hub gauge (tool)" },
+    pla:   { c: 0x2a8a7c, label: "Carrier (printed)" },
+    ring:  { c: 0x7a5fa8, label: "Drive ring (wear)" },
+    plate: { c: 0xd8c9a3, o: 0.6, label: "Case plate" },
+    brass: { c: 0xc9a24a, m: 0.3, r: 0.45, label: "9mm cases" },
+    pla2:  { c: 0xc0603f, label: "Disc (printed)" },
+    pla3:  { c: 0x4a5f8f, label: "Knob (printed)" },
+    cap:   { c: 0x2f6f9f, o: 0.55, label: "Cap (printed)" },
+    extender: { c: 0x8f9a96, o: 0.35, label: "Wall extender (optional)" },
+    spring:{ c: 0xb7bec5, m: 0.8, r: 0.25, label: "Springs" },
+    drop:  { c: 0x3f9a6a, label: "Drop tube" },
+    yoke:  { c: 0xa8564a, label: "Yoke" },
+    clamp: { c: 0x5b6fb0, label: "Clamp" },
+    link:  { c: 0xc9a227, label: "Tilt link (printed rod ends, M6 rod)" },
+    tube:  { c: 0xa6adb4, m: 0.7, r: 0.4, label: "Stand tube (stub)" },
+    screw: { c: 0x34383c, m: 0.6, r: 0.4, label: "Screws and bolts" },
+    nut:   { c: 0x6b7379, m: 0.6, r: 0.4, label: "Nuts" },
+    washer:{ c: 0x9ea6ad, m: 0.6, r: 0.4, label: "Washers" },
+    insert:{ c: 0xb8944d, m: 0.7, r: 0.35, label: "Heat-set inserts" },
+    elec:  { c: 0x4c5461, label: "Electronics box" },
+    lid:   { c: 0x73808f, label: "Electronics lid" },
+  };
+
+  // assembly sequence: step 0 is already in place, later steps lift away from the body in the part's own direction.
+  // In each step the parts move in first, then their fasteners along their own axes: screws, then nuts.
+  const STEPS = INFO.steps, FS = INFO.fasteners;
+  const SPRING_STEP = INFO.spring_step, CASE_STEP = INFO.case_step;
+
+  const MOVE = 0.9, FMOVE = 0.6, HOLD = 0.3, END = 2.0;  // seconds
+  const SEQS = STEPS.map(() => []);  // fastener sequences that move in each step, in order
+  for (const f of FS) { const s = SEQS[INFO.parts[f.host].step]; if (f.seq && !s.includes(f.seq)) s.push(f.seq); }
+  SEQS.forEach(s => s.sort());
+  const START = [];  // s
+  let T = 0;
+  STEPS.forEach((_, i) => { START.push(T); if (i) T += MOVE + SEQS[i].length * FMOVE + HOLD; });
+  T += END - HOLD;
+  const placedAt = i => i === 0 ? 0 : START[i] + MOVE + SEQS[i].length * FMOVE;  // step i fully in place
+  const lift = k => 24 + 7 * k;  // mm from the assembled position while waiting
+
+  // page text
+  const specs = [
+    ["Plate", `Ø${INFO.plate_d} mm`, `${INFO.pockets} pockets`],
+    ["Tilt", `${INFO.tilt}°`, `${INFO.tilt_range[0]} to ${INFO.tilt_range[1]}°`],
+    ["Slip torque", `${INFO.slip[0]} to ${INFO.slip[1]} Nm`, `estimate, μ 0.2 to 0.5, ${S.count} springs`],
+    ["Plate drag", `${INFO.drag} Nm`, "estimate, 1 kg of brass"],
+  ];
+  document.getElementById("eyebrow").textContent = INFO.eyebrow;
+  document.getElementById("intro").textContent = INFO.intro;
+  document.getElementById("specs").innerHTML = specs.map(([k, v, n]) => `<div><span>${k}</span> <b>${v}</b> <span>(${n})</span></div>`).join("");
+  for (const [k, l] of Object.entries(INFO.labels)) MATS[k].label = l;
+  const shown = new Set([...INFO.parts.map(p => p.kind), "brass", "spring"]);
+  for (const f of FS) shown.add(f.kind);
+  document.getElementById("legend").innerHTML = Object.entries(MATS).filter(([k]) => shown.has(k)).map(([, m]) => m).map(m => `<div><i style="background:#${m.c.toString(16).padStart(6, "0")}"></i>${m.label}</div>`).join("");
+  document.getElementById("note").textContent = INFO.note;
+  const stepsEl = document.getElementById("steps");
+  stepsEl.innerHTML = STEPS.map(s => `<li tabindex="0"><div><b>${s.t}</b>${s.d}${s.f.length ? `<small>${s.f.join(" · ")}</small>` : ""}</div></li>`).join("");
+
+  // scene
+  const stage = document.getElementById("stage");
+  const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.localClippingEnabled = true;
+  stage.prepend(renderer.domElement);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(32, 1, 5, 4000);
+  const camDir = new THREE.Vector3(330, 150, 60).normalize();  // from +x: the exit side is on the right
+  camera.position.copy(camDir).multiplyScalar(900);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x445055, 0.75));
+  const key = new THREE.DirectionalLight(0xffffff, 0.75); key.position.set(120, 400, 280); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.3); rim.position.set(-300, 120, -250); scene.add(rim);
+
+  // CAD body frame (z up the shaft, +y to the exit) -> three.js y up. tiltG rotates the body about the pivot axis (parallel to x).
+  const model = new THREE.Group(); model.rotation.x = -Math.PI / 2; scene.add(model);
+  const [py, pz] = INFO.pivot;
+  const tiltG = new THREE.Group(); tiltG.position.set(0, py, pz); model.add(tiltG);
+  const inner = new THREE.Group(); inner.position.set(0, -py, -pz); tiltG.add(inner);
+  const TILT = INFO.tilt * Math.PI / 180;
+  const cut = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);  // keeps world x <= 0, removes the half facing the camera
+  const materials = {};
+  for (const [k, m] of Object.entries(MATS)) {
+    materials[k] = new THREE.MeshStandardMaterial({
+      color: m.c, metalness: m.m ?? 0.05, roughness: m.r ?? 0.65,
+      transparent: !!m.o, opacity: m.o ?? 1, depthWrite: !m.o, side: THREE.DoubleSide, clippingPlanes: [],
+    });
+  }
+
+  const b64 = s => { const bin = atob(s), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; };
+  const loader = new THREE.STLLoader();
+  const movers = [];  // { obj, step, dir, base, tool }
+  const V0 = new THREE.Vector3();
+  for (const p of INFO.parts) {
+    const mesh = new THREE.Mesh(loader.parse(b64(MODELS[p.name])), materials[p.kind]);
+    if (p.kind === "plate" || p.kind === "wall") mesh.renderOrder = 2;
+    inner.add(mesh);
+    movers.push({ obj: mesh, step: p.step, dir: new THREE.Vector3(...p.dir), base: V0, tool: !!p.tool });
+  }
+
+  // fasteners: one instanced mesh per group, moving with the host part, then in along their own axes
+  const SHIFT = new THREE.Matrix4(), M = new THREE.Matrix4();
+  const fastGroups = FS.map(f => {
+    const mesh = new THREE.InstancedMesh(loader.parse(b64(MODELS[f.model])), materials[f.kind], f.m.length);
+    mesh.frustumCulled = false;  // the instances lie outside the base geometry's bounds
+    inner.add(mesh);
+    const host = INFO.parts[f.host];
+    movers.push({ obj: mesh, step: host.step, dir: new THREE.Vector3(...host.dir), base: V0, tool: false });
+    return { f, mesh, step: host.step, base: f.m.map(a => new THREE.Matrix4().fromArray(a)), off: -1 };
+  });
+  // 9mm cases: plain cylinders standing base-down on the deck, moving with the plate
+  const caseGeo = new THREE.CylinderGeometry(CS.rim_d / 2, CS.rim_d / 2, CS.length, 32).rotateX(Math.PI / 2).translate(0, 0, CS.length / 2);
+  const cases = new THREE.Group();
+  for (const [x, y] of CS.xy) { const m = new THREE.Mesh(caseGeo, materials.brass); m.position.set(x, y, CS.z0); cases.add(m); }
+  inner.add(cases);
+  movers.push({ obj: cases, step: CASE_STEP, dir: new THREE.Vector3(0, 0, 1), base: V0 });
+
+  // springs: helix tube, built at free length and scaled in z to the current length
+  class Helix extends THREE.Curve {
+    constructor(r, h, turns) { super(); this.r = r; this.h = h; this.turns = turns; }
+    getPoint(t, out = new THREE.Vector3()) { const a = t * this.turns * 2 * Math.PI; return out.set(this.r * Math.cos(a), this.r * Math.sin(a), t * this.h); }
+  }
+  const wire = 0.8;  // drawing only
+  const springGeo = new THREE.TubeGeometry(new Helix(S.od / 2 - wire / 2, S.free, 6.5), 320, wire / 2, 8, false);
+  const springs = new THREE.Group();
+  for (let i = 0; i < S.count; i++) {
+    const a = 2 * Math.PI * i / S.count;
+    const m = new THREE.Mesh(springGeo, materials.spring);
+    m.position.set(S.pcd / 2 * Math.cos(a), S.pcd / 2 * Math.sin(a), 0);
+    springs.add(m);
+  }
+  inner.add(springs);
+  movers.push({ obj: springs, step: SPRING_STEP, dir: new THREE.Vector3(0, 0, 1), base: new THREE.Vector3(0, 0, S.bottom) });
+  const knobStep = INFO.parts.find(p => p.name === "slip_clutch_knob").step;
+
+  const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const toward = (t0, d, t) => 1 - ease(Math.min(1, Math.max(0, (t - t0) / d)));
+  const offset = (step, t) => step === 0 ? 0 : lift(step) * toward(START[step], MOVE, t);
+  const fastOffset = (g, t) => g.f.seq ? g.f.lift * toward(START[g.step] + MOVE + SEQS[g.step].indexOf(g.f.seq) * FMOVE, FMOVE, t) : 0;
+
+  let t = reduce ? T : 0, playing = !reduce, last = performance.now(), cutOn = false;
+  let stepMode = false, k = 0, stopAt = T;  // step by step: step k plays up to stopAt
+  let tiltOn = true, tiltCur = TILT;
+  const status = document.getElementById("status"), slider = document.getElementById("time"), playBtn = document.getElementById("play");
+  const items = [...stepsEl.children];
+
+  function apply() {
+    let idx = 0;
+    if (t > 0) START.forEach((s, i) => { if (i && s <= t) idx = i; });
+    for (const m of movers) {
+      m.obj.position.copy(m.base).addScaledVector(m.dir, offset(m.step, t));
+      m.obj.visible = m.tool ? idx === m.step : !(stepMode && m.step > k);  // step by step: later steps hidden
+    }
+    for (const g of fastGroups) {
+      g.mesh.visible = !(stepMode && g.step > k);
+      const o = fastOffset(g, t);
+      if (o === g.off) continue;
+      g.off = o; SHIFT.makeTranslation(0, 0, o);
+      g.base.forEach((b, i) => g.mesh.setMatrixAt(i, M.multiplyMatrices(b, SHIFT)));
+      g.mesh.instanceMatrix.needsUpdate = true;
+    }
+    springs.scale.z = Math.min(S.free, S.working + offset(knobStep, t) - offset(SPRING_STEP, t)) / S.free;
+    items.forEach((li, i) => { li.classList.toggle("now", i === idx); li.classList.toggle("done", i < idx); });
+    const len = (springs.scale.z * S.free).toFixed(1);
+    status.innerHTML = `${String(idx + 1).padStart(2, "0")} · ${STEPS[idx].t}<small>spring length ${len} mm · force per spring ${(S.rate * (S.free - len)).toFixed(1)} N · ${tiltOn ? "tilt " + INFO.tilt + "°" : "level"}</small>`;
+    slider.value = Math.round(1000 * t / T);
+  }
+  const setPlaying = p => { playing = p; playBtn.textContent = p ? "Pause" : "Play"; };
+  const card = document.getElementById("card"), backBtn = document.getElementById("back"), nextBtn = document.getElementById("next");
+  const modeFull = document.getElementById("modeFull"), modeStep = document.getElementById("modeStep");
+  function showStep(i, animate = true) {
+    k = Math.max(0, Math.min(STEPS.length - 1, i));
+    const s = STEPS[k];
+    document.getElementById("cardNo").textContent = `Step ${k + 1} of ${STEPS.length}`;
+    document.getElementById("cardTitle").textContent = s.t;
+    document.getElementById("cardText").textContent = s.d;
+    document.getElementById("cardParts").textContent = s.f.join(" · ");
+    backBtn.disabled = k === 0;
+    nextBtn.textContent = k === STEPS.length - 1 ? "Done" : "Next";
+    nextBtn.disabled = k === STEPS.length - 1;
+    stopAt = placedAt(k);
+    const run = animate && !reduce && k > 0;
+    t = run ? START[k] : stopAt;  // the steps before are in place, this one moves in
+    setPlaying(run); apply();
+  }
+  function setMode(step) {
+    stepMode = step; card.hidden = !step;
+    modeFull.setAttribute("aria-pressed", !step); modeStep.setAttribute("aria-pressed", step);
+    if (step) showStep(k);
+    else { stopAt = T; setPlaying(false); }
+  }
+  modeFull.onclick = () => { setMode(false); t = 0; setPlaying(!reduce); apply(); };
+  modeStep.onclick = () => setMode(true);
+  backBtn.onclick = () => showStep(k - 1);
+  nextBtn.onclick = () => showStep(k + 1);
+  document.getElementById("replay").onclick = () => showStep(k);
+  document.addEventListener("keydown", e => {
+    if (!stepMode || e.target.matches("input, textarea")) return;
+    if (e.key === "ArrowRight") showStep(k + 1);
+    if (e.key === "ArrowLeft") showStep(k - 1);
+  });
+  playBtn.onclick = () => { if (stepMode) setMode(false); if (!playing && t >= T) t = 0; setPlaying(!playing); };
+  document.getElementById("explode").onclick = () => { setMode(false); t = 0; apply(); };
+  document.getElementById("assemble").onclick = () => { setMode(false); t = T; apply(); };
+  const cutBtn = document.getElementById("cut");
+  cutBtn.onclick = () => {
+    cutOn = !cutOn; cutBtn.setAttribute("aria-pressed", cutOn);
+    for (const m of Object.values(materials)) { m.clippingPlanes = cutOn ? [cut] : []; m.needsUpdate = true; }
+  };
+  const tiltBtn = document.getElementById("tilt");
+  tiltBtn.onclick = () => {
+    tiltOn = !tiltOn; tiltBtn.setAttribute("aria-pressed", tiltOn);
+    tiltBtn.textContent = tiltOn ? "Tilted" : "Level";
+    if (reduce) tiltCur = tiltOn ? TILT : 0;
+    apply();
+  };
+  slider.oninput = () => { if (stepMode) setMode(false); setPlaying(false); t = T * slider.value / 1000; apply(); };
+  items.forEach((li, i) => {
+    const go = () => { if (stepMode) return showStep(i); setPlaying(false); t = placedAt(i); apply(); };
+    li.onclick = go; li.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+
+  function stageColor() {
+    renderer.setClearColor(getComputedStyle(stage).backgroundColor);
+  }
+  new MutationObserver(stageColor).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", stageColor);
+  stageColor();
+
+  // framing: sphere around the assembled feeder in both tilt states
+  t = T; apply();
+  const sphere = rot => {
+    tiltG.rotation.x = rot; scene.updateMatrixWorld(true);
+    const v = new THREE.Vector3(), pts = [];
+    inner.traverse(o => { if (o.isMesh && !o.isInstancedMesh && o.visible) { const a = o.geometry.attributes.position; for (let i = 0; i < a.count; i += 4) pts.push(v.fromBufferAttribute(a, i).applyMatrix4(o.matrixWorld).clone()); } });
+    return pts;
+  };
+  const tiltedPts = sphere(TILT), levelPts = sphere(0);
+  const target = new THREE.Box3().setFromPoints(tiltedPts).getCenter(new THREE.Vector3());
+  const radius = Math.max(...tiltedPts.concat(levelPts).map(p => p.distanceTo(target))) + 30;
+  controls.target.copy(target);
+  if (!reduce) t = 0;
+
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false); camera.aspect = w / h;
+    const half = Math.min(camera.fov / 2, Math.atan(Math.tan(camera.fov * Math.PI / 360) * camera.aspect) * 180 / Math.PI);
+    const dist = radius / Math.sin(half * Math.PI / 180);
+    camera.position.sub(controls.target).setLength(dist).add(controls.target);
+    camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(stage);
+  resize();
+
+  document.getElementById("loading").style.display = "none";
+  apply();
+  (function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (playing) { t += dt; if (t >= stopAt) { t = stopAt; setPlaying(false); } apply(); }
+    const goal = tiltOn ? TILT : 0;
+    tiltCur = reduce ? goal : tiltCur + (goal - tiltCur) * Math.min(1, dt * 6);
+    tiltG.rotation.x = tiltCur;
+    controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  })(performance.now());
+})();
+</script>

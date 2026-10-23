@@ -1,0 +1,4 @@
+# Build guide site (build.py --guide, then mkdocs build). Same pins as OpenReloading/AutoLever.
+mkdocs==1.6.1
+mkdocs-material==9.7.7
+mkdocs-buildguide @ git+https://github.com/OpenReloading/BuildGuide@6677e7ce72628981f141584719befd514adff38c#subdirectory=packages/mkdocs

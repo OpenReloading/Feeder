@@ -1,0 +1,33 @@
+# Feeder
+
+Parametric brass and bullet collator for reloading, built in build123d with metric DIN/ISO hardware. License MIT (`LICENSE`).
+
+## Commands
+
+- Agents run on the host; file edits and Git stay there. Start the container with `devcontainer up --docker-path podman --workspace-folder .` (creates `.venv` from `requirements.txt`); run project commands with the prefix `devcontainer exec --docker-path podman --workspace-folder .`.
+- Build all parts and run the tests: `.venv/bin/python build.py`
+- Build only: `.venv/bin/python build.py --no-test`
+- Tests only: `.venv/bin/python -m pytest -q`
+- Build guide site: `.venv/bin/pip install -r requirements-guide.txt`, `.venv/bin/python build.py --no-test --guide`, `.venv/bin/mkdocs build --strict`
+- Simulation: `.venv/bin/python -m sim run|sweep|plot|calibrate` (README "Simulation"). A sweep runs for hours: at most 4 to 6 workers, never next to the test suite (host memory)
+
+## Conventions
+
+- `feeder/config.py` holds every dimension and option; part modules in `feeder/parts/` use only config values and `feeder/lib/` features, no literal dimensions.
+- Each part module exposes `PARTS = {name: builder}`; `build.py` exports each to `build/<name>.stl` and `.step`.
+- Critical dimensions carry a one-line source note in `config.py`.
+- `reference/` is local research material, excluded in `.git/info/exclude`. Tracked files never depend on it and never copy from it. Dimensions come from standards, datasheets, caliber data and print tolerances.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues in `OpenReloading/Feeder` via `gh`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.

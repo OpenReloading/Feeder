@@ -1,0 +1,206 @@
+# Feeder
+
+Parametric brass and bullet collator for reloading, built in [build123d](https://github.com/gumyr/build123d) with metric DIN/ISO hardware. Every part is generated from `feeder/config.py` and exported as STL and STEP.
+
+Status: early development. Parts are UNTESTED until printed.
+
+## Setup
+
+Requirements: [Dev Container CLI](https://github.com/devcontainers/cli) and podman (or Docker without `--docker-path podman`).
+
+```
+devcontainer up --docker-path podman --workspace-folder .
+```
+
+This builds the container and creates `.venv` from `requirements.txt`.
+
+## Build and test
+
+Run in the container (prefix `devcontainer exec --docker-path podman --workspace-folder .`):
+
+| Command | Result |
+|---|---|
+| `.venv/bin/python build.py` | builds every part into `build/<name>.stl` and `.step`, then runs the tests |
+| `.venv/bin/python build.py --no-test` | builds only |
+| `.venv/bin/python build.py --assembly` | also `build/assembly/`: `feeder.step` (labelled part tree, opens in FreeCAD and Fusion), `feeder.3mf` (every part in place) and `viewer.html` (3D viewer with the assembly steps, works offline once three.js is cached in `build/.three/`). Screws, bolts, nuts, washers and heat-set inserts are included at nominal size. In the viewer each step's part moves in first, then its fasteners along their axes |
+| `.venv/bin/python build.py --variants` | also `build/variants/<split>/` for each `body.split`: body parts and plate, with an `assembly/` folder |
+| `.venv/bin/python build.py --plates` | also `build/plates/<set>/` for each plate set: plate, exit insert, drop tube and hose adapter |
+| `.venv/bin/python -m pytest -q` | tests only |
+
+## Build guide site
+
+The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenReloading/BuildGuide) plugin (`mkdocs.yml`, pages in `guide/`): introduction and BOM checklist from `feeder/guide.py`, the assembly viewer, tilt and capacity from this README. Nothing generated is committed. In the container:
+
+```
+.venv/bin/pip install -r requirements-guide.txt
+.venv/bin/python build.py --no-test --guide   # build/guide/buildguide.json, guide/generated/assembly/
+.venv/bin/mkdocs build --strict               # site/
+```
+
+`.github/workflows/pages.yml` runs the tests, builds the guide and deploys `site/` to GitHub Pages on every push to `main` (pull requests build only). Deploy fails until the repository's Pages source is set to "GitHub Actions" (Settings, Pages).
+
+`build/<name>.stl` and `.step` are in the modelled orientation (assembly frame for the body). `build/print/<name>.stl` is each part as it goes on the bed (`feeder/printing.py`): flipped where it prints upside down, turned across the bed diagonal where it is wider than the bed.
+
+## Configuration
+
+All dimensions and options are in `feeder/config.py` (frozen dataclasses, instance `CFG`). Fastener head sizes, nominal lengths and ISO 273 clearances come from bd_warehouse.
+
+| Section | Contents |
+|---|---|
+| `print` | sliding fit gap, minimum wall, longest bridge, PLA density and fill (for the mount balance) |
+| `fasteners` | heat-set insert holes (CNC Kitchen), thread pitches, head fit, minimum thread engagement |
+| `printer` | bed size and edge margin. The plate and band diameter follow from the bed |
+| `calibers` | rim diameter, minimum rim thickness and case length per caliber (C.I.P. TDCC) |
+| `motor` | 5840-31ZY output shaft, boss, mounting screws, gearbox and can envelope, direction of the can, mass range |
+| `case_plate` | caliber or caliber group, notches or holes, pocket clearance and pitch, plate height over case length, chamfers, pickup channels, ribs, lift tabs, design fill, tilt, rotation direction, drag estimate |
+| `body` | split (`arcs`, `halves`, `one_piece`), floor, wall height, deck, cup, ribs, skirt, wall joint screws and keys, seam post screws, wall extender, motor can tunnel |
+| `track` | gap from plate to deck, band ring, gate setback, chamfer and lap |
+| `exit` | drop opening length over case length, funnel lean and length, bore clearance, spigot, ledge in the deck recess |
+| `plate_seat` | interface of every collator plate: hex drive, plate thickness at the hub, lead-in, cap recess gap, tallest plate |
+| `drive_ring` | wear ring on the clutch cone: cone, floor, flange, disc gap, cap thread (3 starts, 45 deg flanks) |
+| `cap` | twist cap: diameter, top, knob gap, grips, hand torque and friction estimates |
+| `spring` | clutch spring (Gutekunst VD-127E-01) |
+| `metal_hub` | Pololu 2693 aluminium hub (default) or `GENERIC_8MM_FLANGE`, an 8 mm flange coupling with nuts under the flange (unverified) |
+| `electronics` | motor driver current limit as a torque, electronics box: gap below the clamp, inner size, wall, lid screws, zip-tie slots, panel hole sizes (unverified) |
+| `clutch` | slip clutch geometry, height gauge, screws, friction and torque limits |
+| `drop_tube` | thumb screw, M18x1 sensor, lock nut and window sizes, hose sizes and barb |
+| `mount` | tilt mount: body inserts, tube (round or square, 25 mm), tilt range 40 to 60 deg, M10 pivot, tilt link pins and rod, fixed link angles, body mass and load limits, unmodelled mass |
+
+## Parts
+
+Full hardware list for the default 9mm case feeder: `bom/case_feeder_9mm.md`.
+
+| Part | Hardware |
+|---|---|
+| `slip_clutch_carrier_metal_hub` | Pololu 2693 hub with its 2 M3 set screws, 3 x ISO 4762 M3 x 10, CNC Kitchen M5 x 9.5 insert. `GENERIC_8MM_FLANGE`: 2 x ISO 4762 M3 x 12 with ISO 4032 M3 nuts |
+| `slip_clutch_hub_gauge` | none. Fork as thick as the floor gap under the hub boss, with a handle up past the deck: lay it on the cup floor around the shaft, push the hub down onto it, tighten the hub set screws, slide it out by the handle (away from the shaft, about 21 mm) and lift it out. The plate then sits at its design height above the track. Prints fork down |
+| `slip_clutch_drive_ring` | none. Sits on the clutch cone with disc, springs and knob inside and stays there when plates are changed. Reprint it when the cone or floor wears. Prints flange down |
+| `slip_clutch_cap` | none. Twists onto the ring thread by hand (right-hand for the default counter-clockwise plate) and clamps the plate. Prints top down |
+| `slip_clutch_disc` | 6 Gutekunst VD-127E-01 springs |
+| `slip_clutch_knob` | ISO 4017 M5 x 16 |
+| `case_plate_9mm_luger` | none. 240.2 mm, 34 notches open to the rim, 7.09 mm high on a 256 mm bed. The band closes each notch, so the pocket is rim + 3 mm measured to the band. A shallow pickup channel (1.5 mm deep at the pocket, 25 mm long) leads into each pocket, 6 half-round radial ribs stir the pile, 2 upright tabs beside the cap lift the plate (pinch both). Drops over the ring hex onto its flange, 6 mm thick at the hub, cap recess above. `case_plate.notches` False: closed round holes for an A/B test |
+| `body_core` | 4 x ISO 10642 M4 x 10 (motor, from inside the cup), 9 x CNC Kitchen M3 x 5.7 inserts (wall joints), 4 x CNC Kitchen M5 x 9.5 inserts (mount). Deck and band in one piece: the band is a C ring on the deck round the plate, 3.5 mm thick, up to the longest case plus 3.5 mm above the deck. It closes the plate notches, so cases slide on it and on the deck, never on the wall seams. Its gap over the exit takes the gate. Prints bottom down |
+| `body_wall_0` to `body_wall_2` | 3 x ISO 4762 M3 x 12 each, into the core inserts. Lap joints at the seams, key ribs in the core skirt. The wall top is full height (100 mm above the plate) on the low side and falls at 15 deg toward the high side, not below one case length above the plate (`body.heap_angle`, `body.wall_slant`): brass lies level in the world, so at 40 deg tilt it stays below that line with 25 deg to spare for heaping (estimate) |
+| `body_extender_0`, `body_extender_1` | none. Optional, 60 mm more wall at the low side (`body.extender_h`, 0 for none), flat top at the wall slant. The sleeve slides 15 mm down over the outside of the wall top. A post at each seam end joins the halves into a closed ring: 2 x ISO 4762 M3 x 12 per seam end into CNC Kitchen M3 x 5.7 inserts in `body_extender_1` (4 of each), so brass pressure cannot push a half outward. 2 x ISO 10642 M3 x 12 per half from inside the bowl, head flush in the wall, through wall and sleeve into ISO 4032 M3 nuts captive in ribs outside the sleeve hold it to the wall. Prints on its flat top |
+| `body_track_gate` | none. Band sector in the band gap, on the exit insert. Its face is 0.5 mm behind the band face, the band ends have a 1 mm 45 deg lead-in, so cases pass the seams in either direction. The band ends lap 6 mm behind its ends, so it lifts out but cannot move inward. Prints top down |
+| `body_exit_insert` | none. Wear part: drop opening, funnel (30 deg lean toward the bowl centre) and spigot in a block that fills a vertical shaft through the core, so it drops in from above. Its 3 mm ledge rests in a 2 mm deck recess round the shaft, the gate and the plate keep it down. Prints top down |
+| `drop_tube` | Socket over the exit spigot (DIN 464 M3 x 10 knurled thumb screw into one CNC Kitchen M3 x 5.7 insert, hand tight on the spigot). Window, nut slot and plate for an M18x1 inductive sensor (LJ18A3-8-Z/AX default) with 2 M18x1 lock nuts (24 AF x 4, unverified, measure on delivery). Barb for a clear PVC hose, 14 mm ID x 18 mm OD (unverified). The bore only steps outward along the path. Prints socket down, no supports (brim advised). No spring outlet |
+| `electronics_box`, `electronics_lid` | Box on the stand tube 10 mm below the tilt clamp, 110 x 70 x 50 mm inside. Slit collar with 2 x ISO 4762 M5 x 35 on ISO 7089 washers into ISO 4032 nuts, like the clamp. Toggle switch, PWM knob and DC jack in the front face (away from the tube), GX12 motor (2-pin) and sensor (3-pin) sockets in the +x face, a zip-tie tab above them for the cables. The lid carries the modules on zip-tie slots and comes off from below: 4 x ISO 4762 M3 x 8 into CNC Kitchen M3 x 5.7 inserts. Panel hole sizes are seller values, unverified. The box prints top down, the lid flat |
+
+Body splits (`body.split`), each fits a 256 mm bed:
+
+| Split | Parts | Plate | Joint |
+|---|---|---|---|
+| `arcs` (default) | `body_core` and 3 `body_wall_*` | 240.2 mm, 34 pockets | 9 x M3 x 12 into core inserts, lap joints |
+| `halves` | `body_half_0`, `body_half_1`, cut through the shaft at 35 deg (`body.halves_seam`), clear of the exit, the motor screws, the mount inserts and the motor can tunnel | 240.2 mm, 34 pockets | per seam a post outside the wall with 3 x M3 x 12 into CNC Kitchen M3 x 5.7 inserts (6 of each), 3 motor screws hold half 0 and 1 holds half 1 to the gearbox. Each half prints across the bed diagonal |
+| `one_piece` | `body` | 233.0 mm, 33 pockets | none |
+
+Plates, gate and exit insert follow the bowl, so a `one_piece` body needs its own. With `halves` the motor and the clutch stay concentric only as well as the halves are screwed together: tighten the post screws with both halves flat on a table.
+
+Slip torque (estimates for printed faces, friction 0.2 to 0.5, until tested on hardware):
+
+| Springs | Slip torque | Role |
+|---|---|---|
+| 6 | 0.84 to 2.10 Nm | the torque limit with the default PWM speed controller. With a current-limited motor driver it is the backstop behind that limit (`electronics.current_limit_torque`, 0.6 Nm) |
+
+Plate drag under 1 kg of brass (the 250 case design fill, friction 0.3, estimate): 0.24 Nm at 45 deg, 0.27 Nm at 38 deg (`layout.plate_drag_torque`).
+
+The knob screw is tightened once at assembly, until the knob sits on the clutch. The spring length, and with it the slip torque, then never changes.
+
+Plate change, no tools: twist the cap off, lift the plate off the ring hex, drop the next plate on, twist the cap on hand-tight. The cap holds the plate down against the tipping moment of the brass on the low side (0.59 Nm at 38 deg): about 23.8 N clamp at 1 Nm hand torque, 0.3 N over the 23.5 N the tipping test needs (`slip_clutch.cap_clamp_force`). The cap lifts if its preload is below 15.7 N: twice the 7.8 N reaction, since the reaction tips the cap about its low edge against the preload on the axis. That needs at least 0.6 Nm of twist at thread friction 0.5 (0.25 Nm at 0.2), firmer than a light hand-tight. All values are estimates, test on hardware.
+
+## Plate sets
+
+One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert, drop tube and hose adapter (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, loosen the thumb screw, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI).
+
+| Set (`case_plate.caliber`) | Cases | Plate height | Pocket | Pockets | 45 deg capacity | Drop bore |
+|---|---|---|---|---|---|---|
+| `9mm_luger` (default, one case) | 9mm Luger | 7.09 | 12.96 | 34 | 406 | 10.56 |
+| `pocket_pistol` | .25 ACP, .32 ACP, .380 ACP | 6.06 | 12.53 | 36 | 499 | 10.13 |
+| `small_pistol` | 9mm Makarov, 9mm Luger, .45 GAP, 9x21 | 7.22 | 14.94 | 29 | 255 | 12.54 |
+| `large_pistol` | .40 S&W, .357 SIG, .45 ACP, .38 Super, 7.62x25, 10mm Auto | 8.60 | 15.19 | 29 | 200 | 12.79 |
+| `revolver` | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 127 | 13.66 |
+
+Groups: the fewest (4) that cover the table with one plate height each, every case at 0.34 to 0.40 of its length (the centre of mass estimate is 0.33 to 0.39) and at most 2.3 mm rim spread. The plate bottom must stay within a rim thickness of the deck, so length sets the groups. In a group plate the smallest rim gets up to 2.3 mm more play than the 3 mm of a one-case plate: more upside-down cases are possible, UNTESTED. A one-case plate (any key of `calibers.table`) is the tight option. Capacity counts the group's largest case. Rifle cases (laid down) and bullets need another exit and are not built.
+
+## Hose and sensor
+
+- Lay the hose downhill all the way to the press, with no loops or rising sections. A 9mm case (21.6 mm diagonal) cannot turn over in the 14 mm hose or the 10.9 mm bore.
+- The sensor sees the case through the 1.0 mm `drop_tube.window_t` wall. With a brass correction factor of 0.3 to 0.5 the LJ18A3-8 switches at 1.9 to 3.2 mm (estimate). A case lies 1.45 to 1.90 mm from the sensor face. Test with real cases before printing more. If it misses cases, set `window_t` to 0.6 or use a longer-range M18 sensor.
+- Each falling case passes the sensor in about 0.1 s. Use an off-delay timer relay (BOM) so the motor stops only on a full tube, not on each case.
+
+## Tilt mount
+
+Yoke on the 4 M5 inserts of the body core, M10 pivot axis parallel to x, tube clamp on a vertical 25 mm tube (`mount.tube_shape` round or square). A tilt link joins a fork under the yoke (pin A) and a fork on the low side of the clamp block (pin B). Pivot, A and B form a triangle, so the body is held in both directions and cannot lift or flop. The weight moment turns the body toward a steeper tilt at every tilt of the range, so the link is always in compression and the pin play stays on one side. `test_mount` computes the centre of mass from the CAD volumes of the tilting parts (PLA fill 0.5 to 0.8, motor 0.32 to 0.5 kg, 0.15 kg unmodelled hardware at the exit side, with and without 1 kg of brass). The empty feeder at 38 deg is the worst case (-0.10 Nm), which sets `mount.pivot_depth` to 60 mm. The load checks use 3.25 kg at the plate top (with the wall extender). The nylon nut on the pivot bolt sets the pivot friction. Strength: `mount.push` (50 N, estimate) at any point of the rim top, in 8 horizontal directions and straight down, over the tilt span, must stay within `mount.layer_limit` (10 MPa equivalent stress across the printed layers, unverified) in the tongue stem and at the yoke ear roots. The worst case is a sideways push at the low rim at 62 deg: it twists the stem by about 13 Nm. The tongue is 22 x 24 mm (`mount.tongue_t`, `mount.tongue_w`, 9.3 MPa), and a web from the clamp block edges braces the stem up to the yoke ears.
+
+Two links on the same pins (`mount.link_a`, `mount.link_b`). The link gets 1.1 to 1.2 mm shorter per degree steeper, so 0.1 mm of hole or print error moves the tilt by 0.1 deg at most:
+
+| Link | Parts | Tilt |
+|---|---|---|
+| adjustable | `mount_rod_end_adjust` on pin A, `mount_rod_end_fixed` on pin B, M6 threaded rod. Fixed end: captive nut in the outer face, jam nut in the window. Adjust end: a nut each side of its wall. To change the tilt, loosen the two adjust end nuts, run them along the rod, tighten them against the wall | 40 to 60 deg, stepless (`mount.tilt_range`) |
+| fixed | `mount_link_45`, `mount_link_50`, `mount_link_55`, one printed bar per angle (`mount.fixed_tilts`). Swap the bar to change the tilt | the angle in its name |
+
+<!-- --8<-- [start:tilt] -->
+Tilt choice. The best angle for 9mm on this feeder is UNTESTED. Start at 45 and go steeper only for the reason in the table:
+
+| Tilt | When | 9mm capacity, wall / with extender | Link pin to pin |
+|---|---|---|---|
+| 45 deg | default, start here | 406 / 1039 | 91.4 mm |
+| 50 deg | cases still go in upside down at 45 | 325 / 832 | 85.6 mm |
+| 55 deg | still upside down at 50 | 254 / 661 | 79.7 mm |
+| 60 deg | last resort, extender needed for the design fill | 193 / 516 | 73.8 mm |
+| 40 deg | most capacity, range end of this mount | 504 / 1296 | 97.1 mm |
+
+Capacity: cases under a level brass surface at the low-side wall top, loose packing 0.55 of the case envelope (`layout.capacity`, estimate). Fill at most 250 9mm cases (1 kg, `case_plate.fill_cases`, `case_plate.drag_mass`) at any tilt: the clutch, cap and mount load checks assume no more. The extender keeps 250 cases in at 60 deg, it is not for a larger fill.
+<!-- --8<-- [end:tilt] -->
+
+| Part | Hardware |
+|---|---|
+| `mount_yoke` | 4 x ISO 4762 M5 x 12 into the body's CNC Kitchen M5 x 9.5 inserts |
+| `mount_clamp` | 2 x ISO 4762 M5 x 35 on 2 x ISO 7089 M5 washers, 2 x ISO 4032 M5 nuts |
+| pivot (both parts) | ISO 4017 M10 x 55, 2 x ISO 7089 M10 washers (same sizes as DIN 125 A), DIN 985 M10 nut |
+| link pins A and B | 2 x ISO 4762 M6 x 45, 4 x ISO 7089 M6 washers, 2 x DIN 985 M6 nuts |
+| adjustable link | DIN 976-1 M6 threaded rod cut to 60 mm, 4 x ISO 4032 M6 nuts |
+
+Check the tilt with a phone inclinometer laid on the empty case plate, along the slope. The wall top is not parallel to the plate (it falls toward the high side).
+
+Print the yoke with the flat mating face on the bed, the clamp upright, links and rod ends flat. The clamp bore is closed at the top (25 mm bridge) and stops the tube. The fork ears on the clamp are 45 deg triangles, so they print without supports. The printed pin and pivot holes under load are UNTESTED.
+
+## Simulation
+
+`sim/` simulates brass on the turning plate in MuJoCo (`pip install -e .[sim]`, already in `requirements.txt`) and estimates cases per hour, pocket fill, case orientation at the exit and plate torque for a tilt and plate speed. It runs slower than real time (about 3 to 4 s of computing per simulated second with 250 cases), so a sweep takes hours. In the container:
+
+| Command | Result |
+|---|---|
+| `.venv/bin/python -m sim run --tilt 45 --rpm 1.5` | one point after one warm-up turn, metrics as JSON |
+| `.venv/bin/python -m sim sweep --tilt 38,45,52,62 --rpm 0.75,1.5,3,6.5` | grid into `build/sim/sweep.csv`; a stopped sweep resumes, at most 6 workers |
+| `.venv/bin/python -m sim sweep --plate 9mm_luger,small_pistol --case 9mm_luger --out build/sim/pockets.csv` | one case size on several plate sets (`--plate` takes `case_plate.caliber` values, `--case` a `calibers.table` key) |
+| `.venv/bin/python -m sim plot` | `build/sim/sweep.png`: cases per hour, fill with its 95 % interval, torque |
+| `.venv/bin/python -m sim calibrate measured.csv` | fits friction and case centre of mass to hardware runs (columns `tilt`, `rpm`, `cases_per_h`, `base_down_share`) into `build/sim/calibration.csv` |
+
+`valid` is false when a case went through the deck outside the opening (`lost`, with where in `lost_at`): a model fault, so `plot` leaves the point out. `spilled` counts cases over the wall (`spilled_at`), `overfill` the cases that found no room below the wall top on their way back. The extender is fitted (`extender`) when `--cases` is more than the wall holds at the tilt (`layout.capacity`). `deepest_mm`, `deepest_pair` and `deep_share` (share of checks with a contact overlap above 1.5 mm) show how far the soft contacts give.
+`wrong_upper` is the upper bound on cases leaving mouth down or sideways.
+
+Approximations, so take the numbers as trends until calibrated:
+
+- The plate collider is a convex decomposition of the CAD plate (CoACD): hulls reach up to 0.26 mm into the pockets (`sim.pocket_hull_threshold`) and up to 0.8 mm into the air elsewhere (`sim.hull_threshold`).
+- Deck, band, gate and wall are boxes round the bowl (`sim.segments`).
+- A case is a capsule against other cases, with flat end discs against the feeder.
+- One friction value (`case_plate.drag_mu`) for every contact. Case mass and centre of mass (`sim.case_mass`, `sim.com_ratio`) are estimates, unverified.
+
+Results (250 9mm cases, 9mm plate, wall 125, about 3 counted turns per point, one seed). Cases per hour and pocket fill:
+
+| Tilt | 0.75 rpm | 1.5 rpm | 3 rpm | 6.5 rpm |
+|---|---|---|---|---|
+| 38 deg | 885, 59 % | 1,920, 63 % | 2,700, 45 % | 6,500, 49 % |
+| 45 deg | 1,005, 67 % | 1,920, 63 % | 2,640, 43 % | 3,770, 28 % |
+| 52 deg | 660, 44 % | 1,320, 44 % | 1,920, 31 % | 2,860, 22 % |
+| 62 deg (extender) | 375, 25 % | 510, 17 % | 660, 11 % | 520, 4 % |
+
+- Every point is valid, and every case left base down, about 600 exits in all. Plate torque peaks at 0.72 Nm, below the low slip estimate of 0.84 Nm.
+- Case centre of mass at 0.33 and 0.39 of the length from the base (38 and 45 deg, 1.5 and 3 rpm) moves the rate between 1,200 and 3,780 per hour, still all base down. The farther the centre of mass from the base, the lower the fill.
+- 9mm cases on the small_pistol plate (larger pockets) at 45 deg: 1,650 per hour at 1.5 rpm and 2,400 at 3 rpm, all base down.
+
+## License
+
+MIT, see `LICENSE`.
