@@ -1,7 +1,7 @@
 name: Build guide
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
   workflow_dispatch:
 permissions: {}
@@ -30,7 +30,7 @@ jobs:
         with:
           path: site
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-24.04
     permissions:
