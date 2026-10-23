@@ -27,6 +27,10 @@ Tick the parts off on the [BOM](bom.md) page, then follow the [assembly steps](a
 
 Start at 45 deg. [Tilt and capacity](tilt.md) lists when to go steeper, the sources and the capacity per angle.
 
+## When it does not work
+
+[Troubleshooting](troubleshooting.md) lists symptoms, causes and the config value or part to change.
+
 ## Printing
 
 Every printed part prints without supports, except a few small support islands on the body core, the drop tube and the clamp. Print orientation STLs come from build.py (`build/print/`).
