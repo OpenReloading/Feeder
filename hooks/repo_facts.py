@@ -5,6 +5,7 @@ build time instead and passes the values to overrides/partials/source.html throu
 config.extra["repo_facts"]. Any failure leaves the facts out; the build never fails because of it.
 """
 
+import http.client
 import json
 import logging
 import os
@@ -14,7 +15,7 @@ import urllib.request
 log = logging.getLogger("mkdocs.hooks.repo_facts")
 API = "https://api.github.com/repos/"
 _cache = {}
-ERRORS = (OSError, ValueError, LookupError, TypeError)  # network, JSON, missing field
+ERRORS = (OSError, ValueError, LookupError, TypeError, http.client.HTTPException)  # network, cut-off answer, JSON, missing field
 
 
 def _get(path):
