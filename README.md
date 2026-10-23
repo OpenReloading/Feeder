@@ -25,7 +25,7 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 | `.venv/bin/python build.py --assembly` | also `build/assembly/`: `feeder.step` (labelled part tree, opens in FreeCAD and Fusion), `feeder.3mf` (every part in place) and `viewer.html` (3D viewer with the assembly steps, works offline once three.js is cached in `build/.three/`). Screws, bolts, nuts, washers and heat-set inserts are included at nominal size. In the viewer each step's part moves in first, then its fasteners along their axes |
 | `.venv/bin/python build.py --variants` | also `build/variants/<split>/` for each `body.split`: body parts and plate, with an `assembly/` folder |
 | `.venv/bin/python build.py --plates` | also `build/plates/<set>/` for each plate set: plate, exit insert, drop tube and hose adapter |
-| `.venv/bin/python -m pytest -q` | tests only |
+| `.venv/bin/python -m pytest -q` | tests only. `-n 4 --dist loadfile` runs the test files on 4 cores |
 
 ## Build guide site
 

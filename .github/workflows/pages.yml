@@ -23,8 +23,12 @@ jobs:
           python3 -m venv .venv
           .venv/bin/pip install -r requirements.txt -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
-      - run: .venv/bin/python -m pytest -q
-      - run: .venv/bin/python build.py --no-test --guide
+      # guide data in the background while the test files run on the runner's cores
+      - run: |
+          .venv/bin/python build.py --no-test --guide > guide.log 2>&1 &
+          guide=$!
+          .venv/bin/python -m pytest -q -n auto --dist loadfile
+          wait "$guide" || { cat guide.log; exit 1; }
       - run: .venv/bin/mkdocs build --strict
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
