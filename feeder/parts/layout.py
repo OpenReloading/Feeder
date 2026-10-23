@@ -28,7 +28,7 @@ def caliber(cfg: Config = CFG) -> Caliber:
 
 def plate_sets(cfg: Config = CFG) -> list[Config]:
     """One config per plate the body takes: the configured plate and every group. Body and band are sized
-    for all of them, the plate, exit insert, drop tube and hose adapter belong to one."""
+    for all of them, the plate, exit insert and drop tube belong to one."""
     names = dict.fromkeys((cfg.case_plate.caliber, *cfg.calibers.groups))
     return [replace(cfg, case_plate=replace(cfg.case_plate, caliber=n)) for n in names]
 
