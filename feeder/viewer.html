@@ -57,7 +57,6 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
 .card p { margin: 0; max-width: 90ch }
 .card small { font-family: var(--f-mono); font-size: 12px; color: var(--muted) }
 [hidden] { display: none !important }
-.note { font-size: 13px; color: var(--muted); max-width: 90ch; margin: 0 }
 </style>
 
 <div class="wrap">
@@ -108,7 +107,6 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
     <ol class="steps" id="steps"></ol>
   </div>
 
-  <p class="note" id="note"></p>
 </div>
 
 <!-- LIBS -->
@@ -180,7 +178,6 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
   const shown = new Set([...INFO.parts.map(p => p.kind), "brass", "spring"]);
   for (const f of FS) shown.add(f.kind);
   document.getElementById("legend").innerHTML = Object.entries(MATS).filter(([k]) => shown.has(k)).map(([, m]) => m).map(m => `<div><i style="background:#${m.c.toString(16).padStart(6, "0")}"></i>${m.label}</div>`).join("");
-  document.getElementById("note").textContent = INFO.note;
   const stepsEl = document.getElementById("steps");
   stepsEl.innerHTML = STEPS.map(s => `<li tabindex="0"><div><b>${s.t}</b>${s.d}${s.f.length ? `<small>${s.f.join(" · ")}</small>` : ""}</div></li>`).join("");
 

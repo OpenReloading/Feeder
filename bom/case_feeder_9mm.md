@@ -34,7 +34,7 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 
 | Item | Qty | Used in | Note |
 |---|---|---|---|
-| Worm gear motor 5840-31ZY, 12 V, 8 mm D shaft, 1240 winding, 590:1 (6.5 rpm no load, 5 rpm at the suggested load) | 1 | body core | slowest variant: the plate needs 0.65 to 1.96 rpm for 1200 to 2000 cases/h at 90 to 50 % pocket fill. The plate drag (0.27 Nm, estimate) is far below the suggested load, so the motor runs near its no-load speed, at about 10 to 30 % PWM duty. 2.35 Nm suggested load, 3.92 Nm gearbox limit ([microdcmotors](https://microdcmotors.com/product/12v-24v-high-torque-low-speed-dc-motor-with-encoder-self-locking-model-nfp-5840-31zy-en)). It may not start below about 10 to 15 % duty (unverified) |
+| Worm gear motor 5840-31ZY, 12 V, 8 mm D shaft, 1240 winding, 590:1 (6.5 rpm no load, 5 rpm at the suggested load) | 1 | body core | slowest variant. Runs at about 10 to 30 % PWM duty. Gearbox limit 3.92 Nm ([microdcmotors](https://microdcmotors.com/product/12v-24v-high-torque-low-speed-dc-motor-with-encoder-self-locking-model-nfp-5840-31zy-en)). May not start below 10 to 15 % duty (unverified) |
 | Pololu 2693 aluminium hub, 8 mm bore, M3 holes | 1 | carrier | sold in pairs, includes its set screws. Option: `GENERIC_8MM_FLANGE` with 2 x ISO 4762 M3 x 12 and 2 x ISO 4032 M3 nuts |
 | Compression spring Gutekunst VD-127E-01 | 6 | disc | |
 | ISO 4762 M3 x 10 | 3 | hub to carrier | |
