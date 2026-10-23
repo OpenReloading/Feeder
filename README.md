@@ -24,7 +24,7 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 | `.venv/bin/python build.py --no-test` | builds only |
 | `.venv/bin/python build.py --assembly` | also `build/assembly/`: `feeder.step` (labelled part tree, opens in FreeCAD and Fusion), `feeder.3mf` (every part in place) and `viewer.html` (3D viewer with the assembly steps, works offline once three.js is cached in `build/.three/`). Screws, bolts, nuts, washers and heat-set inserts are included at nominal size. In the viewer each step's part moves in first, then its fasteners along their axes |
 | `.venv/bin/python build.py --variants` | also `build/variants/<split>/` for each `body.split`: body parts and plate, with an `assembly/` folder |
-| `.venv/bin/python build.py --plates` | also `build/plates/<set>/` for each plate set: plate, exit insert, drop tube and hose adapter |
+| `.venv/bin/python build.py --plates` | also `build/plates/<set>/` for each plate set: plate, exit insert and drop tube |
 | `.venv/bin/python -m pytest -q` | tests only |
 
 ## Build guide site
@@ -111,7 +111,7 @@ Plate change, no tools: twist the cap off, lift the plate off the ring hex, drop
 
 ## Plate sets
 
-One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert, drop tube and hose adapter (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, loosen the thumb screw, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI).
+One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert and drop tube (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, loosen the thumb screw, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI).
 
 | Set (`case_plate.caliber`) | Cases | Plate height | Pocket | Pockets | 45 deg capacity | Drop bore |
 |---|---|---|---|---|---|---|
