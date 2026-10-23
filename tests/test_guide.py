@@ -29,3 +29,13 @@ def test_tilt_section_markers_for_the_guide_page():
 def test_steps_markdown_numbers_every_assembly_step():
     lines = guide.steps_markdown().splitlines()
     assert lines and all(line.startswith(f"{i}. ") for i, line in enumerate(lines, 1))
+
+
+def test_wiring_board_ends_exist_and_the_motor_runs_through_the_relay():
+    board = guide.wiring_board()
+    terminals = {f"{k}:{t}" for k, p in board["parts"].items() for side in p["ports"].values() for t in side}
+    wires = [c for step in board["steps"] for c in step["connections"]]
+    assert len({c["no"] for c in wires}) == len(wires)
+    assert all(c["a"] in terminals and c["b"] in terminals and c["color"] in board["colors"] for c in wires)
+    ends = {frozenset((c["a"], c["b"])) for c in wires}
+    assert {frozenset(("U1:M+", "K1:COM")), frozenset(("K1:NO", "X1:S1")), frozenset(("X2:S3", "K1:IN"))} <= ends
