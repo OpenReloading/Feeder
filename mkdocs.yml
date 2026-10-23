@@ -34,4 +34,5 @@ nav:
   - Introduction: index.md
   - BOM: bom.md
   - Assembly: assembly.md
+  - Wiring: wiring.md
   - Tilt and capacity: tilt.md
