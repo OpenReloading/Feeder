@@ -14,6 +14,7 @@ import urllib.request
 log = logging.getLogger("mkdocs.hooks.repo_facts")
 API = "https://api.github.com/repos/"
 _cache = {}
+ERRORS = (OSError, ValueError, LookupError, TypeError)  # network, JSON, missing field
 
 
 def _get(path):
@@ -34,10 +35,10 @@ def _facts(repo):
     facts = {}
     try:
         tag = _get(repo + "/releases/latest")["tag_name"]
-    except Exception:
+    except ERRORS:
         try:
             tag = _get(repo + "/tags")[0]["name"]
-        except Exception:
+        except ERRORS:
             tag = None
     if tag:
         facts["version"] = tag
@@ -53,7 +54,7 @@ def on_config(config):
         if repo not in _cache:
             try:
                 _cache[repo] = _facts(repo)
-            except Exception as error:  # offline, rate limit, API change: the header just has no facts
+            except ERRORS as error:  # offline, rate limit, API change: the header just has no facts
                 log.info("No repository facts for %s: %s", repo, error)
                 _cache[repo] = {}
         config.extra["repo_facts"] = _cache[repo]
