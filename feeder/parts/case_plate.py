@@ -16,6 +16,7 @@ import math
 from build123d import Align, Box, Cone, Cylinder, Part, Pos, Rot
 
 from feeder.config import CFG, Config
+from feeder.lib.cache import per_config
 from feeder.parts import layout
 from feeder.parts import slip_clutch as sc
 
@@ -80,6 +81,7 @@ def _lift_tab(cfg: Config, h: float) -> Part:
     return Pos(_inner_r(cfg), 0, h - 1) * Box(cp.lift_len, cp.lift_t, lift_tab_top(cfg) - h + 1, align=(Align.MIN, Align.CENTER, Align.MIN))
 
 
+@per_config
 def plate(cfg: Config = CFG) -> Part:
     cp = cfg.case_plate
     h = layout.plate_h(cfg)

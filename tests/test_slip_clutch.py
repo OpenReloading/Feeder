@@ -193,7 +193,12 @@ def test_metal_hub_clutch_is_a_backstop_above_the_current_limit():
 
 
 def test_cap_thread_meshes_with_the_ring():
-    assert assembly.cap_angle()[1] < 1e-6
+    dr, z = CFG.drive_ring, sc.levels()
+    band = Cylinder(dr.thread_d, z.ring_top - z.hex_top, align=sc.BOTTOM)  # only the thread band is intersected
+    ring = Pos(0, 0, z.ring_bottom) * sc.drive_ring() & Pos(0, 0, z.hex_top) * band
+    cap = sc.cap() & Pos(0, 0, z.hex_top - z.cap_face) * band
+    common = ring & Pos(0, 0, z.cap_face) * Rot(Z=assembly.cap_angle()) * cap
+    assert (common.volume if common.solids() else 0.0) < 1e-6
 
 
 def _plate_stub(z):

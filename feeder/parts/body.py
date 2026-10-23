@@ -32,6 +32,7 @@ from shapely.geometry import MultiPoint
 from shapely.geometry.polygon import orient
 
 from feeder.config import CFG, Config
+from feeder.lib.cache import per_config
 from feeder.lib import fasteners
 from feeder.lib.features import hex_corner_r, hex_prism, teardrop, teardrop_cone
 from feeder.parts import layout
@@ -115,6 +116,7 @@ def _funnel(cfg: Config, grow: float, up: float = 0.0) -> Part:
     return solid
 
 
+@per_config
 def exit_insert(cfg: Config = CFG) -> Part:
     e, f = cfg.exit, cfg.print.fit
     z = layout.levels(cfg)
@@ -203,6 +205,7 @@ def _band(cfg: Config) -> Part:
     return body
 
 
+@per_config
 def track_gate(cfg: Config = CFG) -> Part:
     """Band sector over the exit on the deck and the exit insert, its face `gate_setback` behind the band face. Its outer ends
     lap behind the band ends. Prints top down."""
@@ -256,6 +259,7 @@ def _joint_z(cfg: Config) -> float:
     return (z.bottom + z.deck_bottom) / 2
 
 
+@per_config
 def core(cfg: Config = CFG) -> Part:
     b, m, f = cfg.body, cfg.motor, cfg.print.fit
     z = layout.levels(cfg)
@@ -349,6 +353,7 @@ def seam_lap(cfg: Config = CFG) -> float:
     return (cfg.body.wall_t - cfg.print.fit) / 2
 
 
+@per_config
 def wall(index: int, cfg: Config = CFG) -> Part:
     """Wall arc `index`, counter-clockwise from `body.seam_start`."""
     b, f = cfg.body, cfg.print.fit
@@ -384,6 +389,7 @@ def _wall_ring(cfg: Config) -> Part:
     return (ring - _exit_cut(cfg)) & _below_wall_top(cfg)
 
 
+@per_config
 def body_one_piece(cfg: Config = CFG) -> Part:
     return core(cfg) + _wall_ring(cfg)
 
@@ -449,6 +455,7 @@ def _posts(index: int, cfg: Config) -> Part:
     return out
 
 
+@per_config
 def half(index: int, cfg: Config = CFG) -> Part:
     """Body half `index`: core and wall on one side of the seam plane, a seam rib under the deck, seam posts."""
     b, m = cfg.body, cfg.motor
@@ -461,6 +468,7 @@ def half(index: int, cfg: Config = CFG) -> Part:
     return body + _posts(index, cfg)
 
 
+@per_config
 def extender(index: int, cfg: Config = CFG) -> Part:
     """Wall extender half `index`: wall above the wall top up to a flat top `extender_h` above the full wall top,
     falling at the wall slant, sleeve down over the outside of the wall. Prints on its flat top."""
