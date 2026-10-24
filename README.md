@@ -23,6 +23,7 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 | `.venv/bin/python build.py --assembly` | also `build/assembly/`: `feeder.step` (part tree), `feeder.3mf` and `viewer.html` (3D assembly steps with every fastener) |
 | `.venv/bin/python build.py --variants` | also `build/variants/<split>/` for each `body.split`: body parts and plate, with an `assembly/` folder |
 | `.venv/bin/python build.py --plates` | also `build/plates/<set>/` for each plate set: plate, exit insert and drop tube |
+| `.venv/bin/python build.py --configurator` | also `build/configurator/`: the print files of every option combination (body split, plate set, extender, tilt link, tube shape, hub) as `<hash>.stl`, identical parts stored once, and `manifest.json` with the part files and BOM rows per choice |
 | `.venv/bin/python -m pytest -q` | tests only. `-n 4 --dist loadfile` runs the test files on 4 cores |
 
 ## Build guide site
@@ -130,7 +131,7 @@ Two links on the same pins (`mount.link_a`, `mount.link_b`). The link gets 1.1 t
 | Link | Parts | Tilt |
 |---|---|---|
 | adjustable | `mount_rod_end_adjust` on pin A, `mount_rod_end_fixed` on pin B, M6 threaded rod. Fixed end: captive nut in the outer face, jam nut in the window. Adjust end: a nut each side of its wall. To change the tilt, loosen the two adjust end nuts, run them along the rod, tighten them against the wall | 40 to 60 deg, stepless (`mount.tilt_range`) |
-| fixed | `mount_link_45`, `mount_link_50`, `mount_link_55`, one printed bar per angle (`mount.fixed_tilts`). Swap the bar to change the tilt | the angle in its name |
+| fixed | `mount_link_45`, `mount_link_50`, `mount_link_55`, one printed bar per angle (`mount.fixed_tilts`). Swap the bar to change the tilt. `mount.link` set to one of these angles builds the assembly with that bar, without rod ends, rod and rod nuts, at that tilt | the angle in its name |
 
 <!-- --8<-- [start:tilt] -->
 Tilt choice. The best angle for 9mm on this feeder is UNTESTED. Start at 45 and go steeper only for the reason in the table:

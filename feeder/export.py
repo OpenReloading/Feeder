@@ -101,7 +101,7 @@ def export_assembly(cfg: Config, out: Path, title: str, inline_libs: bool = True
     """Write feeder.step, feeder.3mf and viewer.html for `cfg` to `out`. `inline_libs` False: the page loads
     three.js from the CDN."""
     out.mkdir(parents=True, exist_ok=True)
-    tilt = cfg.case_plate.tilt
+    tilt = assembly.body_tilt(cfg)
     placed, fs = assembly.placed(cfg, tilt), assembly.fasteners_in_body(cfg, tilt)
     solids = []
     for p in placed:
