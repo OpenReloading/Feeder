@@ -26,6 +26,7 @@ Default: split body, Pololu 2693 metal hub, simple PWM speed controller, no micr
 | `mount_rod_end_adjust`, `mount_rod_end_fixed` | 1 each, adjustable link |
 | `mount_link_45`, `mount_link_50`, `mount_link_55` | 1 each, optional fixed links |
 | `electronics_box` | 1 |
+| `electronics_collar` | 1 |
 | `electronics_lid` | 1 |
 
 Other calibers: plate, exit insert and drop tube come per plate set from `build/plates/<set>/` (README, Plate sets). The rest stays.
@@ -96,14 +97,13 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 | ISO 4762 M5 x 35 | 2 | box collar on the tube | |
 | ISO 7089 M5 washer | 2 | box collar, under the screw heads | |
 | ISO 4032 M5 nut | 2 | box collar | |
-| CNC Kitchen heat-set insert M3 x 5.7 | 4 | box corner posts | |
-| ISO 4762 M3 x 8 | 4 | lid to box, from below | |
+| CNC Kitchen heat-set insert M3 x 5.7 | 10 | 4 box corner posts, 2 collar, 4 relay standoffs | |
+| ISO 4762 M3 x 8 | 10 | 4 lid to box, 2 box to collar from inside, 4 relay to its standoffs | |
 | Toggle switch MTS-102, 6 mm panel hole | 1 | power, front face | rating for 12 V DC 3 A unverified |
 | DC panel jack DC-022B, 5.5 x 2.1 mm, 11 mm panel hole | 1 | 12 V in, front face | hole size unverified |
 | GX12 2-pin panel socket and plug | 1 | motor, side face | 12 mm hole unverified |
 | GX12 3-pin panel socket and plug | 1 | sensor, side face | 12 mm hole unverified. The pin counts differ so the motor plug cannot go in the sensor socket |
-| Zip ties up to 3.6 mm wide | 6 | modules on the lid, motor and sensor cables on the side tab | |
 
-The PWM controller mounts by its knob potentiometer nut in the front face (7.2 mm hole, unverified, the pot must be on the board or on a lead). The timer relay module sits on the lid between two slots of a row, tied down. Hole sizes are in `electronics.front_holes` and `electronics.side_holes`.
+The PWM controller hangs on its knob potentiometer nut in the lid (7.2 mm hole, unverified, the pot must be on the board or on a lead). The timer relay module sits on four standoffs on the back wall, 44 x 24 mm hole spacing (`electronics.relay_holes`, unverified: measure on delivery). Hole sizes are in `electronics.front_holes` and `electronics.side_holes`.
 
 Without a motor driver there is no current limit, and the motor's stall torque is far above the gearbox limit: the clutch (0.84 to 2.10 Nm, estimate) is the only torque limit, below the gearbox limit of 3.92 Nm and above the plate drag of 0.27 Nm at 38 deg (estimate).
