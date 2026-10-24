@@ -3,8 +3,8 @@
 Notches open to the rim carry the cases up to the exit. The track band closes them, so the pocket is measured
 to the band. The plate is about as tall as a case's centre of mass is high: a base-down case sits low and rides
 along, a mouth-down case sits high, tips at the tilt and falls back into the pile. A shallow pickup channel leads
-from the centre into each pocket, broad half-round radial ribs stir the pile, two upright tabs beside the cap lift
-the plate. The centre drops over the drive ring hex onto its flange and the cap clamps it
+from the centre into each pocket, radial ribs or ridges stir the pile, a split key ring in an eye beside the cap
+lifts the plate. The centre drops over the drive ring hex onto its flange and the cap clamps it
 (`slip_clutch.plate_seat_cut`). `case_plate.notches` False gives closed round holes for an A/B test.
 
 CSG only (cylinders, cones, boxes, booleans), so the plate can be ported to OpenSCAD.
@@ -16,6 +16,7 @@ import math
 from build123d import Align, Box, Cone, Cylinder, Part, Pos, Rot
 
 from feeder.config import CFG, Config
+from feeder.lib.features import teardrop
 from feeder.parts import layout
 from feeder.parts import slip_clutch as sc
 
@@ -56,7 +57,7 @@ def _channel(cfg: Config, h: float) -> Part:
 
 
 def _inner_r(cfg: Config) -> float:
-    """Ribs and lift tabs start outside the cap recess."""
+    """Ribs, ridges and the pull eye start outside the cap recess."""
     return cfg.cap.d / 2 + cfg.plate_seat.cap_gap + cfg.print.min_wall
 
 
@@ -69,15 +70,26 @@ def _rib(cfg: Config, h: float) -> Part:
     return rib & Pos(0, 0, h - 1) * Box(1000, 1000, 100, align=BOTTOM)  # never below the top face less 1
 
 
-def lift_tab_top(cfg: Config = CFG) -> float:
-    """Lift tab top above the plate bottom: level with the cap top, so the tabs stand no higher than the cap."""
-    z = sc.levels(cfg)
-    return z.cap_top - z.plate_bottom
+def ridge_end_r(cfg: Config = CFG) -> float:
+    """Ridges end at the inner edge of the pocket mouths, so the pocket wall keeps its height."""
+    return layout.pocket_circle_r(cfg) - layout.pocket_d(cfg) / 2 - cfg.case_plate.top_chamfer
 
 
-def _lift_tab(cfg: Config, h: float) -> Part:
+def _ridge(cfg: Config, h: float) -> Part:
+    """Ridge on the top face along +x, rising from the top face outside the cap to `ridge_h` at `ridge_end_r`."""
     cp = cfg.case_plate
-    return Pos(_inner_r(cfg), 0, h - 1) * Box(cp.lift_len, cp.lift_t, lift_tab_top(cfg) - h + 1, align=(Align.MIN, Align.CENTER, Align.MIN))
+    r0, r1 = _inner_r(cfg), ridge_end_r(cfg)
+    slope = math.degrees(math.atan(cp.ridge_h / (r1 - r0)))
+    bar = Pos(r0, 0, h - 1) * Box(r1 - r0, cp.ridge_w, cp.ridge_h + 1, align=(Align.MIN, Align.CENTER, Align.MIN))
+    return bar & Pos(r1, 0, h + cp.ridge_h) * Rot(Y=-slope) * Box(1000, 100, 1000, align=(Align.CENTER, Align.CENTER, Align.MAX))
+
+
+def _pull_eye(cfg: Config, h: float) -> Part:
+    """Eye along +x outside the cap recess, its hole across (teardrop, prints without supports)."""
+    cp = cfg.case_plate
+    eye = Pos(_inner_r(cfg), 0, h - 1) * Box(cp.pull_len, cp.pull_t, cp.pull_h + 1, align=(Align.MIN, Align.CENTER, Align.MIN))
+    z = h + cp.pull_h - cfg.print.min_wall - cp.pull_hole_d / math.sqrt(2)  # the teardrop roof tip is above the hole centre by d / sqrt(2)
+    return eye - Pos(_inner_r(cfg) + cp.pull_len / 2, -cp.pull_t, z) * Rot(Z=90) * teardrop(cp.pull_hole_d, 2 * cp.pull_t)
 
 
 def plate(cfg: Config = CFG) -> Part:
@@ -85,10 +97,13 @@ def plate(cfg: Config = CFG) -> Part:
     h = layout.plate_h(cfg)
     r = layout.pocket_circle_r(cfg)
     body = Cylinder(layout.plate_r(cfg), h, align=BOTTOM)
-    for k in range(cp.rib_count):
-        body += Rot(Z=90 + 360 * (k + 0.5) / cp.rib_count) * _rib(cfg, h)
-    for k in range(cp.lift_tabs):
-        body += Rot(Z=90 + 360 * k / cp.lift_tabs) * _lift_tab(cfg, h)
+    if cp.ribs == "per_pocket":
+        for a in pocket_angles(cfg):
+            body += Rot(Z=a + 180 / layout.pocket_count(cfg)) * _ridge(cfg, h)
+    else:
+        for k in range(cp.rib_count):
+            body += Rot(Z=90 + 360 * (k + 0.5) / cp.rib_count) * _rib(cfg, h)
+    body += Rot(Z=pocket_angles(cfg)[0]) * _pull_eye(cfg, h)  # over a pocket, off every rib and ridge
     body -= sc.plate_seat_cut(h, cfg)
     for a in pocket_angles(cfg):
         tool = _pocket(cfg, h) + (_channel(cfg, h) if cp.channel_len else Part())
