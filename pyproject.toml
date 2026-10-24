@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest==9.1.1", "ocp_vscode==4.2.0"]
+dev = ["pytest==9.1.1", "pytest-xdist==3.8.0", "ocp_vscode==4.2.0"]
 sim = ["mujoco==3.16.0", "coacd==1.0.14"]
 
 [tool.setuptools.packages.find]

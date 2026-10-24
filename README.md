@@ -23,7 +23,7 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 | `.venv/bin/python build.py --assembly` | also `build/assembly/`: `feeder.step` (part tree), `feeder.3mf` and `viewer.html` (3D assembly steps with every fastener) |
 | `.venv/bin/python build.py --variants` | also `build/variants/<split>/` for each `body.split`: body parts and plate, with an `assembly/` folder |
 | `.venv/bin/python build.py --plates` | also `build/plates/<set>/` for each plate set: plate, exit insert and drop tube |
-| `.venv/bin/python -m pytest -q` | tests only |
+| `.venv/bin/python -m pytest -q` | tests only. `-n 4 --dist loadfile` runs the test files on 4 cores |
 
 ## Build guide site
 
