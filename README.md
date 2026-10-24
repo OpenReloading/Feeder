@@ -104,7 +104,7 @@ Plate change, no tools: twist the cap off, lift the plate off the ring hex, drop
 
 ## Plate sets
 
->>>>>>> origin/develop
+One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert and drop tube (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, twist the drop tube off the spigot, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI). The exit opening is not adjustable: each plate set has its own exit insert, a slide would add a part and a lock for no gain.
 
 | Set (`case_plate.caliber`) | Cases | Plate height | Pocket | Pockets | 45 deg capacity | Drop bore |
 |---|---|---|---|---|---|---|
