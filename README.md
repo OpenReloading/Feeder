@@ -79,8 +79,8 @@ Full hardware list for the default 9mm case feeder: `bom/case_feeder_9mm.md`.
 | `slip_clutch_knob` | ISO 4017 M5 x 16 |
 | `case_plate_9mm_luger` | 25 mm split key ring. 240.2 mm, 34 notches open to the rim, 7.09 mm high on a 256 mm bed. The band closes each notch, so the pocket is rim + 3 mm measured to the band. A shallow pickup channel (1.5 mm deep at the pocket, 25 mm long) leads into each pocket, 6 half-round radial ribs stir the pile (`case_plate.ribs` `per_pocket`: a ridge between every two pockets instead), the ring in the eye beside the cap lifts the plate. Drops over the ring hex onto its flange, 6 mm thick at the hub, cap recess above. `case_plate.notches` False: closed round holes for an A/B test |
 | `body_core` | 4 x ISO 10642 M4 x 10 (motor, from inside the cup), 9 x CNC Kitchen M3 x 5.7 inserts (wall joints), 4 x CNC Kitchen M5 x 9.5 inserts (mount). Deck and band in one piece: the band is a C ring on the deck round the plate, 3.5 mm thick, up to the longest case plus 3.5 mm above the deck. It closes the plate notches, so cases slide on it and on the deck, never on the wall seams. Its gap over the exit takes the gate. Prints bottom down |
-| `body_wall_0` to `body_wall_2` | 3 x ISO 4762 M3 x 12 each, into the core inserts. Lap joints at the seams, key ribs in the core skirt. The wall top is full height (125 mm above the plate bottom, `body.wall_h`) on the low side and falls at 15 deg toward the high side, not below one case length above the plate (`body.heap_angle`, `body.wall_slant`): brass lies level in the world, so at 40 deg tilt it stays below that line with 25 deg to spare for heaping (estimate) |
-| `body_extender_0`, `body_extender_1` | none. Optional, 60 mm more wall at the low side (`body.extender_h`, 0 for none), flat top at the wall slant. The sleeve slides 15 mm down over the outside of the wall top. A post at each seam end joins the halves into a closed ring: 2 x ISO 4762 M3 x 12 per seam end into CNC Kitchen M3 x 5.7 inserts in `body_extender_1` (4 of each), so brass pressure cannot push a half outward. 2 x ISO 10642 M3 x 12 per half from inside the bowl, head flush in the wall, through wall and sleeve into ISO 4032 M3 nuts captive in ribs outside the sleeve hold it to the wall. Prints on its flat top |
+| `body_wall_0` to `body_wall_2` | 3 x ISO 4762 M3 x 12 each, into the core inserts. Lap joints at the seams, key ribs in the core skirt. The wall top is full height (125 mm above the plate bottom, `body.wall_h`) on the low side and falls at 40 deg toward the high side, not below one case length above the plate (`body.heap_angle`, `body.wall_slant`): brass lies level in the world, so at 40 deg tilt, the flattest, it stays below that line and the high side is open down to one case length above the plate |
+| `body_extender` | none. Optional, 60 mm more wall (`body.extender_h`, 0 for none) over a 150 deg arc centred on the low side (`body.extender_arc`), flat top at the wall slant, the high side stays open. The sleeve slides 15 mm down over the outside of the wall top. 4 x ISO 10642 M3 x 12 from inside the bowl, head flush in the wall, through wall and sleeve into ISO 4032 M3 nuts captive in ribs outside the sleeve. Prints on its flat top, turned on the bed to fit |
 | `body_track_gate` | none. Band sector in the band gap, on the exit insert. Its face is 0.5 mm behind the band face, the band ends have a 1 mm 45 deg lead-in, so cases pass the seams in either direction. The band ends lap 6 mm behind its ends, so it lifts out but cannot move inward. Prints top down |
 | `body_exit_insert` | none. Wear part: drop opening, funnel (30 deg lean toward the bowl centre) and spigot in a block that fills a vertical shaft through the core, so it drops in from above. Its 3 mm ledge rests in a 2 mm deck recess round the shaft, the gate and the plate keep it down. Prints top down |
 | `drop_tube` | Socket over the exit spigot (DIN 464 M3 x 10 knurled thumb screw into one CNC Kitchen M3 x 5.7 insert, hand tight on the spigot). Window, nut slot and plate for an M18x1 inductive sensor (LJ18A3-8-Z/AX default) with 2 M18x1 lock nuts (24 AF x 4, unverified, measure on delivery); the assembly draws the sensor (65 mm, unverified) between them. Barb for a clear PVC hose, 14 mm ID x 18 mm OD (unverified). The bore only steps outward along the path. Prints socket down, no supports (brim advised). No spring outlet |
@@ -138,13 +138,13 @@ Tilt choice. The best angle for 9mm on this feeder is UNTESTED. Start at 45 and 
 
 | Tilt | When | 9mm capacity, wall / with extender | Link pin to pin |
 |---|---|---|---|
-| 45 deg | default, start here | 406 / 1039 | 91.4 mm |
-| 50 deg | cases still go in upside down at 45 | 325 / 832 | 85.6 mm |
-| 55 deg | still upside down at 50 | 254 / 661 | 79.7 mm |
+| 45 deg | default, start here | 406 / 534 | 91.4 mm |
+| 50 deg | cases still go in upside down at 45 | 325 / 574 | 85.6 mm |
+| 55 deg | still upside down at 50 | 254 / 626 | 79.7 mm |
 | 60 deg | last resort, extender needed for the design fill | 193 / 516 | 73.8 mm |
-| 40 deg | most capacity, range end of this mount | 504 / 1296 | 97.1 mm |
+| 40 deg | most capacity, range end of this mount | 504 / 504 | 97.1 mm |
 
-Capacity: cases under a level brass surface at the low-side wall top, loose packing 0.55 of the case envelope (`layout.capacity`, estimate). Fill at most 250 9mm cases (1 kg, `case_plate.fill_cases`, `case_plate.drag_mass`) at any tilt: the clutch, cap and mount load checks assume no more. The extender keeps 250 cases in at 60 deg, it is not for a larger fill.
+Capacity: cases under a level brass surface as high as the lowest rim point allows (the wall top, or the extender top over its arc), loose packing 0.55 of the case envelope (`layout.capacity`, estimate). Fill at most 250 9mm cases (1 kg, `case_plate.fill_cases`, `case_plate.drag_mass`) at any tilt: the clutch, cap and mount load checks assume no more. The extender keeps 250 cases in at 60 deg, it is not for a larger fill. Above 55 deg it is the low side that limits the capacity, below it the open high side: the extender adds little at 40 deg.
 <!-- --8<-- [end:tilt] -->
 
 | Part | Hardware |
@@ -190,9 +190,17 @@ Results (250 9mm cases, 9mm plate, wall 125, about 3 counted turns per point, on
 | 52 deg | 660, 44 % | 1,320, 44 % | 1,920, 31 % | 2,860, 22 % |
 | 62 deg (extender) | 375, 25 % | 510, 17 % | 660, 11 % | 520, 4 % |
 
-- Every point is valid, and every case left base down, about 600 exits in all. Plate torque peaks at 0.72 Nm, below the low slip estimate of 0.84 Nm.
+- Wall falling at 15 deg: every point is valid, and every case left base down, about 600 exits in all. Plate torque peaks at 0.72 Nm, below the low slip estimate of 0.84 Nm.
 - Case centre of mass at 0.33 and 0.39 of the length from the base (38 and 45 deg, 1.5 and 3 rpm) moves the rate between 1,200 and 3,780 per hour, still all base down. The farther the centre of mass from the base, the lower the fill.
 - 9mm cases on the small_pistol plate (larger pockets) at 45 deg: 1,650 per hour at 1.5 rpm and 2,400 at 3 rpm, all base down.
+
+The results above and in the three bullets are from the wall that fell at 15 deg. With the wall top falling at 40 deg toward the open high side (`body.heap_angle` 0) and the extender as an open arc, 250 cases, one seed, no case spilled and all left base down:
+
+| Tilt | 1.5 rpm | 3 rpm |
+|---|---|---|
+| 40 deg | 1,590, 52 % | 2,820, 46 % |
+| 45 deg | 1,920, 63 % | 2,460, 40 % |
+| 60 deg (extender) | 690, 23 % | 1,140, 19 % |
 
 ## License
 

@@ -90,13 +90,10 @@ def opening(cfg: Config = CFG) -> tuple[float, float, float]:
 
 
 def wall_top(y: float, extender: bool, cfg: Config = CFG) -> float:
-    """Wall top at `y`, raised by the wall extender (its top falls at the wall slant from `extender_h` above the
-    full wall top)."""
+    """Wall top at `y` on the low side, inside the extender arc: raised by the wall extender (its top falls at the wall
+    slant from `extender_h` above the full wall top)."""
     top = b.wall_top_at(y, cfg)
-    if not extender:
-        return top
-    z, R = layout.levels(cfg), layout.bowl_r(cfg)
-    return max(top, z.wall_top + cfg.body.extender_h - (y + R) * math.tan(math.radians(b.wall_slant(cfg))))
+    return max(top, b.extender_top_at(y, cfg)) if extender else top
 
 
 def mjcf(tilt: float, n_cases: int, cfg: Config = CFG, com_ratio: float | None = None, mu: float | None = None,
@@ -120,7 +117,7 @@ def mjcf(tilt: float, n_cases: int, cfg: Config = CFG, com_ratio: float | None =
             static.append(_box(f"band{i}", r_band, R, z.deck_top, band_top, ang, step / 2, "0.85 0.5 0.2 1"))
         else:
             static.append(_box(f"gate{i}", r_band + cfg.track.gate_setback, R, z.deck_top, band_top, ang, step / 2, "0.66 0.55 0.88 1"))
-        top = wall_top(R * math.sin(math.radians(ang)), extender, cfg)
+        top = b.rim_top(ang, extender, cfg)
         static.append(_box(f"wall{i}", R, R + cfg.body.wall_t, band_top, top, ang, step / 2, "0.7 0.7 0.7 0.15"))
 
     hulls = plate_hulls(cfg)

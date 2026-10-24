@@ -10,7 +10,8 @@
   one half to the gearbox. "one_piece": core and wall are one part.
 - Wall top: full height on the low side, falling toward the open high side (`wall_slant`), not below one case
   length above the plate.
-- Wall extender (optional): two halves above the wall top, a sleeve over the outside of the wall top holds them.
+- Wall extender (optional): one open arc over the low side above the wall top, a sleeve over the outside of the wall
+  top, screwed to the wall. The high side stays open.
 - Track band: C ring on the core's deck round the plate, printed with the core. Its gap is over the exit.
 - Track gate: band sector in the band gap, on the exit insert. Its face sits behind the band face, the band ends
   have a lead-in chamfer and lap behind the gate ends, so it lifts out but cannot move inward.
@@ -477,10 +478,29 @@ def half(index: int, cfg: Config = CFG) -> Part:
     return body + _posts(index, cfg)
 
 
+def extender_span(cfg: Config = CFG) -> tuple[float, float]:
+    """Angles (deg) of the two extender ends: an arc centred on the low side (-y)."""
+    half = cfg.body.extender_arc / 2
+    return 270 - half, 270 + half
+
+
+def extender_top_at(y: float, cfg: Config = CFG) -> float:
+    """Extender top at `y`: a flat top `extender_h` above the full wall top, falling at the wall slant."""
+    return layout.levels(cfg).wall_top + cfg.body.extender_h - (y + layout.bowl_r(cfg)) * math.tan(math.radians(wall_slant(cfg)))
+
+
+def rim_top(ang: float, extender: bool = True, cfg: Config = CFG) -> float:
+    """Top of the bowl rim at body-frame angle `ang` deg: the extender top over its arc, the wall top elsewhere."""
+    y = layout.bowl_r(cfg) * math.sin(math.radians(ang))
+    if extender and cfg.body.extender_h and extender_span(cfg)[0] <= ang % 360 <= extender_span(cfg)[1]:
+        return extender_top_at(y, cfg)
+    return wall_top_at(y, cfg)
+
+
 @per_config
-def extender(index: int, cfg: Config = CFG) -> Part:
-    """Wall extender half `index`: wall above the wall top up to a flat top `extender_h` above the full wall top,
-    falling at the wall slant, sleeve down over the outside of the wall. Prints on its flat top."""
+def extender(cfg: Config = CFG) -> Part:
+    """Wall extender: wall above the wall top up to a flat top `extender_h` above the full wall top, falling at the wall
+    slant, sleeve down over the outside of the wall, over the arc `extender_span`. Prints on its flat top."""
     b, f = cfg.body, cfg.print.fit
     z = layout.levels(cfg)
     R = layout.bowl_r(cfg)
@@ -488,16 +508,17 @@ def extender(index: int, cfg: Config = CFG) -> Part:
     top = Pos(0, -R, z.wall_top + b.extender_h) * Rot(X=-wall_slant(cfg)) * Box(2000, 2000, 2000, align=(Align.CENTER, Align.CENTER, Align.MAX))
     body = (_ring(R, R + 2 * b.wall_t + f, z.bottom, tall) & top) - _below_wall_top(cfg)
     body += (_ring(R + b.wall_t + f, R + 2 * b.wall_t + f, z.bottom, tall) & _below_wall_top(cfg)) - _below_wall_top(cfg, -b.extender_lap)
-    body = (body & _side(index, cfg)) + ((_extender_posts(index, cfg) + _extender_ribs(index, cfg)) & top)
-    return body - _extender_nut_holes(index, cfg)
+    body += _extender_ribs(cfg) & top
+    body &= _wedge(*extender_span(cfg), 2 * R, z.bottom, tall)
+    return body - _extender_nut_holes(cfg)
 
 
 def extender_wall_screws(cfg: Config = CFG) -> list[tuple[float, float]]:
-    """(angle, z) of each screw that holds the extender to the wall: evenly over each half, at the middle of the
-    sleeve lap."""
+    """(angle, z) of each screw that holds the extender to the wall: evenly over the arc, at the middle of the sleeve lap."""
     b = cfg.body
     n, R = b.extender_wall_screws, layout.bowl_r(cfg)
-    angles = [b.halves_seam + 180 * h + 180 * (j + 0.5) / n for h in range(2) for j in range(n)]
+    a0, a1 = extender_span(cfg)
+    angles = [a0 + (a1 - a0) * (j + 0.5) / n for j in range(n)]
     return [(a, wall_top_at(R * math.sin(math.radians(a)), cfg) - b.extender_lap / 2) for a in angles]
 
 
@@ -534,11 +555,7 @@ def _extender_wall_holes(cfg: Config) -> Part:
     return out
 
 
-def _half_screws(index: int, cfg: Config) -> list[tuple[float, float]]:
-    return [(a, z) for a, z in extender_wall_screws(cfg) if (index == 0) == (math.sin(math.radians(a - cfg.body.halves_seam)) > 0)]
-
-
-def _extender_ribs(index: int, cfg: Config) -> Part:
+def _extender_ribs(cfg: Config) -> Part:
     """Ribs outside the sleeve from each wall screw up to the flat top, so they print without overhang."""
     b = cfg.body
     nut = fasteners.nut_data(b.joint_screw_size)
@@ -546,62 +563,22 @@ def _extender_ribs(index: int, cfg: Config) -> Part:
     r0 = layout.bowl_r(cfg) + 2 * b.wall_t + cfg.print.fit
     top = layout.levels(cfg).wall_top + b.extender_h
     out = None
-    for ang, z in _half_screws(index, cfg):
+    for ang, z in extender_wall_screws(cfg):
         rib = Rot(Z=ang) * Pos(r0 - 1 + (nut["m"] + 1) / 2, 0, z - w / 2) * Box(nut["m"] + 1, w, top - z + w / 2 + 2 * layout.bowl_r(cfg), align=BOTTOM)  # the slanted top cuts it
         out = rib if out is None else out + rib
     return out
 
 
-def _extender_nut_holes(index: int, cfg: Config) -> Part:
+def _extender_nut_holes(cfg: Config) -> Part:
     """Screw hole through sleeve and rib, hex pocket for the captive nut."""
     b, f = cfg.body, cfg.print.fit
     size = b.joint_screw_size
     nut = fasteners.nut_data(size)
     out = None
-    for ang, z in _half_screws(index, cfg):
+    for ang, z in extender_wall_screws(cfg):
         hole = Rot(Z=ang) * Pos(layout.bowl_r(cfg) + b.wall_t, 0, z) * Rot(X=180) * teardrop(fasteners.clearance_d(size), b.wall_t + f + nut["m"] + 1)  # roof down: prints top down
         hole += extender_nut_seat(ang, z, cfg) * Pos(0, 0, -1) * hex_prism(nut["s"] + 2 * cfg.fasteners.head_fit, nut["m"] + 1)
         out = hole if out is None else out + hole
-    return out
-
-
-def extender_post_axis_r(cfg: Config = CFG) -> float:
-    ins = cfg.fasteners.inserts[cfg.body.joint_screw_size]
-    return layout.bowl_r(cfg) + 2 * cfg.body.wall_t + cfg.print.fit + (ins.od + 2 * ins.min_wall) / 2
-
-
-def extender_screw_z(cfg: Config = CFG) -> list[tuple[float, float]]:
-    """(seam angle, z) of each extender screw: from the sleeve bottom at that seam end, one lap apart."""
-    b = cfg.body
-    out = []
-    for ang in (b.halves_seam, b.halves_seam + 180):
-        z0 = wall_top_at(extender_post_axis_r(cfg) * math.sin(math.radians(ang)), cfg) - b.extender_lap
-        out += [(ang, z0 + b.extender_lap * (i + 0.5)) for i in range(b.extender_screws)]
-    return out
-
-
-def _extender_posts(index: int, cfg: Config) -> Part:
-    """Posts outside the extender sleeve at both seam ends, from the sleeve bottom up to the flat top, M3 screws
-    across the seam: clearance on half 0, heat-set insert on half 1. Holes with the teardrop roof down, since the
-    extender prints top down."""
-    b, f = cfg.body, cfg.print.fit
-    ins = cfg.fasteners.inserts[b.joint_screw_size]
-    w = ins.od + 2 * ins.min_wall
-    r_axis, r_in = extender_post_axis_r(cfg), layout.bowl_r(cfg) + 2 * b.wall_t + f - 1  # 1 into the sleeve
-    length = post_lengths(cfg)[index]
-    out = None
-    for k, ang in enumerate((b.halves_seam, b.halves_seam + 180)):
-        s = (1 if index == 0 else -1) * (1 if k == 0 else -1)  # local y of this half at this seam end
-        zs = [z for a, z in extender_screw_z(cfg) if a == ang]
-        z0, z1 = zs[0] - b.extender_lap / 2, layout.levels(cfg).wall_top + b.extender_h  # up to the flat top, which is on the bed
-        post = Pos((r_in + r_axis + w / 2) / 2, s * (f / 2 + length / 2), z0) * Box(r_axis + w / 2 - r_in, length, z1 - z0, align=BOTTOM)
-        for zz in zs:
-            if index == 0:  # from the outer face toward the seam
-                post -= Pos(r_axis, s * (f / 2 + length), zz) * Rot(Z=-90 * s) * Rot(X=180) * teardrop(fasteners.clearance_d(b.joint_screw_size), length)
-            else:  # from the seam face into the post
-                post -= Pos(r_axis, s * f / 2, zz) * Rot(Z=90 * s) * Rot(X=180) * teardrop(ins.hole_d, ins.hole_depth)
-        post = Rot(Z=ang) * post
-        out = post if out is None else out + post
     return out
 
 
@@ -618,8 +595,7 @@ def parts(cfg: Config = CFG) -> dict:
     else:
         out["body"] = body_one_piece
     if b.extender_h:
-        for i in range(2):
-            out[f"body_extender_{i}"] = lambda cfg=cfg, i=i: extender(i, cfg)
+        out["body_extender"] = extender
     return out
 
 
