@@ -21,7 +21,7 @@ PARTS = {
     "body_track_gate": body.track_gate,
     "body_exit_insert": body.exit_insert,
     "electronics_box": electronics.box,
-    "electronics_collar": electronics.collar,
+    "electronics_box_left": electronics.box_left,
     "electronics_lid": electronics.lid,
 }
 

@@ -339,9 +339,9 @@ def clamp_screw_z(cfg: Config = CFG) -> list[float]:
     return [mt.clamp_h * (i + 0.5) / mt.clamp_screws for i in range(mt.clamp_screws)]
 
 
-def clamp_nut_pocket(z: float, cfg: Config = CFG) -> Location:
-    """Nut pocket mouth on the +x face of the clamp, a flat up, +z out of the pocket."""
-    return Pos(clamp_width(cfg) / 2, clamp_layout(cfg)["y_s"], z) * Rot(Y=90) * Rot(Z=90)
+def clamp_nut_pocket(z: float, cfg: Config = CFG, roof: Location = Pos()) -> Location:
+    """Nut pocket mouth on the +x face of the clamp, a flat up (`roof` turns it about the screw axis), +z out of the pocket."""
+    return Pos(clamp_width(cfg) / 2, clamp_layout(cfg)["y_s"], z) * roof * Rot(Y=90) * Rot(Z=90)
 
 
 @per_config
@@ -370,21 +370,22 @@ def clamp(cfg: Config = CFG) -> Part:
     return body - tube_clamp_cuts(h, cap, clamp_screw_z(cfg), cfg)
 
 
-def tube_clamp_cuts(h: float, cap: float, screw_z: list[float], cfg: Config = CFG, top_down: bool = False) -> Part:
+def tube_clamp_cuts(h: float, cap: float, screw_z: list[float], cfg: Config = CFG, top_down: bool = False, lying: bool = False) -> Part:
     """What a slit tube clamp `h` tall on z = 0 cuts: the tube bore (closed `cap` at the top, through if 0), the
     slit on the +y side and the clamp screws along x at `screw_z` (head counterbore at -x, nut pocket at +x with a
-    flat up). `top_down`: hole roofs point -z, for a part that prints top down."""
+    flat up). `top_down`: hole roofs point -z, for a part that prints top down. `lying`: the tube axis is flat on
+    the bed and -y is up, so hole roofs and nut flats point -y."""
     mt = cfg.mount
     L, b, w = clamp_layout(cfg), bore(cfg), clamp_width(cfg)
     bore_h = h - cap + 1 if cap else h + 2
     out = Pos(0, 0, -1) * (Cylinder(b / 2, bore_h, align=BOTTOM) if mt.tube_shape == "round" else Box(b, b, bore_h, align=BOTTOM))
     out += Pos(0, (L["y_max"] + 1) / 2, -1) * Box(mt.clamp_slit, L["y_max"] + 1, bore_h, align=BOTTOM)
     out += Pos(0, (L["y_max"] + 1 + b / 2) / 2, -1) * Box(mt.clamp_slit, L["y_max"] + 1 - b / 2, h + 2, align=BOTTOM)
-    roof = Rot(X=180) if top_down else Pos()
+    roof = Rot(X=180) if top_down else Rot(X=90) if lying else Pos()
     for z in screw_z:
         out += Pos(-w / 2, L["y_s"], z) * roof * teardrop(fasteners.clearance_d(mt.clamp_size), w)
         out += Pos(-w / 2, L["y_s"], z) * roof * teardrop(2 * L["cb_r"], clamp_cb_depth(cfg))
-        out += clamp_nut_pocket(z, cfg) * fasteners.nut_pocket(mt.clamp_size)
+        out += clamp_nut_pocket(z, cfg, roof if lying else Pos()) * fasteners.nut_pocket(mt.clamp_size)
     return out
 
 
