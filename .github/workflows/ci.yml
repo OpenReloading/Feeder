@@ -1,14 +1,21 @@
 name: CI
 on:
   push:
-    branches: [develop, main]
+    branches: [develop]
   pull_request:
 permissions: {}
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   workflows:
+    # The promotion pull request (develop -> main) repeats what the push to develop already checked. Matching the head
+    # repository too keeps a fork branch named develop from skipping the checks.
+    if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
     permissions:
       contents: read
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -19,11 +26,36 @@ jobs:
         with:
           version: 1.31.1
           advanced-security: false
-  dependency-review:
+  # ruff and basedpyright from the hash-locked requirements-dev.txt. Rules are in pyproject.toml, the basedpyright
+  # baseline in .basedpyright/baseline.json, the ruff baseline as noqa comments.
+  lint-python:
+    # skipped on the promotion pull request, see `workflows`
+    if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
     permissions:
       contents: read
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # 3.13 is what requirements-dev.txt was compiled with and what the basedpyright baseline was written on
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.13'
+      - run: python -m venv .venv
+      - run: '.venv/bin/pip install --only-binary :all: --require-hashes -r requirements-dev.txt'
+      # basedpyright needs the project's dependencies to resolve imports
+      - run: '.venv/bin/pip install --only-binary :all: -r requirements.txt'
+      - run: .venv/bin/ruff check .
+      - run: .venv/bin/basedpyright --pythonpath .venv/bin/python
+  dependency-review:
+    # also skipped on the promotion pull request, see `workflows`
+    if: ${{ github.event_name == 'pull_request' && !(github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:

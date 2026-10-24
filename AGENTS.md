@@ -16,7 +16,7 @@ Parametric brass and bullet collator for reloading, built in build123d with metr
 - `feeder/config.py` holds every dimension and option; part modules in `feeder/parts/` use only config values and `feeder/lib/` features, no literal dimensions.
 - Each part module exposes `PARTS = {name: builder}`; `build.py` exports each to `build/<name>.stl` and `.step`.
 - Critical dimensions carry a one-line source note in `config.py`.
-- Lint: CI runs ruff and basedpyright (`.github/workflows/lint-python.yml`, rules in `pyproject.toml`); locally `.venv/bin/ruff check .` and `.venv/bin/basedpyright`. Versions are pinned in `pyproject.toml` and `requirements.txt`. Existing findings are baselined (`# noqa` comments, `.basedpyright/baseline.json`): fix a new finding, do not add to the baseline. Remove a baseline entry when its code is fixed.
+- Lint (as CI, job `lint-python` in `.github/workflows/ci.yml`): `.venv/bin/pip install --only-binary :all: --require-hashes -r requirements-dev.txt`, then `.venv/bin/ruff check .` and `.venv/bin/basedpyright --pythonpath .venv/bin/python` (rules in `pyproject.toml`). `requirements-dev.txt` is compiled from `requirements-dev.in` on Python 3.13: `pip-compile --generate-hashes --strip-extras --output-file=requirements-dev.txt requirements-dev.in`. Existing findings are baselined (`# noqa` comments, `.basedpyright/baseline.json`): fix a new finding, do not add to the baseline. Remove a baseline entry when its code is fixed.
 - `reference/` is a local folder, excluded in `.git/info/exclude`. Tracked files never depend on it and never copy from it. Dimensions come from standards, datasheets, caliber data and print tolerances.
 
 ## Branches
