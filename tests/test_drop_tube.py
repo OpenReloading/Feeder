@@ -172,14 +172,16 @@ def test_hanging_tube_clears_the_exit_insert_and_turns_clear_of_the_body(part):
 
 
 @pytest.mark.parametrize("left", [False, True], ids=["right", "left"])
-def test_tube_goes_on_and_turns_clear_of_the_mount_and_the_box(part, left):
+def test_tube_with_its_sensor_goes_on_and_turns_clear_of_the_mount_and_the_box(part, left):
     pl, (lo, hi) = dt.placement(), m.tilt_span()
     box = el.box_left() if left else el.box()
+    sensor = Pos(K.window_x, 0, K.sensor_z) * Rot(Y=90) * Cylinder(D.sensor_thread_d / 2, D.sensor_length, align=sc.BOTTOM)  # stays in the tube when it turns off
+    carried = part + sensor
     for tilt in (lo, (lo + hi) / 2, hi):
-        others = [m.clamp_in_body(m.PARTS["mount_clamp"](), tilt), m.yoke_in_body(m.PARTS["mount_yoke"]()), el.box_frame(tilt, left=left) * box]
+        others = [b.core(), m.clamp_in_body(m.PARTS["mount_clamp"](), tilt), m.yoke_in_body(m.PARTS["mount_yoke"]()), el.box_frame(tilt, left=left) * box]
         for u in (1.0, 0.5, 0.0):  # from the slots to the stop
             for below in (0.0, 40.0, 100.0):  # sliding on from below, the sensor boss sweeps the drop path
-                moved = pl * Pos(0, 0, below - LIFT - FIT / 2) * Rot(Z=-SLOT * u) * part
+                moved = pl * Pos(0, 0, below - LIFT - FIT / 2) * Rot(Z=-SLOT * u) * carried
                 assert all(_overlap(moved, o) < EPS for o in others), (tilt, u, below)
 
 

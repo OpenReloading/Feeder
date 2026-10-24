@@ -441,10 +441,10 @@ class DropTube:
     (LJ18A3-8-Z/AX, NPN NC, 8 mm rated), barb for a clear PVC hose. The bore only steps outward along the path.
     Sensor, nut and hose sizes are typical kit values, unverified, measure on delivery."""
 
-    lug_h: float = 1.2  # radial height of a spigot lug, with a 45 deg underside that prints without support
+    lug_h: float = 1.2  # radial height of a spigot lug, with a 45 deg underside that prints without support (print tolerance estimate, unverified: try it on a print)
     lug_tip: float = 1.2  # flat axial width of a lug behind its 45 deg underside
     lug_z: float = 4.0  # underside root of the lugs from the start of the spigot
-    lug_w: tuple = (4.4, 3.0)  # tangential widths of the wide lug (sensor side) and the narrow lug (opposite), the wide one does not fit the narrow slot
+    lug_w: tuple = (4.4, 3.0)  # tangential widths of the wide lug (sensor side) and the narrow lug (opposite), the wide one does not fit the narrow slot (strength estimate: 10 N on one lug is about 1.4 MPa, unverified)
     twist: float = 60.0  # deg from the entry slots to the stop, leaves a land over min_wall between slot and notch on the smallest spigot
     twist_dir: int = -1  # -1: the tube turns clockwise seen from the hose end to lock, like a right-hand thread (+1 the other way)
     lock_lift: float = 1.0  # the tube hangs this far below its groove floor, in a notch at the stop: lift it out of the notch to turn it off

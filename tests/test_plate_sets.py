@@ -83,7 +83,7 @@ def test_drop_tube_passes_every_case(plate_set, core):
         assert hose > c.rim_d + 0.4  # the case runs down the hose
         assert math.hypot(c.rim_d, c.case_length) > hose  # and cannot turn over in it
     k = dt.dims(s)
-    assert k.tip - k.sensor_z >= layout.caliber(s).case_length + s.drop_tube.sensor_margin - 1e-9  # sensor clears the last case (equal by construction on the long sets: a rounding error of the sum)
+    assert k.tip - k.sensor_z >= layout.caliber(s).case_length + s.drop_tube.sensor_margin  # sensor clears the last case
     slab = Pos(0, 0, 5) * Box(80, 80, 0.2)
     assert (parts["tube"] & dt.placement(s) * slab).volume > 0
 
