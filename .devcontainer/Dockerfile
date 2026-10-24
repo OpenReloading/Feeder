@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/python:3.2.6-3.12-bookworm@sha256:589b65db720b03c96d721706005f176ff467ee879f92c2d137c04a537feffa56
+FROM mcr.microsoft.com/devcontainers/python:3.14-bookworm@sha256:68aef3859e340a2b0cc63260978c5d40e82f48e30fb00503c59cea9104ff8a6b
 
 # libgl for OCP.
 RUN apt-get update \

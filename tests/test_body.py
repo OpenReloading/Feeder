@@ -193,7 +193,8 @@ def _mates(cfg) -> dict[str, tuple[str, ...]]:
         "mount_clamp": ("mount_yoke",),
         "mount_tilt_link": ("mount_yoke", "mount_clamp"),
         "stand_tube": ("mount_clamp",),
-        "electronics_box": ("stand_tube",),
+        "electronics_collar": ("stand_tube",),
+        "electronics_box": ("electronics_collar",),
         "electronics_lid": ("electronics_box",),
     }
     if split == "halves":
