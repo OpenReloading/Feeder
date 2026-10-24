@@ -225,6 +225,7 @@ class Mount:
     link_nut_af: float = 10.0
     link_rod_size: str = "M6"  # DIN 976-1 threaded rod, ISO 4032 nuts
     fixed_tilts: tuple = (45.0, 50.0, 55.0)  # printed fixed links: 45 the start value, 50 and 55 steeper
+    link: str | float = "adjustable"  # the assembled link: "adjustable" (rod ends and rod) or the angle of a printed fixed link from `fixed_tilts`, which then sets the assembly tilt
     clamp_size: str = "M5"
     clamp_wall: float = 6.0  # around the tube bore, also the closed top that stops the tube
     clamp_h: float = 40.0

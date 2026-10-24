@@ -9,7 +9,7 @@ from shapely.geometry import Polygon as ShapelyPolygon
 from test_mount import _unsupported
 
 from feeder import assembly, printing
-from feeder.config import CFG
+from feeder.config import CFG, GENERIC_8MM_FLANGE
 from feeder.lib import fasteners
 from feeder.lib.features import d_bore
 from feeder.parts import body as b
@@ -149,9 +149,16 @@ def _cfg(split):
     return replace(CFG, body=replace(B, split=split))
 
 
-@pytest.fixture(scope="module", params=SPLITS)
+CONFIGS = {  # the body splits, then the default body with a printed fixed link and with the generic flange hub
+    **{split: _cfg(split) for split in SPLITS},
+    "fixed_link_50": replace(CFG, mount=replace(CFG.mount, link=50.0)),
+    "generic_hub": b.with_hub(CFG, GENERIC_8MM_FLANGE),
+}
+
+
+@pytest.fixture(scope="module", params=CONFIGS)
 def assembled(request):
-    cfg = _cfg(request.param)
+    cfg = CONFIGS[request.param]
     return cfg, {p.name: p for p in assembly.placed(cfg)}
 
 
@@ -185,7 +192,7 @@ def _mates(cfg) -> dict[str, tuple[str, ...]]:
         "drop_tube": ("body_exit_insert",),
         "mount_yoke": main,
         "mount_clamp": ("mount_yoke",),
-        "mount_tilt_link": ("mount_yoke", "mount_clamp"),
+        assembly.link_name(assembly.body_tilt(cfg), cfg): ("mount_yoke", "mount_clamp"),
         "stand_tube": ("mount_clamp",),
         "electronics_collar": ("stand_tube",),
         "electronics_box": ("electronics_collar",),
@@ -343,3 +350,10 @@ def test_extender_sits_on_the_wall_top_and_prints_on_its_flat_top():
         bed = printing.on_bed(f"body_extender_{i}", ext)
         assert printing.fits(bed)
         assert _unsupported(Pos(0, 0, -0.013) * bed) == []
+
+
+def test_generic_hub_keeps_the_outlet_where_it_is_under_the_body():
+    cfg = b.with_hub(CFG, GENERIC_8MM_FLANGE)
+    assert layout.levels(cfg).deck_top > layout.levels(CFG).deck_top  # the taller hub raises the deck
+    assert b.outlet(cfg)[0].Z == pytest.approx(b.outlet(CFG)[0].Z)
+    assert b.with_hub(CFG, CFG.metal_hub) == CFG  # the default hub changes nothing

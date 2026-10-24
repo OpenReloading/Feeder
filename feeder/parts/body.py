@@ -26,12 +26,13 @@ Band, gate and exit insert print top down. Skirt, no brim: a brim takes the band
 """
 
 import math
+from dataclasses import replace
 
 from build123d import Align, Box, Circle, Cylinder, Part, Plane, Polygon, Pos, Rot, Vector, extrude, loft
 from shapely.geometry import MultiPoint
 from shapely.geometry.polygon import orient
 
-from feeder.config import CFG, Config
+from feeder.config import CFG, Config, MetalHub
 from feeder.lib.cache import per_config
 from feeder.lib import fasteners
 from feeder.lib.features import hex_corner_r, hex_prism, teardrop, teardrop_cone
@@ -89,6 +90,14 @@ def outlet(cfg: Config = CFG) -> tuple[Vector, Vector]:
     _, r0, r1 = opening(cfg)
     d = _lean_dir(cfg)
     return Vector(0, (r0 + r1) / 2, layout.levels(cfg).deck_top) + d * cfg.exit.funnel_len, d
+
+
+def with_hub(cfg: Config, hub: MetalHub) -> Config:
+    """`cfg` with another hub. A taller hub raises the deck and the outlet with it: the funnel is lengthened by the rise,
+    so the outlet and the drop tube socket stay where they are under the body bottom."""
+    new = replace(cfg, metal_hub=hub)
+    rise = layout.levels(new).deck_top - layout.levels(cfg).deck_top
+    return replace(new, exit=replace(new.exit, funnel_len=cfg.exit.funnel_len - rise / _lean_dir(cfg).Z))
 
 
 def _opening_plan(cfg: Config, grow: float):

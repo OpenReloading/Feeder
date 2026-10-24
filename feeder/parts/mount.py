@@ -273,6 +273,16 @@ def link_frame(tilt: float, cfg: Config = CFG) -> Location:
     return Plane(origin=(-cfg.mount.link_t / 2, ay, az), x_dir=x, z_dir=(1, 0, 0)).location
 
 
+def link_angle(cfg: Config = CFG) -> float | None:
+    """Tilt of the fixed link `cfg.mount.link` names, None for the adjustable link."""
+    link = cfg.mount.link
+    if link == "adjustable":
+        return None
+    if link not in cfg.mount.fixed_tilts:
+        raise ValueError(f"mount.link {link!r} is neither 'adjustable' nor one of fixed_tilts {cfg.mount.fixed_tilts}")
+    return float(link)
+
+
 def link_in_body(part: Part, tilt: float, cfg: Config = CFG) -> Part:
     return link_frame(tilt, cfg) * part
 
