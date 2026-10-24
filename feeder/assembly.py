@@ -119,7 +119,6 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
         Placed("stand_tube", stand_tube(tilt, cfg), "tube", 13, explode=down, bought=True),
         Placed("mount_tilt_link", mount.link_in_body(mount.adjustable_link(tilt, cfg), tilt, cfg), "link", 14, explode=(1.0, 0.0, 0.0)),
         Placed("electronics_box", box * electronics.box(cfg), "elec", 16, explode=down),
-        Placed("electronics_collar", box * electronics.collar(cfg), "elec", 16, explode=down),
         Placed("timer_relay", box * electronics.relay_board(cfg), "board", 16, explode=_dir(box, (0, -1, 0)), bought=True),
     ]
     for name, pp, mouth, _ in electronics.panel_fits(cfg):
@@ -283,19 +282,16 @@ def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fast
     L, w = mount.clamp_layout(cfg), mount.clamp_width(cfg)
     wh, nut = fasteners.washer_data(mt.clamp_size)["h"], fasteners.nut_data(mt.clamp_size)
     box = electronics.box_frame(tilt, cfg)
-    for frame, zs, host in ((mount.clamp_frame(tilt, cfg), mount.clamp_screw_z(cfg), "mount_clamp"), (box, electronics.collar_screw_z(cfg), "electronics_collar")):
+    for frame, zs, host, roof in ((mount.clamp_frame(tilt, cfg), mount.clamp_screw_z(cfg), "mount_clamp", Pos()), (box * electronics.tube_frame(cfg), electronics.clamp_screw_z(cfg), "electronics_box", Rot(X=90))):
         for zz in zs:
             seat = frame * Pos(-w / 2 + mount.clamp_cb_depth(cfg), L["y_s"], zz) * Rot(Y=-90)
             items.append((f"ISO 7089 {mt.clamp_size} washer", "washer", _washer(mt.clamp_size), seat, host, 1))
             screw(mt.clamp_size, mount.clamp_bolt_length(cfg), seat * Pos(0, 0, wh), host)
-            items.append((_nut_name(mt.clamp_size), "nut", _nut(mt.clamp_size, nut["s"], nut["m"]), frame * mount.clamp_nut_pocket(zz, cfg) * Pos(0, 0, -nut["m"]), host, 2))
+            items.append((_nut_name(mt.clamp_size), "nut", _nut(mt.clamp_size, nut["s"], nut["m"]), frame * mount.clamp_nut_pocket(zz, cfg, roof) * Pos(0, 0, -nut["m"]), host, 2))
     e, o = cfg.electronics, electronics.outline(cfg)
     for x, zz in electronics.lid_screws(cfg):  # into the box: +y in the box frame
         insert(e.lid_screw_size, box * Pos(x, o["y0"], zz) * Rot(X=90), "electronics_box")
         screw(e.lid_screw_size, electronics.lid_screw_length(cfg), box * Pos(x, o["y0"] - e.lid_t, zz) * Rot(X=90), "electronics_lid")
-    for zz in electronics.collar_screw_z(cfg):
-        insert(e.collar_screw_size, box * Pos(0, o["y1"], zz) * Rot(X=90), "electronics_collar")
-        screw(e.collar_screw_size, electronics.collar_screw_length(cfg), box * Pos(0, o["y1"] - e.box_wall, zz) * Rot(X=90), "electronics_box")
     back = o["y1"] - e.box_wall - e.standoff_h
     for x, zz in electronics.relay_screws(cfg):
         insert(e.lid_screw_size, box * Pos(x, back, zz) * Rot(X=90), "electronics_box")
