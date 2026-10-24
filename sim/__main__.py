@@ -23,10 +23,6 @@ def _floats(s: str) -> list[float]:
     return [float(v) for v in s.split(",")]
 
 
-def _point(kw: dict) -> dict:
-    return run(**kw)
-
-
 def _done(path: Path) -> set[tuple]:
     if not path.exists():
         return set()
@@ -46,8 +42,9 @@ def sweep(a) -> None:
                                                        range(1, a.seeds + 1))
             if (pl, a.case, t, r, a.cases, c, m, s) not in done]
     print(f"{len(todo)} points to run, {len(done)} done", flush=True)
+    # submit `run` itself: under forkserver and spawn a function defined in `__main__` is not importable in the worker
     with ProcessPoolExecutor(max_workers=min(a.workers, 6)) as ex:  # each worker holds a 250 case pile; the host has about 10 GB free
-        for fut in as_completed([ex.submit(_point, kw) for kw in todo]):
+        for fut in as_completed([ex.submit(run, **kw) for kw in todo]):
             row = fut.result()
             new = not path.exists()
             if not new:
@@ -95,7 +92,7 @@ def calibrate(a) -> None:
     pairs = list(itertools.product(_floats(a.mu), _floats(a.com)))
     jobs = [dict(tilt=m["tilt"], rpm=m["rpm"], n_cases=a.cases, revs=a.revs, mu=mu, com_ratio=c) for mu, c in pairs for m in measured]
     with ProcessPoolExecutor(max_workers=min(a.workers, 6)) as ex:
-        sims = list(ex.map(_point, jobs))
+        sims = [f.result() for f in [ex.submit(run, **kw) for kw in jobs]]
     out = []
     for k, (mu, c) in enumerate(pairs):
         err = 0.0
