@@ -44,7 +44,7 @@ DEPENDS = [
     ("body", ("split", "plate", "extender", "hub")),
     ("case_plate", ("split", "plate")),
     ("drop_tube", ("plate",)),
-    ("electronics_collar", ("tube",)),
+    ("electronics_box", ("tube",)),
     ("electronics", ()),
     ("mount_yoke", ()),
     ("mount_clamp", ("tube",)),

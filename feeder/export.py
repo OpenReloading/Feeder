@@ -27,7 +27,7 @@ COLORS = {  # STEP and 3MF colours by viewer kind, RGB 0..1
     "pla3": (0.29, 0.37, 0.56), "cap": (0.18, 0.44, 0.62), "drop": (0.25, 0.6, 0.42), "yoke": (0.66, 0.34, 0.29),
     "clamp": (0.36, 0.44, 0.69), "link": (0.79, 0.64, 0.15), "tube": (0.65, 0.68, 0.71), "screw": (0.2, 0.22, 0.24),
     "nut": (0.42, 0.45, 0.48), "washer": (0.62, 0.65, 0.68), "insert": (0.72, 0.58, 0.3), "elec": (0.3, 0.33, 0.38),
-    "lid": (0.45, 0.5, 0.56),
+    "lid": (0.45, 0.5, 0.56), "panel": (0.12, 0.13, 0.15), "board": (0.1, 0.45, 0.25), "sensor": (0.75, 0.62, 0.2),
 }
 
 
@@ -53,12 +53,14 @@ def _steps(cfg: Config) -> list[dict]:
         ("Knob and its screw", f"Tighten once at assembly until the knob sits on the carrier top: springs at {spring_len:.1f} mm, clamp {sc.clamp_force(n, cfg):.1f} N. Plate changes never touch it."),
         ("Case plate", f"{layout.plate_r(cfg) * 2:.1f} mm, {layout.pocket_count(cfg)} notches, closed by the band. Drops over the ring hex onto the flange; lift it by the key ring."),
         ("Cap", f"Twist on by hand until it sits on the plate: about {sc.cap_clamp_force(cfg):.0f} N clamp at 1 Nm (estimate) holds the plate against the brass on the low side. Twist off to change plates."),
-        ("Drop tube", "Heat-set insert into the boss first. Socket over the exit spigot, thumb screw into the insert, hand tight on the spigot. M18 x 1 sensor between two lock nuts in the boss (not drawn)."),
+        ("Drop tube", "Heat-set insert into the boss first. Socket over the exit spigot, thumb screw into the insert, hand tight on the spigot. Inner M18 x 1 lock nut into the slot from the side first."),
         ("Yoke", "Screws from below into the heat-set inserts in the body's bottom plane."),
         ("Clamp on the 25 mm tube", "Slit clamp: screws on washers in the counterbores, nuts in the pockets. Tongue between the yoke ears on the pivot bolt, a washer on each side, the nylon nut sets the pivot friction."),
         ("Tilt link", f"Pin A in the yoke fork, pin B in the clamp fork, a washer on each side and a nylon nut each. Adjustable link: fixed rod end on a captive M6 nut and a jam nut, adjust end between two nuts on a {mount.rod_length(cfg):.0f} mm M6 threaded rod, {mt.tilt_range[0]:.0f} to {mt.tilt_range[1]:.0f} deg. Or one printed fixed link per angle ({', '.join(f'{t:.0f}' for t in mt.fixed_tilts)} deg) on the same pins."),
         ("Wall extender (optional)", f"Two halves, {cfg.body.extender_h:.0f} mm more wall at the low side, top at the wall slant. The sleeve slides {cfg.body.extender_lap:.0f} mm down over the outside of the wall top. Heat-set inserts into the posts of half 1 and a nut into each rib pocket first, then screw the halves together at both seam posts. Countersunk screws from inside the bowl through wall and sleeve into the rib nuts."),
-        ("Electronics box", f"Heat-set inserts into the collar, the corner posts and the relay standoffs first. Collar on the stand tube {cfg.electronics.box_gap:.0f} mm below the clamp like the clamp: screws on washers in the counterbores, nuts in the pockets. Box on the collar, screws from inside through the back wall. Relay onto its standoffs, GX12 sockets into the side face. PWM knob, toggle switch and DC jack into the lid, lid screws from the front."),
+        ("Electronics box", f"Heat-set inserts into the corner posts and the relay standoffs first. The box clamps the stand tube {cfg.electronics.box_gap:.0f} mm below the tilt clamp, beside it with its front toward the user: right or left of the tube, the left box is the mirror image. Screws on washers in the counterbores from the outside, nuts in the pockets from the gap at the wall. Timer relay module onto its standoffs, screws into the inserts. GX12 sockets into the side face, each with its panel nut inside."),
+        ("Lid with the controls", "PWM knob, toggle switch and DC jack into the lid from the front, each with its panel nut on the inside. The PWM controller hangs on the back of the knob potentiometer. Lid on the box, screws from the front. The cables are long enough to open it."),
+        ("Level sensor", "Sensor from the outside through the plate hole and the inner lock nut until its face touches the window wall, outer lock nut on the plate. Plug it into the GX12 3-pin socket."),
     ]
 
 

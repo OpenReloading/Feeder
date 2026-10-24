@@ -358,9 +358,24 @@ GENERIC_8MM_FLANGE = MetalHub(
 
 
 @dataclass(frozen=True)
+class PanelPart:
+    """Bought panel part as an envelope in the panel frame: z = 0 on the outer face, +z into the box. Threaded
+    barrel from the outer face to `thread_l`, panel nut on the inner face, body behind the barrel, front piece
+    (lever, knob, flange) outside. Seller values, unverified: measure on delivery."""
+
+    label: str
+    thread_d: float  # nominal thread diameter, the barrel and the panel nut bore
+    thread_l: float  # barrel length from the outer face: panel plus nut must fit on it
+    nut_af: float
+    nut_t: float
+    body: tuple  # across x, across y, depth behind the barrel (the panel frame x and y)
+    front: tuple = (0.0, 0.0)  # diameter and height outside the panel
+
+
+@dataclass(frozen=True)
 class Electronics:
-    """Motor driver limit, and the box on the stand tube below the tilt clamp, on the exit side: upright, controls
-    in the front lid away from the tube, its own slit collar (the tilt clamp's screws). Panel hole and module sizes
+    """Motor driver limit, and the box beside the stand tube below the tilt clamp: upright, controls in the front
+    lid toward the user (the low side), its own slit clamp on the tube (the tilt clamp's screws). Panel hole and module sizes
     from seller listings, unverified: measure on delivery."""
 
     current_limit_torque: float = 0.6  # Nm the driver current limit allows, calibrate with a scale test
@@ -369,14 +384,29 @@ class Electronics:
     box_wall: float = 2.4  # thin enough for the panel threads (6 mm and longer, unverified)
     lid_t: float = 3.0
     lid_screw_size: str = "M3"  # ISO 4762 through the lid into heat-set inserts in the box corners
-    collar_h: float = 40.0  # slit collar at the box top, on the tube
-    collar_screw_size: str = "M3"  # ISO 4762 from inside the box through the back wall into inserts in the collar
+    clamp_h: float = 40.0  # slit clamp on the tube in the box side wall, at the box top
     relay_holes: tuple = (44.0, 24.0)  # timer relay module mounting holes, x and z spacing (unverified, measure on delivery)
     relay_pcb_t: float = 1.6
     standoff_h: float = 8.0  # relay board above the back wall, room for its solder joints
     relay_hole_depth: float = 7.7  # insert hole in the standoff, 1 deeper than usual so the M3 x 8 does not bottom out
     front_holes: tuple = (("PWM knob", 7.2), ("toggle switch", 6.2), ("DC jack", 11.0))  # lid, top to bottom: pot M7, MTS-102 6 mm, DC-022B 5.5 x 2.1 (unverified)
     side_holes: tuple = (("motor", 12.2), ("sensor", 12.2))  # +x face, low: GX12 2-pin (motor) and 3-pin (sensor), 12 mm (unverified). Different pin counts: the motor plug cannot go in the sensor socket
+    # Envelopes of the panel parts by hole name. MTS-102: M6 x 0.75 thread 9, body 13 x 7.9, 29 long with the thread
+    # (https://www.tinytronics.nl/en/switches/manual-switches/toggle-switches/standard-built-in-flip-switch-mts-102).
+    # Potentiometer: body 17 x 9.5 (https://www.piekarz.pl/en/10065-potentiometer-spike-wh148-1a-2-15v-b50k), knob
+    # 15 mm shaft and 16 knob estimated. DC jack, GX12 and all panel nuts: no drawing found, estimates, unverified.
+    # The jack barrel is the hole (11.0) less the 0.2 clearance of the other holes. The GX12 body ends 12 behind the
+    # inner face of the panel, the depth `test_panel_holes_leave_room` assumes.
+    panel_parts: tuple = (
+        ("PWM knob", PanelPart("PWM knob", 7.0, 7.0, 10.0, 2.0, (17.0, 17.0, 9.5), (16.0, 15.0))),
+        ("toggle switch", PanelPart("toggle switch", 6.0, 9.0, 8.0, 2.0, (13.0, 7.9, 20.0), (3.0, 12.0))),
+        ("DC jack", PanelPart("DC jack", 10.8, 8.0, 14.0, 2.0, (12.0, 11.0, 14.0))),
+        ("motor", PanelPart("GX12 2-pin socket", 12.0, 8.5, 15.0, 2.0, (13.0, 13.0, 5.9), (16.0, 2.5))),
+        ("sensor", PanelPart("GX12 3-pin socket", 12.0, 8.5, 15.0, 2.0, (13.0, 13.0, 5.9), (16.0, 2.5))),
+    )
+    pwm_board: tuple = (50.0, 50.0, 13.6)  # PWM controller: across x, along z (about 25 round its knob), depth with parts on the board (estimate, unverified)
+    relay_board: tuple = (50.0, 30.0)  # timer relay module PCB over its holes: across x, along z (estimate, unverified)
+    relay_parts: tuple = (36.0, 16.0, 16.0)  # relay and terminal blocks between the mounting screw heads: across x, along z, height above the PCB (estimate, unverified)
 
 
 @dataclass(frozen=True)
@@ -417,7 +447,9 @@ class DropTube:
     collar_d: float = 6.0
     head_h: float = 7.5
     knurl_h: float = 2.5
+    sensor_thread: str = "M18 x 1"
     sensor_thread_d: float = 18.0  # M18x1 sensor body, unverified, measure on delivery
+    sensor_length: float = 65.0  # LJ18A3-8-Z/BX listing 6.5 cm, the -Z/AX listing says 70 (https://market.samm.com/en/lj18a3-8-z-bx-inductive-proximity-sensor-en, https://www.phippselectronics.com/product/inductive-proximity-npn-sensor-lj18a3-8-z-ax/), unverified, measure on delivery
     sensor_hole_d: float = 19.0  # ISO 273 fine series clearance for M18
     nut_af: float = 24.0  # M18x1 lock nut across flats, unverified, measure on delivery
     nut_t: float = 4.0  # lock nut thickness, unverified, measure on delivery
