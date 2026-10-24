@@ -59,21 +59,45 @@ def test_channels_lead_into_the_pockets_and_keep_the_pocket_wall(plate):
     assert _top_at(plate, r - P.channel_len - 2, a) == pytest.approx(h, abs=0.01)
 
 
-def test_ribs_and_lift_tabs_sit_between_cap_and_channels(plate):
+RIDGES = replace(CFG, case_plate=replace(P, ribs="per_pocket"))
+
+
+def test_ribs_and_pull_eye_sit_between_cap_and_channels(plate):
     h = layout.plate_h()
     recess = CFG.cap.d / 2 + PS.cap_gap
     assert cp._inner_r(CFG) - recess >= CFG.print.min_wall  # the cap twists off past them
     rib_end = layout.pocket_circle_r() - layout.pocket_d() / 2 - P.channel_len - P.top_chamfer
     assert rib_end - cp._inner_r(CFG) >= 30  # ribs long enough to stir
-    assert cp._inner_r(CFG) + P.lift_len < rib_end
+    assert cp._inner_r(CFG) + P.pull_len < rib_end
     zc = sc.levels()
-    assert cp.lift_tab_top() == pytest.approx(zc.cap_top - zc.plate_bottom)  # no higher than the cap
-    assert plate.bounding_box().max.Z == pytest.approx(cp.lift_tab_top(), abs=0.01)
+    assert h + P.pull_h < zc.cap_top - zc.plate_bottom  # the eye stands lower than the cap
+    assert plate.bounding_box().max.Z == pytest.approx(h + P.pull_h, abs=0.01)
+    eye = Rot(Z=cp.pocket_angles()[0]) * Pos(cp._inner_r(CFG) + P.pull_len / 2, 0, h + P.pull_h / 2) * Box(0.2, 2 * P.pull_t, 0.2)
+    assert (plate & eye).volume < 0.2 * 0.2 * P.pull_t  # the ring passes through the eye
     rib_angle = 90 + 360 * 0.5 / P.rib_count
     assert _top_at(plate, (cp._inner_r(CFG) + rib_end) / 2, rib_angle) == pytest.approx(h + P.rib_h, abs=0.05)
     assert plate.bounding_box().min.Z == pytest.approx(0, abs=1e-6)  # nothing under the plate
 
 
+def test_ridge_plate_has_a_ridge_between_every_two_pockets_rising_to_the_pocket_mouths():
+    plate, h, n = cp.plate(RIDGES), layout.plate_h(RIDGES), layout.pocket_count(RIDGES)
+    assert plate.is_valid and len(plate.solids()) == 1
+    r0, r1 = cp._inner_r(RIDGES), cp.ridge_end_r(RIDGES)
+    for a in cp.pocket_angles(RIDGES)[1:4]:
+        land = a + 180 / n
+        assert _top_at(plate, r1 - 0.2, land) == pytest.approx(h + P.ridge_h, abs=0.1)  # tallest at the pockets
+        assert _top_at(plate, (r0 + r1) / 2, land) == pytest.approx(h + P.ridge_h / 2, abs=0.1)
+        assert _top_at(plate, layout.pocket_circle_r(RIDGES), land) == pytest.approx(h, abs=1e-6)  # the land between pockets keeps the plate height: the ridge ends before the mouths
+
+
 def test_plate_fits_inside_the_band():
     assert layout.plate_r() + P.wall_gap <= layout.band_inner_r()
     assert layout.band_inner_r() + CFG.track.band_t + CFG.print.fit <= layout.bowl_r() + 1e-9
+
+
+def test_pull_eye_keeps_the_minimum_wall_above_its_hole(plate):
+    P = CFG.case_plate
+    h = layout.plate_h(CFG)
+    tip = h + P.pull_h - CFG.print.min_wall  # highest the roof tip may reach
+    probe = Rot(Z=cp.pocket_angles()[0]) * Pos(cp._inner_r(CFG) + P.pull_len / 2, 0, tip + 0.05) * Box(0.2, P.pull_t, 0.1)
+    assert (plate & probe).volume > 0.9 * 0.2 * P.pull_t * 0.1  # solid from the minimum wall up

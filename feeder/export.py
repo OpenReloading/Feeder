@@ -51,7 +51,7 @@ def _steps(cfg: Config) -> list[dict]:
         ("Drive ring", "Onto the carrier cone. It stays on the clutch when plates change."),
         (f"Pressure disc and {n} springs", f"Disc keyed to the carrier hex, bearing on the ring floor inside the ring. Gutekunst VD-127E-01 springs in the disc pockets, free length {cfg.spring.free_length} mm."),
         ("Knob and its screw", f"Tighten once at assembly until the knob sits on the carrier top: springs at {spring_len:.1f} mm, clamp {sc.clamp_force(n, cfg):.1f} N. Plate changes never touch it."),
-        ("Case plate", f"{layout.plate_r(cfg) * 2:.1f} mm, {layout.pocket_count(cfg)} notches, closed by the band. Drops over the ring hex onto the flange; lift it by the two tabs."),
+        ("Case plate", f"{layout.plate_r(cfg) * 2:.1f} mm, {layout.pocket_count(cfg)} notches, closed by the band. Drops over the ring hex onto the flange; lift it by the key ring."),
         ("Cap", f"Twist on by hand until it sits on the plate: about {sc.cap_clamp_force(cfg):.0f} N clamp at 1 Nm (estimate) holds the plate against the brass on the low side. Twist off to change plates."),
         ("Drop tube", "Heat-set insert into the boss first. Socket over the exit spigot, thumb screw into the insert, hand tight on the spigot. M18 x 1 sensor between two lock nuts in the boss (not drawn)."),
         ("Yoke", "Screws from below into the heat-set inserts in the body's bottom plane."),
