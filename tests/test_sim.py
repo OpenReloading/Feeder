@@ -3,8 +3,10 @@
 import math
 
 import mujoco
+import pytest
 
 from feeder.config import CFG
+from feeder.parts import body as b
 from feeder.parts import case_plate, layout
 from sim import model as sm
 from sim.run import run, wilson
@@ -52,6 +54,19 @@ def test_extender_raises_the_wall_by_its_height_on_the_low_side():
     R = layout.bowl_r()
     assert math.isclose(sm.wall_top(-R, True) - sm.wall_top(-R, False), CFG.body.extender_h)
     assert all(sm.wall_top(y, True) >= sm.wall_top(y, False) for y in (-R, 0, R))
+
+
+def test_extender_arc_stands_on_the_low_side_only_in_the_sim_wall():
+    step = 360 / CFG.sim.segments
+    for extender in (False, True):
+        m = mujoco.MjModel.from_xml_string(sm.mjcf(60.0, 1, extender=extender))
+        for i in range(CFG.sim.segments):
+            g = m.geom(f"wall{i}")
+            assert (g.pos[2] + g.size[2]) / sm.MM == pytest.approx(b.rim_top((i + 0.5) * step, extender)), (extender, i)
+    m = mujoco.MjModel.from_xml_string(sm.mjcf(60.0, 1, extender=True))
+    low, high = m.geom(f"wall{round(270 / step - 0.5)}"), m.geom(f"wall{round(90 / step - 0.5)}")
+    assert (low.pos[2] + low.size[2]) / sm.MM == pytest.approx(layout.levels().wall_top + CFG.body.extender_h, abs=1)
+    assert (high.pos[2] + high.size[2]) / sm.MM == pytest.approx(b.wall_low(), abs=1)  # open high side
 
 
 def test_case_option_sets_the_case_size_on_any_plate():
