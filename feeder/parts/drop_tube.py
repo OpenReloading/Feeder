@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from build123d import Align, Box, Cone, Cylinder, Location, Part, Plane, Polygon, Pos, RegularPolygon, Rot, extrude
 
 from feeder.config import CFG, Config
+from feeder.lib.cache import per_config
 from feeder.lib import fasteners
 from feeder.lib.features import teardrop
 from feeder.parts import body, layout
@@ -123,6 +124,7 @@ def _barb(k: Dims, cfg: Config) -> Part:
     return solid
 
 
+@per_config
 def drop_tube(cfg: Config = CFG) -> Part:
     d, f = cfg.drop_tube, cfg.print.fit
     k = dims(cfg)

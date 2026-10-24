@@ -22,6 +22,7 @@ import math
 from build123d import Box, Circle, Cylinder, Location, Part, Plane, Polygon, Pos, Rectangle, Rot, Vector, extrude
 
 from feeder.config import CFG, Config
+from feeder.lib.cache import per_config
 from feeder.lib import fasteners
 from feeder.lib.features import teardrop
 from feeder.parts import body as body_part
@@ -291,6 +292,7 @@ def _fork(cfg: Config, y: float, height: float) -> Part:
     return out
 
 
+@per_config
 def yoke(cfg: Config = CFG) -> Part:
     mt, mw = cfg.mount, cfg.print.min_wall
     py, _ = pivot_point(cfg)
@@ -342,6 +344,7 @@ def clamp_nut_pocket(z: float, cfg: Config = CFG) -> Location:
     return Pos(clamp_width(cfg) / 2, clamp_layout(cfg)["y_s"], z) * Rot(Y=90) * Rot(Z=90)
 
 
+@per_config
 def clamp(cfg: Config = CFG) -> Part:
     mt = cfg.mount
     L = clamp_layout(cfg)
@@ -394,6 +397,7 @@ def _bar(cfg: Config, length: float) -> Part:
     return extrude(Circle(w / 2) + Pos(0, length / 2) * Rectangle(w, length), cfg.mount.link_t)
 
 
+@per_config
 def fixed_link(tilt: float, cfg: Config = CFG) -> Part:
     """Printed link for one tilt: two pin holes `link_length(tilt)` apart, round ends."""
     L = link_length(tilt, cfg)
@@ -418,14 +422,17 @@ def _rod_end(cfg: Config, kind: str) -> Part:
     return body
 
 
+@per_config
 def rod_end_adjust(cfg: Config = CFG) -> Part:
     return _rod_end(cfg, "adjust")
 
 
+@per_config
 def rod_end_fixed(cfg: Config = CFG) -> Part:
     return _rod_end(cfg, "fixed")
 
 
+@per_config
 def adjustable_link(tilt: float, cfg: Config = CFG) -> Part:
     """Adjust end on pin A, fixed end on pin B (turned end for end), the rod between them, link frame."""
     L = link_length(tilt, cfg)

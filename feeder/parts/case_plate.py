@@ -16,6 +16,7 @@ import math
 from build123d import Align, Box, Cone, Cylinder, Part, Pos, Rot
 
 from feeder.config import CFG, Config
+from feeder.lib.cache import per_config
 from feeder.lib.features import teardrop
 from feeder.parts import layout
 from feeder.parts import slip_clutch as sc
@@ -92,6 +93,7 @@ def _pull_eye(cfg: Config, h: float) -> Part:
     return eye - Pos(_inner_r(cfg) + cp.pull_len / 2, -cp.pull_t, z) * Rot(Z=90) * teardrop(cp.pull_hole_d, 2 * cp.pull_t)
 
 
+@per_config
 def plate(cfg: Config = CFG) -> Part:
     cp = cfg.case_plate
     h = layout.plate_h(cfg)

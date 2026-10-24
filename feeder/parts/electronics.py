@@ -16,6 +16,7 @@ from build123d import Box, Cylinder, Location, Part, Pos, Rot
 
 from feeder.config import CFG, Config
 from feeder.lib import fasteners
+from feeder.lib.cache import per_config
 from feeder.lib.features import teardrop
 from feeder.parts import mount
 from feeder.parts.slip_clutch import BOTTOM
@@ -110,6 +111,7 @@ def _side_hole(d: float, depth: float) -> Part:
     return Rot(Y=-90) * Rot(X=90) * hole
 
 
+@per_config
 def box(cfg: Config = CFG) -> Part:
     e, o = cfg.electronics, outline(cfg)
     h, wt, p = height(cfg), e.box_wall, post_w(cfg)
@@ -131,6 +133,7 @@ def box(cfg: Config = CFG) -> Part:
     return body
 
 
+@per_config
 def collar(cfg: Config = CFG) -> Part:
     """Slit collar on the tube, box frame: from `collar_face` to the clamp's +y side, at the box top."""
     e, L = cfg.electronics, mount.clamp_layout(cfg)
@@ -143,6 +146,7 @@ def collar(cfg: Config = CFG) -> Part:
     return body
 
 
+@per_config
 def lid(cfg: Config = CFG) -> Part:
     e, o = cfg.electronics, outline(cfg)
     h = height(cfg)

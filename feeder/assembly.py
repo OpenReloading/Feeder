@@ -41,30 +41,17 @@ def motor_envelope(cfg: Config = CFG) -> Part:
     return Rot(Z=m.angle) * (gb + can)
 
 
-_cap_angles: dict = {}
-
-
-def cap_angle(cfg: Config = CFG, step: float = 3.0) -> tuple[float, float]:
-    """Rotation of the cap at its clamp face where its thread meshes with the ring (the helix phase is not
-    modelled), and the overlap left there. Only the thread band is intersected."""
-    key = (cfg.drive_ring, cfg.cap, cfg.plate_seat, cfg.clutch, cfg.case_plate.direction, cfg.print.fit, step)
-    if key not in _cap_angles:
-        dr, z = cfg.drive_ring, sc.levels(cfg)
-        band = Pos(0, 0, z.hex_top) * Cylinder(dr.thread_d, z.ring_top - z.hex_top, align=B)
-        ring = Pos(0, 0, z.ring_bottom) * sc.drive_ring(cfg) & band
-        cap = sc.cap(cfg) & Pos(0, 0, z.hex_top - z.cap_face) * Cylinder(dr.thread_d, z.ring_top - z.hex_top, align=B)
-        overlaps = []
-        for i in range(round(360 / dr.thread_starts / step)):
-            common = ring & Pos(0, 0, z.cap_face) * Rot(Z=i * step) * cap
-            overlaps.append((common.volume if common.solids() else 0.0, i * step))
-        volume, angle = min(overlaps)
-        _cap_angles[key] = (angle, volume)
-    return _cap_angles[key]
+def cap_angle(cfg: Config = CFG) -> float:
+    """Rotation of the cap at its clamp face where its thread meshes with the ring. Both threads start at angle 0 at
+    their lower ends, the cap's `cap_face - hex_top` higher, so its teeth sit half a pitch from the ring's there."""
+    dr, z = cfg.drive_ring, sc.levels(cfg)
+    hand = 1 if sc.thread_hand(cfg) == "right" else -1
+    return (hand * 360 * (z.cap_face - z.hex_top) / sc.thread_lead(cfg) + 180 / dr.thread_starts) % (360 / dr.thread_starts)
 
 
 def cap_on_ring(cfg: Config = CFG) -> Part:
     """Cap in the clutch frame at its clamp face, turned to mesh with the ring."""
-    return Pos(0, 0, sc.levels(cfg).cap_face) * Rot(Z=cap_angle(cfg)[0]) * sc.cap(cfg)
+    return Pos(0, 0, sc.levels(cfg).cap_face) * Rot(Z=cap_angle(cfg)) * sc.cap(cfg)
 
 
 def _hub(cfg: Config) -> Part:
