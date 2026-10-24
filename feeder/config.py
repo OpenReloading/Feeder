@@ -437,16 +437,18 @@ class Clutch:
 
 @dataclass(frozen=True)
 class DropTube:
-    """Socket over the exit spigot, straight section with a port for an M18x1 inductive tube-full sensor
+    """Bayonet socket over the exit spigot (two lugs on the spigot, an L slot with a notch at the stop in the socket wall),
+    straight section with a port for an M18x1 inductive tube-full sensor
     (LJ18A3-8-Z/AX, NPN NC, 8 mm rated), barb for a clear PVC hose. The bore only steps outward along the path.
     Sensor, nut and hose sizes are typical kit values, unverified, measure on delivery."""
 
-    screw_size: str = "M3"  # one thumb screw into a heat-set insert presses on the spigot, friction does the rest
-    screw_length: float = 10.0  # DIN 464, the head stays 2.35 mm off the boss with the tip on the spigot
-    knurl_d: float = 12.0  # DIN 464 M3 head: knurl diameter, collar diameter, head height, knurl height (https://www.fasten.it/en/norms/norm/din_464)
-    collar_d: float = 6.0
-    head_h: float = 7.5
-    knurl_h: float = 2.5
+    lug_h: float = 1.2  # radial height of a spigot lug, with a 45 deg underside that prints without support (print tolerance estimate, unverified: try it on a print)
+    lug_tip: float = 1.2  # flat axial width of a lug behind its 45 deg underside
+    lug_z: float = 4.0  # underside root of the lugs from the start of the spigot
+    lug_w: tuple = (4.4, 3.0)  # tangential widths of the wide lug (sensor side) and the narrow lug (opposite), the wide one does not fit the narrow slot (strength estimate: 10 N on one lug is about 1.4 MPa, unverified)
+    twist: float = 60.0  # deg from the entry slots to the stop, leaves a land over min_wall between slot and notch on the smallest spigot
+    twist_dir: int = -1  # -1: the tube turns clockwise seen from the hose end to lock, like a right-hand thread (+1 the other way)
+    lock_lift: float = 1.0  # the tube hangs this far below its groove floor, in a notch at the stop: lift it out of the notch to turn it off
     sensor_thread: str = "M18 x 1"
     sensor_thread_d: float = 18.0  # M18x1 sensor body, unverified, measure on delivery
     sensor_length: float = 65.0  # LJ18A3-8-Z/BX listing 6.5 cm, the -Z/AX listing says 70 (https://market.samm.com/en/lj18a3-8-z-bx-inductive-proximity-sensor-en, https://www.phippselectronics.com/product/inductive-proximity-npn-sensor-lj18a3-8-z-ax/), unverified, measure on delivery

@@ -280,12 +280,6 @@ def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fast
     k = fasteners.hex_screw(c.knob_screw_size, c.knob_screw_length).screw_data["k"]
     items.append((f"ISO 4017 {c.knob_screw_size} x {c.knob_screw_length:g}", "screw", _hex_screw(c.knob_screw_size, c.knob_screw_length), off * Pos(0, 0, zc.top + c.knob_t - k), "slip_clutch_knob", 1))
     d = cfg.drop_tube
-    mouth = drop_tube.placement(cfg).location * drop_tube.screw_mouth(cfg)
-    insert(d.screw_size, mouth, "drop_tube")
-    k = drop_tube.dims(cfg)
-    lift = d.screw_length - (k.r_socket + k.screw_boss_t - k.r_spigot)  # tip on the spigot, head off the boss
-    thumb = _shank(d.screw_size, d.screw_length) + Cylinder(d.collar_d / 2, d.head_h - d.knurl_h, align=B) + Pos(0, 0, d.head_h - d.knurl_h) * Cylinder(d.knurl_d / 2, d.knurl_h, align=B)
-    items.append((f"DIN 464 {d.screw_size} x {d.screw_length:g} thumb screw", "screw", thumb, mouth * Pos(0, 0, lift), "drop_tube", 1))
     # clamp and box collar screws along x: washer and head in the -x counterbore, nut in the +x pocket
     L, w = mount.clamp_layout(cfg), mount.clamp_width(cfg)
     wh, nut = fasteners.washer_data(mt.clamp_size)["h"], fasteners.nut_data(mt.clamp_size)
