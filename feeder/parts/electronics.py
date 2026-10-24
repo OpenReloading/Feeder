@@ -14,7 +14,7 @@ exit side. The box prints on its back wall, the collar upright, the lid flat.
 
 from build123d import Box, Cylinder, Location, Part, Pos, Rot
 
-from feeder.config import CFG, Config
+from feeder.config import CFG, Config, PanelPart
 from feeder.lib import fasteners
 from feeder.lib.cache import per_config
 from feeder.lib.features import teardrop
@@ -102,6 +102,42 @@ def panel_holes(cfg: Config = CFG) -> list[tuple[str, float, Location]]:
         y = o["y0"] + e.box_inner[1] * (i + 0.5) / len(e.side_holes)
         out.append((name, d, Pos(o["x"], y, wt + iz / 6) * Rot(Y=-90)))
     return out
+
+
+def panel_fits(cfg: Config = CFG) -> list[tuple]:
+    """(name, PanelPart, mouth, panel thickness) of each panel part, mouth as in `panel_holes`."""
+    e = cfg.electronics
+    parts = dict(e.panel_parts)
+    return [(name, parts[name], loc, e.lid_t if i < len(e.front_holes) else e.box_wall) for i, (name, _, loc) in enumerate(panel_holes(cfg))]
+
+
+def panel_envelope(pp: PanelPart) -> Part:
+    """Envelope of a panel part in its panel frame (see `PanelPart`)."""
+    bx, by, bl = pp.body
+    shape = Cylinder(pp.thread_d / 2, pp.thread_l, align=BOTTOM) + Pos(0, 0, pp.thread_l) * Box(bx, by, bl, align=BOTTOM)
+    fd, fh = pp.front
+    return shape + Pos(0, 0, -fh) * Cylinder(fd / 2, fh, align=BOTTOM) if fh else shape
+
+
+def pwm_board(cfg: Config = CFG) -> Part:
+    """PWM controller envelope, box frame: centred on the knob, its front against the back of the potentiometer."""
+    e = cfg.electronics
+    _, pot, loc, _ = panel_fits(cfg)[0]
+    w, h, d = e.pwm_board
+    return loc * Pos(0, 0, pot.thread_l + pot.body[2]) * Box(w, h, d, align=BOTTOM)
+
+
+def relay_board(cfg: Config = CFG) -> Part:
+    """Timer relay envelope, box frame: the board on its standoffs, relay and terminals on its front."""
+    e, o = cfg.electronics, outline(cfg)
+    back = o["y1"] - e.box_wall - e.standoff_h
+    zc = e.box_wall + e.box_inner[2] / 4
+    w, h = e.relay_board
+    px, pz, ph = e.relay_parts
+    pcb = Pos(0, back - e.relay_pcb_t / 2, zc) * Box(w, e.relay_pcb_t, h)
+    for x, z in relay_screws(cfg):  # mounting holes: the screws pass through the board
+        pcb -= Pos(x, back + 1, z) * Rot(X=-90) * fasteners.clearance_hole(e.lid_screw_size, e.relay_pcb_t + 2)
+    return pcb + Pos(0, back - e.relay_pcb_t - ph / 2, zc) * Box(px, ph, pz)
 
 
 def _side_hole(d: float, depth: float) -> Part:

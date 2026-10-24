@@ -78,7 +78,8 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 |---|---|---|---|
 | CNC Kitchen heat-set insert M3 x 5.7 | 1 | drop tube | |
 | DIN 464 M3 x 10 thumb screw | 1 | drop tube on the spigot, hand tight | knurled, high type ([DIN 464 sizes](https://www.fasten.it/en/norms/norm/din_464)), M3 x 10 stock unverified |
-| Inductive sensor LJ18A3-8-Z/AX, M18x1, NPN NC, 6 to 36 V (unverified) | 1 | drop tube, tube-full | body and lock nuts unverified (24 AF x 4) |
+| Inductive sensor LJ18A3-8-Z/AX, M18x1, NPN NC, 6 to 36 V (unverified) | 1 | drop tube, tube-full | body (65 mm long) and lock nuts unverified (24 AF x 4) |
+| Lock nut M18 x 1 | 2 | sensor in the drop tube | one each side of the printed plate, supplied with the sensor. 24 AF x 4 unverified |
 | Clear PVC hose 14 mm ID x 18 mm OD | length to the press | drop tube barb | unverified |
 
 ## Electronics
@@ -102,6 +103,11 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 | DC panel jack DC-022B, 5.5 x 2.1 mm, 11 mm panel hole | 1 | 12 V in, front face | hole size unverified |
 | GX12 2-pin panel socket and plug | 1 | motor, side face | 12 mm hole unverified |
 | GX12 3-pin panel socket and plug | 1 | sensor, side face | 12 mm hole unverified. The pin counts differ so the motor plug cannot go in the sensor socket |
+| Panel nut, PWM knob | 1 | potentiometer in the lid | supplied with the potentiometer, size unverified |
+| Panel nut, toggle switch | 1 | toggle switch in the lid | supplied with the switch, size unverified |
+| Panel nut, DC jack | 1 | DC jack in the lid | supplied with the jack, size unverified |
+| Panel nut, GX12 2-pin socket | 1 | motor socket in the side face | supplied with the socket, size unverified |
+| Panel nut, GX12 3-pin socket | 1 | sensor socket in the side face | supplied with the socket, size unverified |
 
 The PWM controller hangs on its knob potentiometer nut in the lid (7.2 mm hole, unverified, the pot must be on the board or on a lead). The timer relay module sits on four standoffs on the back wall, 44 x 24 mm hole spacing (`electronics.relay_holes`, unverified: measure on delivery). Hole sizes are in `electronics.front_holes` and `electronics.side_holes`.
 

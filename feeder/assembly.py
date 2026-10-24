@@ -71,6 +71,16 @@ def stand_tube(tilt: float, cfg: Config = CFG, stub: float = 100.0) -> Part:
     return mount.clamp_in_body(Pos(0, 0, -stub) * tube, tilt, cfg)
 
 
+def _dir(loc, v: tuple) -> tuple:
+    """Direction `v` of the frame `loc`, in the body frame."""
+    p = (loc * Pos(*v)).position - loc.position
+    return p.X, p.Y, p.Z
+
+
+def _slug(label: str) -> str:
+    return label.lower().replace("-", "_").replace(" ", "_")
+
+
 def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
     """Every part of the feeder in the body frame, in assembly order."""
     tilt = cfg.case_plate.tilt if tilt is None else tilt
@@ -84,6 +94,9 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
                                      + Pos(0, 0, zc.gearbox_face) * Cylinder(m.boss_d / 2, m.boss_h, align=B)), "steel", 0, bought=True),
     ]
     split = cfg.body.split
+    box = electronics.box_frame(tilt, cfg)
+    sensor = drop_tube.sensor_frame(cfg)
+    dt = cfg.drop_tube
     kinds = {"body_core": ("body", 1), "body": ("body", 1), "body_track_gate": ("gate", 3), "body_exit_insert": ("exit", 3)}
     for name, build in body.parts(cfg).items():
         kind, step = kinds.get(name, ("wall", 2) if name.startswith("body_wall") else ("body", 1) if name.startswith("body_half") else ("extender", 15))
@@ -105,9 +118,18 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
         Placed("mount_clamp", mount.clamp_in_body(mount.clamp(cfg), tilt, cfg), "clamp", 13, explode=down),
         Placed("stand_tube", stand_tube(tilt, cfg), "tube", 13, explode=down, bought=True),
         Placed("mount_tilt_link", mount.link_in_body(mount.adjustable_link(tilt, cfg), tilt, cfg), "link", 14, explode=(1.0, 0.0, 0.0)),
-        Placed("electronics_box", electronics.box_frame(tilt, cfg) * electronics.box(cfg), "elec", 16, explode=down),
-        Placed("electronics_collar", electronics.box_frame(tilt, cfg) * electronics.collar(cfg), "elec", 16, explode=down),
-        Placed("electronics_lid", electronics.box_frame(tilt, cfg) * electronics.lid(cfg), "lid", 16, explode=down),
+        Placed("electronics_box", box * electronics.box(cfg), "elec", 16, explode=down),
+        Placed("electronics_collar", box * electronics.collar(cfg), "elec", 16, explode=down),
+        Placed("timer_relay", box * electronics.relay_board(cfg), "board", 16, explode=_dir(box, (0, -1, 0)), bought=True),
+    ]
+    for name, pp, mouth, _ in electronics.panel_fits(cfg):
+        front = name in dict(cfg.electronics.front_holes)
+        out.append(Placed(_slug(pp.label), box * mouth * electronics.panel_envelope(pp), "panel", 17 if front else 16,
+                          explode=_dir(box, (0, -1, 0) if front else (1, 0, 0)), bought=True))
+    out += [
+        Placed("electronics_lid", box * electronics.lid(cfg), "lid", 17, explode=_dir(box, (0, -1, 0))),
+        Placed("pwm_controller", box * electronics.pwm_board(cfg), "board", 17, explode=_dir(box, (0, -1, 0)), bought=True),
+        Placed("level_sensor", sensor * Cylinder(dt.sensor_thread_d / 2, dt.sensor_length, align=B), "sensor", 18, explode=_dir(sensor, (0, 0, 1)), bought=True),
     ]
     if split == "halves":  # the two halves part sideways in the exploded view
         a = math.radians(cfg.body.halves_seam)
@@ -147,8 +169,12 @@ def _countersunk_screw(size: str, length: float) -> Part:
     return _shank(size, length) + Cone(r, rk, rk - r, align=fasteners.DOWN)  # 90 deg head, length includes it
 
 
+def _nut_d(d: float, af: float, m: float) -> Part:
+    return hex_prism(af, m) - Cylinder(d / 2, m, align=B)
+
+
 def _nut(size: str, af: float, m: float) -> Part:
-    return hex_prism(af, m) - Cylinder(fasteners.nominal_d(size) / 2, m, align=B)
+    return _nut_d(fasteners.nominal_d(size), af, m)
 
 
 def _washer(size: str) -> Part:
@@ -268,7 +294,14 @@ def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fast
     back = o["y1"] - e.box_wall - e.standoff_h
     for x, zz in electronics.relay_screws(cfg):
         insert(e.lid_screw_size, box * Pos(x, back, zz) * Rot(X=90), "electronics_box")
-        screw(e.lid_screw_size, electronics.relay_screw_length(cfg), box * Pos(x, back - e.relay_pcb_t, zz) * Rot(X=90), "electronics_box", 2)
+        screw(e.lid_screw_size, electronics.relay_screw_length(cfg), box * Pos(x, back - e.relay_pcb_t, zz) * Rot(X=90), "timer_relay", 2)
+    for name, pp, mouth, t in electronics.panel_fits(cfg):  # nut on the inner face of the panel
+        host = "electronics_lid" if name in dict(e.front_holes) else "electronics_box"
+        items.append((f"Panel nut, {pp.label}", "nut", _nut_d(pp.thread_d, pp.nut_af, pp.nut_t), box * mouth * Pos(0, 0, t), host, 2))
+    pl, k = drop_tube.sensor_frame(cfg), drop_tube.dims(cfg)
+    nut = (f"Lock nut {d.sensor_thread}", "nut", _nut_d(d.sensor_thread_d, d.nut_af, d.nut_t))
+    items.append((*nut, pl * Pos(0, 0, f) * Rot(Z=30), "drop_tube", 0))  # in the slot, flats against its walls
+    items.append((*nut, pl * Pos(0, 0, k.plate_x - k.window_x), "level_sensor", 2))
     py, pz = mount.pivot_point(cfg)
     pivot = _pin_stack(mt.pivot_size, mount.pivot_bolt_length(cfg), mount.ear_gap(cfg) / 2 + mt.ear_t, mt.pivot_nut_af, mt.pivot_nut_h, "hex")
     items += [(n, kd, sh, Pos(0, py, pz) * loc, "mount_clamp", sq) for n, kd, sh, loc, sq in pivot]
