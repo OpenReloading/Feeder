@@ -37,7 +37,7 @@ def wilson(k: int, n: int, zq: float = 1.96) -> tuple[float, float]:
     return max(0.0, mid - c), min(1.0, mid + c)
 
 
-def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Config = CFG, com_ratio: float | None = None,
+def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Config = CFG, com_ratio: float | None = None,  # noqa: C901, PLR0912, PLR0913, PLR0915
         mu: float | None = None, seed: int = 1, seconds: float | None = None, extender: bool | None = None,
         plate: str | None = None, case: str | None = None) -> dict:
     """Simulate and return the metrics. `seconds` replaces warm-up and `revs` by a plain run (smoke tests).
@@ -91,7 +91,7 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
     warm = 0.0 if seconds else s.warmup_revs * 60 / rpm
     total = seconds if seconds else warm + revs * 60 / rpm
     data.ctrl[0] = w
-    m = dict(exits=0, base_down=0, mouth_down=0, sideways=0, lost=0, spilled=0, overfill=0)
+    m = dict(exits=0, base_down=0, mouth_down=0, sideways=0, lost=0, spilled=0, overfill=0)  # noqa: C408
     torque, speed, deepest, deepest_pair, lost_at, spilled_at, deep_checks = [], [], 0.0, "", [], [], 0
     turn0 = None
     above = data.qpos[qa[:, None] + np.arange(3)] / MM

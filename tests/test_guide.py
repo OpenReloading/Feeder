@@ -28,7 +28,7 @@ def test_tilt_section_markers_for_the_guide_page():
 
 def test_steps_markdown_numbers_every_assembly_step():
     lines = guide.steps_markdown().splitlines()
-    assert lines and all(line.startswith(f"{i}. ") for i, line in enumerate(lines, 1))
+    assert lines and all(line.startswith(f"{i}. ") for i, line in enumerate(lines, 1))  # noqa: PT018
 
 
 def test_wiring_board_ends_exist_and_the_motor_runs_through_the_relay():

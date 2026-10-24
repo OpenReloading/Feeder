@@ -71,7 +71,7 @@ def plate_hulls(cfg: Config = CFG) -> list[tuple[np.ndarray, np.ndarray]]:
     return [(data[f"v{i}"], data[f"f{i}"]) for i in range(len(data.files) // 2)]
 
 
-def _box(name: str, ra: float, rb: float, za: float, zb: float, ang: float, half: float, rgba: str) -> str:
+def _box(name: str, ra: float, rb: float, za: float, zb: float, ang: float, half: float, rgba: str) -> str:  # noqa: PLR0913
     """Box over the annular sector ra..rb, za..zb at `ang` deg, `half` deg each way, wide enough to close at rb."""
     a = math.radians(ang)
     rm, hw = (ra + rb) / 2, rb * math.sin(math.radians(half)) + 0.2
@@ -96,7 +96,7 @@ def wall_top(y: float, extender: bool, cfg: Config = CFG) -> float:
     return max(top, b.extender_top_at(y, cfg)) if extender else top
 
 
-def mjcf(tilt: float, n_cases: int, cfg: Config = CFG, com_ratio: float | None = None, mu: float | None = None,
+def mjcf(tilt: float, n_cases: int, cfg: Config = CFG, com_ratio: float | None = None, mu: float | None = None,  # noqa: PLR0913
          extender: bool = False, case: str | None = None) -> str:
     s, cp = cfg.sim, cfg.case_plate
     com_ratio = s.com_ratio if com_ratio is None else com_ratio

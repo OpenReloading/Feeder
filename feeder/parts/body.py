@@ -26,7 +26,7 @@ Frame: `layout` body frame (z = 0 at the cup floor top, +y toward the exit). Cor
 Band, gate and exit insert print top down. Skirt, no brim: a brim takes the band past the bed.
 """
 
-import math
+import math  # noqa: I001
 from dataclasses import replace
 
 from build123d import Align, Box, Circle, Cylinder, Part, Plane, Polygon, Pos, Rot, Vector, extrude, loft
@@ -130,7 +130,7 @@ def _funnel(cfg: Config, grow: float, up: float = 0.0) -> Part:
 def exit_insert(cfg: Config = CFG) -> Part:
     e, f = cfg.exit, cfg.print.fit
     z = layout.levels(cfg)
-    length, r0, r1 = opening(cfg)
+    length, r0, r1 = opening(cfg)  # noqa: RUF059
     body = Pos(0, 0, z.bottom) * extrude(_exit_outline(cfg, -f), z.deck_top - z.bottom)  # fills the shaft up to one flat top (prints top down)
     body += Pos(0, 0, z.deck_top - e.seat_t) * extrude(_exit_outline(cfg, e.seat_w - f), e.seat_t)  # ledge in the deck recess
     body = body & Cylinder(layout.bowl_r(cfg) - f, 1000)

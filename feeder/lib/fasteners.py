@@ -3,7 +3,7 @@
 Tools are solids to subtract. Each starts at z = 0 and runs into -z, so place them on the face they enter.
 """
 
-from functools import cache  # cached screws are shared: callers read them, never move or change them
+from functools import cache  # cached screws are shared: callers read them, never move or change them  # noqa: I001
 
 from bd_warehouse.fastener import CounterSunkScrew, HexHeadScrew, HexNut, PlainWasher, SetScrew, SocketHeadCapScrew
 from build123d import Align, Cone, Cylinder, Part, RegularPolygon, extrude, Pos

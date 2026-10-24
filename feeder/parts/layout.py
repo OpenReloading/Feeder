@@ -154,7 +154,7 @@ def motor_screws(cfg: Config = CFG) -> list[tuple[float, float]]:
     out = []
     for along in (-m.mount_near, m.mount_far):  # along the gearbox toward the can
         for across in (-m.mount_across / 2, m.mount_across / 2):
-            out.append((along * math.cos(a) - across * math.sin(a), along * math.sin(a) + across * math.cos(a)))
+            out.append((along * math.cos(a) - across * math.sin(a), along * math.sin(a) + across * math.cos(a)))  # noqa: PERF401
     return out
 
 

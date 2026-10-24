@@ -11,9 +11,9 @@ from test_mount import _unsupported
 from feeder import assembly, printing
 from feeder.config import CFG, GENERIC_8MM_FLANGE
 from feeder.lib import fasteners
-from feeder.lib.features import d_bore
+from feeder.lib.features import d_bore  # noqa: F401
 from feeder.parts import body as b
-from feeder.parts import case_plate as cp
+from feeder.parts import case_plate as cp  # noqa: F401
 from feeder.parts import layout
 from feeder.parts import slip_clutch as sc
 
@@ -37,7 +37,7 @@ def test_track_gap_stays_under_the_rim_thickness():
 
 
 def test_exit_insert_and_wall_seams_keep_the_minimum_wall():
-    length, r0, r1 = b.opening()
+    length, r0, r1 = b.opening()  # noqa: RUF059
     assert layout.bowl_r() - FIT - r1 >= MW  # the opening's outer edge is an arc under the band
     assert b.seam_lap() >= MW
 
@@ -46,7 +46,7 @@ def test_countersink_is_widest_at_the_surface():
     tool = fasteners.countersink(M.mount_screw_size, M.mount_screw_length, B.floor_t)
     head_r = fasteners.countersunk_screw(M.mount_screw_size, M.mount_screw_length).screw_data["dk"] / 2
     top = tool & Pos(0, 0, -0.05) * Box(30, 30, 0.1)
-    assert top.bounding_box().size.X / 2 >= head_r
+    assert top.bounding_box().size.X / 2 >= head_r  # noqa: SIM300
 
 
 def test_insert_recess_keeps_the_deck():
@@ -57,13 +57,13 @@ def test_insert_recess_keeps_the_deck():
 def test_gate_sits_behind_the_band_face_with_a_lead_in():
     assert T.gate_setback >= 2 * FIT  # band and gate each shift by a fit against the wall
     assert T.gate_chamfer >= T.gate_setback + 2 * FIT  # the 45 deg chamfer spans the step from the gate face
-    assert T.band_t / 2 - FIT >= MW / 2 and T.gate_lap >= 2 * MW  # lap halves and overlap
+    assert T.band_t / 2 - FIT >= MW / 2 and T.gate_lap >= 2 * MW  # lap halves and overlap  # noqa: PT018
 
 
 def test_opening_takes_every_pocket_and_case():
     length, r0, r1 = b.opening()
     r, d = layout.pocket_circle_r(), layout.pocket_d()
-    assert r0 < r - d / 2 and r1 > r + d / 2
+    assert r0 < r - d / 2 and r1 > r + d / 2  # noqa: PT018
     assert length > CAL.case_length + d  # case drops before the far edge
     assert r1 + E.wall < layout.bowl_r()
     assert b.bore_d() >= CAL.rim_d + 0.4
@@ -81,16 +81,16 @@ def test_exit_insert_fills_its_shaft_and_sits_on_the_deck(parts):
     assert (core & ins).volume < 1e-3
     seat = Pos(0, 0, z.deck_top - E.seat_t - 0.05) * Box(400, 400, 0.1)
     assert (core & seat & Pos(0, 0, -0.1) * ins).volume > 1  # lowered 0.1, the ledge meets the recess floor round the shaft
-    assert ins.bounding_box().min.Z < z.bottom  # funnel end and spigot below the body
+    assert ins.bounding_box().min.Z < z.bottom  # funnel end and spigot below the body  # noqa: SIM300
     shaft_plan = ShapelyPolygon([(v.X, v.Y) for v in b._exit_outline(CFG, 0.0).vertices()]).buffer(1e-3)
     verts, _ = ins.tessellate(0.05)
-    assert all(shaft_plan.contains(Point(v.X, v.Y)) for v in verts if v.Z < z.deck_top - E.seat_t - 1e-3)  # it drops in from above
+    assert all(shaft_plan.contains(Point(v.X, v.Y)) for v in verts if v.Z < z.deck_top - E.seat_t - 1e-3)  # it drops in from above  # noqa: SIM300
 
 
 def test_exit_outlet_is_below_the_body_and_clear_of_the_motor():
     o, d = b.outlet()
     end = o + d * E.spigot_len
-    assert end.Z < layout.levels().bottom
+    assert end.Z < layout.levels().bottom  # noqa: SIM300
     assert math.hypot(end.X, end.Y) > M.gearbox_l  # past the gearbox at any motor angle
 
 
@@ -164,9 +164,9 @@ def assembled(request):
 
 def test_variant_body_parts_are_single_valid_solids_that_fit_the_bed(assembled):
     cfg, placed = assembled
-    for name, build in b.parts(cfg).items():
+    for name, build in b.parts(cfg).items():  # noqa: B007, PERF102
         part = placed[name].shape
-        assert part.is_valid and len(part.solids()) == 1, name
+        assert part.is_valid and len(part.solids()) == 1, name  # noqa: PT018
         assert printing.fits(printing.on_bed(name, part, cfg), cfg), name
 
 
@@ -177,7 +177,7 @@ def _mates(cfg) -> dict[str, tuple[str, ...]]:
     walls = {"arcs": tuple(f"body_wall_{i}" for i in range(B.wall_segments)), "halves": main, "one_piece": main}[split]
     out = {
         "motor_shaft": ("motor",),
-        **{n: ("motor",) for n in main},
+        **{n: ("motor",) for n in main},  # noqa: C420
         **{f"body_wall_{i}": ("body_core",) for i in range(B.wall_segments) if split == "arcs"},
         **({"body_extender": walls} if B.extender_h else {}),
         "body_track_gate": ("body_exit_insert",),
@@ -255,7 +255,7 @@ def test_gate_and_exit_insert_lift_out_of_the_core(assembled):
 def test_halves_seam_screws_pass_both_posts():
     cfg = _cfg("halves")
     h0, h1 = b.half(0, cfg), b.half(1, cfg)
-    head, ins = b.post_lengths(cfg)
+    head, ins = b.post_lengths(cfg)  # noqa: RUF059
     insert = cfg.fasteners.inserts[B.joint_screw_size]
     engage = B.joint_screw_length - head - FIT
     assert CFG.fasteners.min_engagement * fasteners.nominal_d(B.joint_screw_size) <= engage <= insert.hole_depth  # tip ends in the insert hole
@@ -266,15 +266,15 @@ def test_halves_seam_screws_pass_both_posts():
             centre = s0 * (FIT / 2 + head - B.joint_screw_length / 2)  # head on the outer face of the half 0 post
             screw = Rot(Z=ang) * Pos(r, centre, z) * Rot(X=90) * Cylinder(d / 2, B.joint_screw_length)
             for h in (h0, h1):
-                assert screw.distance_to(h) < 1 and _overlap_volume(screw, h) < 1e-3, (ang, z)  # in the holes of both halves
+                assert screw.distance_to(h) < 1 and _overlap_volume(screw, h) < 1e-3, (ang, z)  # in the holes of both halves  # noqa: PT018
     assert layout.levels(cfg).bottom + b.post_h(cfg) < layout.levels(cfg).wall_top - B.extender_lap  # posts stay under the extender sleeve
 
 
 def test_extender_is_an_open_arc_over_the_low_side_that_holds_level_brass_at_the_steepest_tilt():
     ext = b.extender()
     a0, a1 = b.extender_span()
-    assert ext.is_valid and len(ext.solids()) == 1
-    assert (a0 + a1) / 2 == 270 and a1 - a0 < 180  # centred on the low side, the high side stays open
+    assert ext.is_valid and len(ext.solids()) == 1  # noqa: PT018
+    assert (a0 + a1) / 2 == 270 and a1 - a0 < 180  # centred on the low side, the high side stays open  # noqa: PT018
     assert ext.bounding_box().max.Y < 0
     R, z = layout.bowl_r(), layout.levels()
     tan = math.tan(math.radians(CFG.mount.tilt_range[1]))
@@ -307,7 +307,7 @@ def test_halves_seam_misses_the_exit_motor_screws_mount_inserts_tabs_and_can_tun
     can = math.radians(M.angle)
     corners = [(t * math.cos(can) - s * w / 2 * math.sin(can), t * math.sin(can) + s * w / 2 * math.cos(can)) for t in (x0, x0 + length) for s in (-1, 1)]
     sides = {math.copysign(1, x * n[0] + y * n[1]) for x, y in corners}
-    assert len(sides) == 1 and all(dist(x, y) > MW for x, y in corners)  # whole tunnel in one half: cut lengthwise, its ceiling hangs free
+    assert len(sides) == 1 and all(dist(x, y) > MW for x, y in corners)  # whole tunnel in one half: cut lengthwise, its ceiling hangs free  # noqa: PT018
     for ang in (b.EXIT_ANGLE,):
         off = (ang - B.halves_seam) % 180
         assert min(off, 180 - off) > b.exit_half_angle(cfg) + 5, ang
@@ -330,7 +330,7 @@ def test_wall_top_is_open_on_the_high_side_and_holds_level_brass():
 
 def test_bowl_holds_the_design_fill():
     cp_, (lo, hi) = CFG.case_plate, CFG.mount.tilt_range
-    z = layout.levels()
+    z = layout.levels()  # noqa: F841
     assert layout.capacity(cp_.tilt) >= cp_.fill_cases  # default tilt, no extender
     assert layout.capacity(cp_.tilt, rim=lambda a: b.rim_top(a, extender=False)) == layout.capacity(cp_.tilt)  # the wall top profile gives the level plane
     assert layout.capacity(hi, rim=b.rim_top) >= cp_.fill_cases  # steepest tilt with the extender
@@ -373,5 +373,5 @@ def test_extender_sits_on_the_wall_top_and_prints_on_its_flat_top():
 def test_generic_hub_keeps_the_outlet_where_it_is_under_the_body():
     cfg = b.with_hub(CFG, GENERIC_8MM_FLANGE)
     assert layout.levels(cfg).deck_top > layout.levels(CFG).deck_top  # the taller hub raises the deck
-    assert b.outlet(cfg)[0].Z == pytest.approx(b.outlet(CFG)[0].Z)
+    assert b.outlet(cfg)[0].Z == pytest.approx(b.outlet(CFG)[0].Z)  # noqa: SIM300
     assert b.with_hub(CFG, CFG.metal_hub) == CFG  # the default hub changes nothing

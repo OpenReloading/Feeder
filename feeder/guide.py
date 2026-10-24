@@ -43,16 +43,16 @@ def bom_items(printed: list[str], cfg: Config = CFG, path: Path = BOM) -> list[d
     for _, cells in rows:
         if FASTENER.match(cells[0]) and len(cells) > 2:
             used_in.setdefault(cells[0], []).append(_plain(cells[2]))
-    items = [dict(group="Printed parts", part=name, spec=printed_notes.get(name, ""), qty=1) for name in printed]
+    items = [dict(group="Printed parts", part=name, spec=printed_notes.get(name, ""), qty=1) for name in printed]  # noqa: C408
     counts: dict = {}
     for f in assembly.fasteners_in_body(cfg):
         counts[f.name] = counts.get(f.name, 0) + len(f.at)
-    items += [dict(group="Fasteners", part=name, spec=", ".join(used_in.get(name, [])), qty=n) for name, n in counts.items()]
+    items += [dict(group="Fasteners", part=name, spec=", ".join(used_in.get(name, [])), qty=n) for name, n in counts.items()]  # noqa: C408
     for section, cells in rows:
         if section == "Printed parts" or cells[0] in counts:
             continue
         link = LINK.search("|".join(cells))
-        item = dict(group=section, part=_plain(cells[0]), spec=". ".join(_plain(c) for c in cells[2:] if _plain(c)), qty=_qty(cells[1]))
+        item = dict(group=section, part=_plain(cells[0]), spec=". ".join(_plain(c) for c in cells[2:] if _plain(c)), qty=_qty(cells[1]))  # noqa: C408
         items.append(item | ({"link": link.group(2)} if link else {}))
     ids: dict = {}
     for item in items:
