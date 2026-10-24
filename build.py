@@ -5,7 +5,7 @@ Run in the dev container from the project root:
     .venv/bin/python build.py --no-test    # build only
     .venv/bin/python build.py --assembly   # also build/assembly/: feeder.step, feeder.3mf, viewer.html
     .venv/bin/python build.py --variants   # also build/variants/<split>/: body and plate for each body split, with assembly
-    .venv/bin/python build.py --plates     # also build/plates/<set>/: plate, exit insert, drop tube, hose adapter per plate
+    .venv/bin/python build.py --plates     # also build/plates/<set>/: plate, exit insert and drop tube per plate
     .venv/bin/python build.py --guide      # also the build guide data and assembly for mkdocs build (mkdocs.yml)
 
 build/<name>.stl and .step are in the modelled orientation, build/print/<name>.stl as the part goes on the bed.
