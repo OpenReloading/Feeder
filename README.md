@@ -189,17 +189,17 @@ Results (250 9mm cases, 9mm plate, wall 125, about 3 counted turns per point, on
 | 52 deg | 660, 44 % | 1,320, 44 % | 1,920, 31 % | 2,860, 22 % |
 | 62 deg (extender) | 375, 25 % | 510, 17 % | 660, 11 % | 520, 4 % |
 
-- The table above is from the wall that fell at 15 deg. With the wall top falling at 40 deg toward the open high side (`body.heap_angle` 0) and the extender as an open arc, 250 cases, one seed, no case spilled and all left base down:
+- Wall falling at 15 deg: every point is valid, and every case left base down, about 600 exits in all. Plate torque peaks at 0.72 Nm, below the low slip estimate of 0.84 Nm.
+- Case centre of mass at 0.33 and 0.39 of the length from the base (38 and 45 deg, 1.5 and 3 rpm) moves the rate between 1,200 and 3,780 per hour, still all base down. The farther the centre of mass from the base, the lower the fill.
+- 9mm cases on the small_pistol plate (larger pockets) at 45 deg: 1,650 per hour at 1.5 rpm and 2,400 at 3 rpm, all base down.
+
+The results above and in the three bullets are from the wall that fell at 15 deg. With the wall top falling at 40 deg toward the open high side (`body.heap_angle` 0) and the extender as an open arc, 250 cases, one seed, no case spilled and all left base down:
 
 | Tilt | 1.5 rpm | 3 rpm |
 |---|---|---|
 | 40 deg | 1,590, 52 % | 2,820, 46 % |
 | 45 deg | 1,920, 63 % | 2,460, 40 % |
 | 60 deg (extender) | 690, 23 % | 1,140, 19 % |
-
-- Every point is valid, and every case left base down, about 600 exits in all. Plate torque peaks at 0.72 Nm, below the low slip estimate of 0.84 Nm.
-- Case centre of mass at 0.33 and 0.39 of the length from the base (38 and 45 deg, 1.5 and 3 rpm) moves the rate between 1,200 and 3,780 per hour, still all base down. The farther the centre of mass from the base, the lower the fill.
-- 9mm cases on the small_pistol plate (larger pockets) at 45 deg: 1,650 per hour at 1.5 rpm and 2,400 at 3 rpm, all base down.
 
 ## License
 
