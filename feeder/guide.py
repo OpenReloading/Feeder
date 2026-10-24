@@ -9,7 +9,8 @@ from feeder import assembly, export
 from feeder.config import CFG, Config
 
 BOM = Path(__file__).resolve().parent.parent / "bom" / "case_feeder_9mm.md"
-FASTENER = re.compile(r"^(ISO|DIN|CNC Kitchen) ")
+FASTENER_PREFIX = "ISO|DIN|CNC Kitchen|Panel nut|Lock nut"  # BOM rows that the assembly places as fasteners
+FASTENER = re.compile(rf"^({FASTENER_PREFIX})[ ,]")
 LINK = re.compile(r"\[([^\]]*)\]\(([^)]*)\)")
 
 

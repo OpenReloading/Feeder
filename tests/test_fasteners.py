@@ -7,17 +7,18 @@ from pathlib import Path
 import pytest
 from build123d import Pos
 
-from feeder import assembly, export
+from feeder import assembly, export, guide
 from feeder.config import CFG
 
 SPLITS = ("arcs", "halves", "one_piece")
 GAP = 0.5  # mm, as in test_body: hole clearances and fits
 BOM = Path(__file__).parent.parent / "bom" / "case_feeder_9mm.md"
+ENVELOPES = ("level_sensor", "timer_relay", "pwm_controller", "pwm_knob", "toggle_switch", "dc_jack", "gx12_2_pin_socket", "gx12_3_pin_socket")  # bought electronics: nuts and screws must not cut them either
 
 
 def test_fastener_counts_match_the_bom():
     bom: dict = {}
-    for item, qty in re.findall(r"^\| ((?:ISO|DIN|CNC Kitchen) [^|]+?) \| (\d+) \|", BOM.read_text(), re.M):
+    for item, qty in re.findall(rf"^\| ((?:{guide.FASTENER_PREFIX})[ ,][^|]+?) \| (\d+) \|", BOM.read_text(), re.M):
         bom[item] = bom.get(item, 0) + int(qty)
     placed: dict = {}
     for f in assembly.fasteners_in_body(CFG):
@@ -35,7 +36,7 @@ def test_fasteners_sit_in_their_holes_without_cutting_printed_parts(split):
     cfg = replace(CFG, body=replace(CFG.body, split=split))
     placed = assembly.placed(cfg)
     names = {p.name for p in placed}
-    printed = [(p.name, p.shape, p.shape.bounding_box()) for p in placed if not p.bought and not p.tool]
+    printed = [(p.name, p.shape, p.shape.bounding_box()) for p in placed if (not p.bought or p.name in ENVELOPES) and not p.tool]
     fs = assembly.fasteners_in_body(cfg)
     solids = [(f, loc * f.shape) for f in fs for loc in f.at]
     boxes = [s.bounding_box() for _, s in solids]
@@ -51,6 +52,16 @@ def test_fasteners_sit_in_their_holes_without_cutting_printed_parts(split):
             assert volume < 1e-3, f"{f.name} on {f.host} cuts {n} by {volume:.4f} mm3"
         near += [(g.name, s) for j, (g, s) in enumerate(solids) if j != i and not _apart(box, boxes[j], GAP)]  # a nut on its washer
         assert min((solid.distance_to(s) for _, s in near), default=GAP + 1) <= GAP, f"{f.name} on {f.host} floats"
+
+
+def test_every_electronics_envelope_has_its_nuts():
+    # sensor: two lock nuts, one each side of the plate; each panel part: one panel nut on its host's inner face
+    placed = {p.name: p for p in assembly.placed(CFG)}
+    assert set(ENVELOPES) <= set(placed) and all(placed[n].bought for n in ENVELOPES)
+    nuts = {(f.name, f.host): len(f.at) for f in assembly.fasteners_in_body(CFG) if f.kind == "nut"}
+    assert nuts[(f"Lock nut {CFG.drop_tube.sensor_thread}", "drop_tube")] == 1 and nuts[(f"Lock nut {CFG.drop_tube.sensor_thread}", "level_sensor")] == 1
+    for _, pp in CFG.electronics.panel_parts:
+        assert sum(n for (name, _), n in nuts.items() if name == f"Panel nut, {pp.label}") == 1, pp.label
 
 
 def test_viewer_matrices_place_fasteners_like_the_cad():

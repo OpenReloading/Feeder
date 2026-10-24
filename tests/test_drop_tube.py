@@ -109,3 +109,13 @@ def test_exit_spigot_radius_matches_the_socket():
     slab = pl * (Pos(0, 0, 5) * Box(80, 80, 0.2))
     section = b.exit_insert() & slab
     assert section.bounding_box().size.X / 2 == pytest.approx(K.r_spigot, abs=0.01)
+
+
+def test_sensor_envelope_runs_through_both_lock_nuts_and_out_of_the_plate():
+    assert D.sensor_thread_d < D.sensor_hole_d  # through the plate hole
+    assert D.sensor_length >= K.plate_x - K.window_x + D.nut_t  # past the outer nut
+    assert K.slot_h >= D.nut_t + 2 * FIT  # inner nut free in its slot
+    # sensor frame: face on the window outer face, axis along the drop tube +x at the sensor height
+    f = dt.sensor_frame()
+    local = dt.placement().location.inverse() * f
+    assert (local.position.X, local.position.Y, local.position.Z) == pytest.approx((K.window_x, 0, K.sensor_z), abs=1e-6)
