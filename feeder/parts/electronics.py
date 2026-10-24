@@ -1,18 +1,20 @@
-"""Electronics box on the stand tube, below the tilt clamp, on the exit side.
+"""Electronics box beside the stand tube, below the tilt clamp, its front toward the user (the low side).
 
-- Box: upright, open at the front (away from the tube). Back wall against the collar, timer relay on standoffs
-  with heat-set inserts inside it, motor and sensor sockets low in the +x face. Heat-set inserts in the corner
-  posts take the lid.
-- Collar: slit collar on the tube at the box top, clamp screws on the side away from the box. Screws from inside
-  the box through the back wall into its inserts.
+- Box: upright, open at the front. Timer relay on standoffs with heat-set inserts on the back wall, motor and
+  sensor sockets low in the side face away from the tube, heat-set inserts in the corner posts for the lid. The
+  box has its own slit clamp on the tube, standing off its side wall, so there is no collar: the slit and the 2
+  clamp screws at the back, heads outward, nuts toward the wall. `electronics_box` stands to the right of the
+  tube as the user sees it, `electronics_box_left` is its mirror.
 - Lid: front plate with the PWM knob (the PWM board hangs on its pot nut), toggle switch and DC jack in a column,
-  screwed to the corner posts. The cables are long enough to open it.
+  screwed to the corner posts. The cables are long enough to open it. One lid fits both boxes.
 
-Modelled in the box frame: tube axis on z, z = 0 at the box bottom, the box toward -y. `box_frame` turns it to the
-exit side. The box prints on its back wall, the collar upright, the lid flat.
+Modelled in the box frame: x = 0 at the middle of the box, z = 0 at the box bottom, the front toward -y, the tube
+at `tube_at`. `box_frame` puts the tube on the clamp axis. The box prints on its back wall, the lid flat.
 """
 
-from build123d import Box, Cylinder, Location, Part, Pos, Rot
+import math
+
+from build123d import Box, Circle, Cylinder, Location, Part, Plane, Polygon, Pos, Rot, extrude
 
 from feeder.config import CFG, Config, PanelPart
 from feeder.lib import fasteners
@@ -26,22 +28,35 @@ def height(cfg: Config = CFG) -> float:
     return cfg.electronics.box_inner[2] + 2 * cfg.electronics.box_wall
 
 
-def box_frame(tilt: float, cfg: Config = CFG) -> Location:
-    """Box frame in the body frame: the box top `box_gap` below the tilt clamp, the box on the exit side (+y)."""
-    return mount.clamp_frame(tilt, cfg) * Pos(0, 0, -cfg.electronics.box_gap - height(cfg)) * Rot(Z=180)
-
-
-def collar_face(cfg: Config = CFG) -> float:
-    """y of the collar face toward the box: the clamp wall plus room for the collar screw inserts."""
-    ins = cfg.fasteners.inserts[cfg.electronics.collar_screw_size]
-    return mount.clamp_layout(cfg)["y_min"] - ins.hole_depth
+def box_frame(tilt: float, cfg: Config = CFG, left: bool = False) -> Location:
+    """Box frame in the body frame: the box top `box_gap` below the tilt clamp, the tube of the box on the clamp axis."""
+    tx, ty = tube_at(cfg)
+    return mount.clamp_frame(tilt, cfg) * Pos(0, 0, -cfg.electronics.box_gap - height(cfg)) * Pos(tx if left else -tx, -ty, 0)
 
 
 def outline(cfg: Config = CFG) -> dict:
-    """Outer x half width of the box, y of its back face (`y1`, on the collar) and of its front rim (`y0`)."""
+    """Outer x half width of the box, y of its back face (`y1`, 0) and of its front rim (`y0`)."""
     e = cfg.electronics
-    y1 = collar_face(cfg)
-    return {"x": e.box_inner[0] / 2 + e.box_wall, "y0": y1 - e.box_wall - e.box_inner[1], "y1": y1}
+    return {"x": e.box_inner[0] / 2 + e.box_wall, "y0": -e.box_wall - e.box_inner[1], "y1": 0.0}
+
+
+def tube_gap(cfg: Config = CFG) -> float:
+    """Gap between the clamp block and the side wall, where the clamp screws end beyond their nuts."""
+    mt, w = cfg.mount, mount.clamp_width(cfg)
+    tip = mount.clamp_bolt_length(cfg) - (w - mount.clamp_cb_depth(cfg) + fasteners.washer_data(mt.clamp_size)["h"])
+    return math.ceil(tip) + 1
+
+
+def tube_at(cfg: Config = CFG) -> tuple[float, float]:
+    """(x, y) of the tube axis in the box frame of the right-hand box: the clamp block stands `tube_gap` off the side
+    wall, its slit and screws toward the back, its rear flush with the back face of the box."""
+    return -outline(cfg)["x"] - tube_gap(cfg) - mount.clamp_width(cfg) / 2, outline(cfg)["y1"] - mount.clamp_layout(cfg)["y_max"]
+
+
+def tube_frame(cfg: Config = CFG) -> Location:
+    """Clamp frame in the box frame: the same axes, so the slit and the screws are at the back."""
+    tx, ty = tube_at(cfg)
+    return Pos(tx, ty, 0)
 
 
 def post_w(cfg: Config = CFG) -> float:
@@ -61,15 +76,10 @@ def lid_screw_length(cfg: Config = CFG) -> float:
     return fasteners.pick_length(fasteners.socket_screw_lengths(e.lid_screw_size), e.lid_t + cfg.fasteners.min_engagement * fasteners.nominal_d(e.lid_screw_size))
 
 
-def collar_screw_z(cfg: Config = CFG) -> list[float]:
-    """z of the collar's clamp screws and of the screws that hold it to the box."""
-    h, n, c = height(cfg), cfg.mount.clamp_screws, cfg.electronics.collar_h
+def clamp_screw_z(cfg: Config = CFG) -> list[float]:
+    """z of the clamp screws, in the clamp block at the top of the box."""
+    h, n, c = height(cfg), cfg.mount.clamp_screws, cfg.electronics.clamp_h
     return [h - c + c * (i + 0.5) / n for i in range(n)]
-
-
-def collar_screw_length(cfg: Config = CFG) -> float:
-    e = cfg.electronics
-    return fasteners.pick_length(fasteners.socket_screw_lengths(e.collar_screw_size), e.box_wall + cfg.fasteners.min_engagement * fasteners.nominal_d(e.collar_screw_size))
 
 
 def relay_screws(cfg: Config = CFG) -> list[tuple[float, float]]:
@@ -147,6 +157,12 @@ def _side_hole(d: float, depth: float) -> Part:
     return Rot(Y=-90) * Rot(X=90) * hole
 
 
+def _roofed_bore(d: float, h: float) -> Part:
+    """The tube bore with a 45 deg roof toward the front of the box (-y), which is up while the box prints on its back wall."""
+    r = d / 2
+    return extrude(Circle(r) + Polygon((r / math.sqrt(2), -r / math.sqrt(2)), (-r / math.sqrt(2), -r / math.sqrt(2)), (0, -r * math.sqrt(2)), align=None), h)
+
+
 @per_config
 def box(cfg: Config = CFG) -> Part:
     e, o = cfg.electronics, outline(cfg)
@@ -162,23 +178,17 @@ def box(cfg: Config = CFG) -> Part:
         body += Pos(x, back + 1, z) * Rot(X=90) * Cylinder(standoff_d(cfg) / 2, e.standoff_h + 1, align=BOTTOM)
         hole_d = cfg.fasteners.inserts[e.lid_screw_size].hole_d
         body -= Pos(x, back - e.standoff_h, z) * Rot(X=-90) * Cylinder(hole_d / 2, e.relay_hole_depth, align=BOTTOM)
-    for z in collar_screw_z(cfg):  # through the back wall into the collar
-        body -= Pos(0, o["y1"] + 1, z) * Rot(X=-90) * fasteners.clearance_hole(e.collar_screw_size, wt + 2)
+    c = e.clamp_h  # the clamp block at the top, on the tube, joined to the side wall by a web in front of the screws
+    L, tf, mw = mount.clamp_layout(cfg), tube_frame(cfg), cfg.print.min_wall
+    tx, ty = tube_at(cfg)
+    body += tf * Pos(0, (L["y_min"] + L["y_max"]) / 2, h - c) * Box(mount.clamp_width(cfg), L["y_max"] - L["y_min"], c, align=BOTTOM)
+    web_x0, web_x1 = tx + mount.clamp_width(cfg) / 2 - 1, -o["x"] + 1
+    web_y0, web_y1 = ty + L["y_min"], ty + L["y_s"] - (L["y_max"] - L["y_s"] - 2 * mw) - mw
+    body += Pos(0, 0, h - c) * extrude(Polygon((web_x0, web_y0), (web_x1, web_y0), (web_x1, web_y1), (web_x0, web_y1 - (web_x1 - web_x0)), align=None), c)  # back end at 45 deg, from the wall
+    body -= tf * Pos(0, 0, h - c) * mount.tube_clamp_cuts(c, 0, [z - (h - c) for z in clamp_screw_z(cfg)], cfg, lying=True)
+    body -= tf * Pos(0, 0, h - c - 1) * _roofed_bore(mount.bore(cfg), c + 2)
     for _, d, loc in panel_holes(cfg)[len(e.front_holes):]:
         body -= loc * Pos(0, 0, -1) * _side_hole(d, wt + 2)
-    return body
-
-
-@per_config
-def collar(cfg: Config = CFG) -> Part:
-    """Slit collar on the tube, box frame: from `collar_face` to the clamp's +y side, at the box top."""
-    e, L = cfg.electronics, mount.clamp_layout(cfg)
-    h, c, y0 = height(cfg), e.collar_h, collar_face(cfg)
-    body = Pos(0, (y0 + L["y_max"]) / 2, h - c) * Box(mount.clamp_width(cfg), L["y_max"] - y0, c, align=BOTTOM)
-    body -= Pos(0, 0, h - c) * mount.tube_clamp_cuts(c, 0, [z - (h - c) for z in collar_screw_z(cfg)], cfg)
-    ins = cfg.fasteners.inserts[e.collar_screw_size]
-    for z in collar_screw_z(cfg):  # horizontal insert holes, teardrop roof up (the collar prints upright)
-        body -= Pos(0, y0, z) * Rot(Z=90) * teardrop(ins.hole_d, ins.hole_depth)
     return body
 
 
@@ -194,4 +204,10 @@ def lid(cfg: Config = CFG) -> Part:
     return body
 
 
-PARTS = {"electronics_box": box, "electronics_collar": collar, "electronics_lid": lid}
+@per_config
+def box_left(cfg: Config = CFG) -> Part:
+    """The box to the left of the tube: the mirror of `box`."""
+    return box(cfg).mirror(Plane.YZ)
+
+
+PARTS = {"electronics_box": box, "electronics_box_left": box_left, "electronics_lid": lid}
