@@ -40,7 +40,7 @@ def plate_set(request):
 def test_parts_are_single_valid_solids(plate_set):
     _, parts = plate_set
     for name, part in parts.items():
-        assert part.is_valid and len(part.solids()) == 1, name
+        assert part.is_valid and len(part.solids()) == 1, name  # noqa: PT018
 
 
 def test_group_plate_height_and_pockets_suit_every_case(plate_set):
@@ -62,7 +62,7 @@ def test_exit_takes_the_set_and_fits_the_body_shaft(plate_set, core):
     s, parts = plate_set
     length, r0, r1 = b.opening(s)
     r, d = layout.pocket_circle_r(s), layout.pocket_d(s)
-    assert r0 < r - d / 2 and r1 > r + d / 2
+    assert r0 < r - d / 2 and r1 > r + d / 2  # noqa: PT018
     assert length > layout.caliber(s).case_length + d
     assert layout.bowl_r(s) - FIT - r1 >= MW  # the opening's outer edge is an arc under the band
     assert b.bore_d(s) >= layout.caliber(s).rim_d + 0.4
@@ -71,7 +71,7 @@ def test_exit_takes_the_set_and_fits_the_body_shaft(plate_set, core):
     z = layout.levels(s)
     shaft_plan = ShapelyPolygon([(v.X, v.Y) for v in b._exit_outline(s, 0.0).vertices()]).buffer(EPS)
     verts, _ = ins.tessellate(0.05)
-    assert all(shaft_plan.contains(Point(v.X, v.Y)) for v in verts if v.Z < z.deck_top - s.exit.seat_t - EPS)  # it drops in from above
+    assert all(shaft_plan.contains(Point(v.X, v.Y)) for v in verts if v.Z < z.deck_top - s.exit.seat_t - EPS)  # it drops in from above  # noqa: SIM300
 
 
 def test_drop_tube_passes_every_case(plate_set, core):

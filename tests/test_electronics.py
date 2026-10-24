@@ -23,7 +23,7 @@ def test_tilting_parts_and_their_fasteners_stay_above_the_box_at_every_tilt():
         shapes = [(p.name, p.shape) for p in assembly.placed(tilt=tilt) if p.name not in OWN]
         shapes += [(f.name, loc * f.shape) for f in assembly.fasteners_in_body(tilt=tilt) if f.host not in OWN for loc in f.at]
         for name, shape in shapes:
-            assert (inv * shape).bounding_box().min.Z > -E.box_gap, (tilt, name)
+            assert (inv * shape).bounding_box().min.Z > -E.box_gap, (tilt, name)  # noqa: SIM300
 
 
 @pytest.mark.parametrize("left", [False, True], ids=["right", "left"])
@@ -41,7 +41,7 @@ def test_box_stands_beside_the_tube_with_its_front_toward_the_user_and_clear_of_
         assert ((into_clamp * Pos(0, 0, 0)).position.X < 0) == left, tilt  # right of the tube as the user sees it is +x
 
 
-@pytest.mark.parametrize("size, length, grip, depth", [
+@pytest.mark.parametrize("size, length, grip, depth", [  # noqa: PT006
     (E.lid_screw_size, el.lid_screw_length(), E.lid_t, CFG.fasteners.inserts[E.lid_screw_size].hole_depth),
     (E.lid_screw_size, el.relay_screw_length(), E.relay_pcb_t, E.relay_hole_depth),
 ])
@@ -56,7 +56,7 @@ def test_relay_insert_holes_stay_closed_at_the_back():
 
 def test_panel_holes_leave_room_for_their_nuts():
     room = 3.0  # mm round each hole for the panel nut, unverified
-    ix, iy, iz = E.box_inner
+    ix, iy, iz = E.box_inner  # noqa: RUF059
     p, sd = el.post_w(), el.standoff_d()
     holes = el.panel_holes()
     o = el.outline()
@@ -75,7 +75,7 @@ def test_panel_holes_leave_room_for_their_nuts():
 
 def test_relay_fits_between_the_posts_and_below_the_pwm_board():
     p, sd = el.post_w(), el.standoff_d()
-    ix, _, iz = E.box_inner
+    ix, _, iz = E.box_inner  # noqa: RUF059
     xs, zs = [x for x, _ in el.relay_screws()], [z for _, z in el.relay_screws()]
     assert max(xs) + sd / 2 <= ix / 2 - p
     knob_z = el.panel_holes()[0][2].position.Z
@@ -88,7 +88,7 @@ def test_every_panel_hole_has_a_part_whose_barrel_fits_and_carries_its_nut():
     for name, pp, _, t in el.panel_fits():
         assert holes[name] - pp.thread_d >= 0.2 - 1e-9, name  # print clearance of the other holes
         assert t + pp.nut_t <= pp.thread_l, name  # the nut sits on the thread
-        assert pp.body[2] > 0 and pp.nut_af > pp.thread_d, name
+        assert pp.body[2] > 0 and pp.nut_af > pp.thread_d, name  # noqa: PT018
 
 
 def test_panel_nuts_sit_on_the_inner_face_of_their_panel():

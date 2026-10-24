@@ -11,7 +11,7 @@ boss on -x (the thumb screw head stays clear of the body bottom for the fingers)
 body's spigot. The inner diameter never shrinks along the path: spigot bore, tube bore (wider by two fits), hose.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass  # noqa: I001
 
 from build123d import Align, Box, Cone, Cylinder, Location, Part, Plane, Polygon, Pos, RegularPolygon, Rot, extrude
 
@@ -131,7 +131,7 @@ def _barb(k: Dims, cfg: Config) -> Part:
 
 @per_config
 def drop_tube(cfg: Config = CFG) -> Part:
-    d, f = cfg.drop_tube, cfg.print.fit
+    d, f = cfg.drop_tube, cfg.print.fit  # noqa: F841
     k = dims(cfg)
     ins = cfg.fasteners.inserts[d.screw_size]
     part = Cylinder(k.r_socket_out, k.socket_top, align=BOTTOM)

@@ -12,7 +12,7 @@ Run in the dev container from the project root:
 build/<name>.stl and .step are in the modelled orientation, build/print/<name>.stl as the part goes on the bed.
 """
 
-import argparse
+import argparse  # noqa: I001
 import importlib
 import pkgutil
 import subprocess
@@ -35,7 +35,7 @@ SPLITS = ("arcs", "halves", "one_piece")
 def iter_parts(cfg: Config = CFG, modules: tuple[str, ...] | None = None):
     """Yield (name, builder) from every feeder.parts module's PARTS mapping, or its parts(cfg) where the part
     set depends on the config. Each builder takes the config."""
-    import feeder.parts
+    import feeder.parts  # noqa: PLC0415
 
     for info in pkgutil.iter_modules(feeder.parts.__path__):
         if modules is not None and info.name not in modules:
@@ -60,14 +60,14 @@ def build_all(cfg: Config = CFG, out: Path = BUILD, modules: tuple[str, ...] | N
 
 def plate_set_parts(cfg: Config) -> list:
     """The parts that belong to one plate: the rest of the feeder takes every plate."""
-    from feeder.parts import body, case_plate, drop_tube
+    from feeder.parts import body, case_plate, drop_tube  # noqa: PLC0415
 
     return [(f"case_plate_{cfg.case_plate.caliber}", case_plate.plate), ("body_exit_insert", body.exit_insert),
             ("drop_tube", drop_tube.drop_tube)]
 
 
 def build_assembly(cfg: Config, out: Path, title: str) -> None:
-    from feeder.export import export_assembly
+    from feeder.export import export_assembly  # noqa: PLC0415
 
     for f in export_assembly(cfg, out, title):
         print(f"built {f.relative_to(ROOT)}")
@@ -92,19 +92,19 @@ def main() -> int:
             print(f"{build_all(cfg, out, ('body', 'case_plate'))} parts in {out}")
             build_assembly(cfg, out / "assembly", f"Body {split.replace('_', ' ')}")
     if args.plates:
-        from feeder.parts import layout
+        from feeder.parts import layout  # noqa: PLC0415
 
         for cfg in layout.plate_sets(CFG):
             out = BUILD / "plates" / cfg.case_plate.caliber
             print(f"{build_all(cfg, out, parts=plate_set_parts(cfg))} parts in {out}")
     if args.configurator:
-        import variants
+        import variants  # noqa: PLC0415
 
         variants.build_configurator()
     if args.guide:
-        import json
+        import json  # noqa: PLC0415
 
-        from feeder import guide
+        from feeder import guide  # noqa: PLC0415
 
         build_assembly(CFG, ROOT / "guide" / "generated" / "assembly", f"Body {CFG.body.split.replace('_', ' ')}, default configuration")
         data = BUILD / "guide" / "buildguide.json"
@@ -114,7 +114,7 @@ def main() -> int:
         (ROOT / "guide" / "generated" / "steps.md").write_text(guide.steps_markdown(CFG), encoding="utf-8")
     if args.no_test:
         return 0
-    return subprocess.run([sys.executable, "-m", "pytest", "-q"], cwd=ROOT).returncode
+    return subprocess.run([sys.executable, "-m", "pytest", "-q"], cwd=ROOT).returncode  # noqa: PLW1510
 
 
 if __name__ == "__main__":

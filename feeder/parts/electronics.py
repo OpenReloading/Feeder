@@ -12,7 +12,7 @@ Modelled in the box frame: x = 0 at the middle of the box, z = 0 at the box bott
 at `tube_at`. `box_frame` puts the tube on the clamp axis. The box prints on its back wall, the lid flat.
 """
 
-import math
+import math  # noqa: I001
 
 from build123d import Box, Circle, Cylinder, Location, Part, Plane, Polygon, Pos, Rot, extrude
 
