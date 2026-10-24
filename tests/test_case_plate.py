@@ -87,7 +87,7 @@ def test_ridge_plate_has_a_ridge_between_every_two_pockets_rising_to_the_pocket_
         land = a + 180 / n
         assert _top_at(plate, r1 - 0.2, land) == pytest.approx(h + P.ridge_h, abs=0.1)  # tallest at the pockets
         assert _top_at(plate, (r0 + r1) / 2, land) == pytest.approx(h + P.ridge_h / 2, abs=0.1)
-        assert _top_at(plate, layout.pocket_circle_r(RIDGES), a) <= h + 1e-6  # the pocket wall keeps its height
+        assert _top_at(plate, layout.pocket_circle_r(RIDGES), land) == pytest.approx(h, abs=1e-6)  # the land between pockets keeps the plate height: the ridge ends before the mouths
 
 
 def test_plate_fits_inside_the_band():
