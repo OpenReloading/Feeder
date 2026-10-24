@@ -18,6 +18,10 @@ updates:
     groups:
       pip:
         update-types: [minor, patch]
+    ignore:  # held back by the locked environment: sympy needs mpmath < 1.4, dataclasses-json marshmallow < 4, bd-materials webcolors 24.8
+      - dependency-name: mpmath
+      - dependency-name: marshmallow
+      - dependency-name: webcolors
   - package-ecosystem: docker
     directory: /.devcontainer
     schedule:
