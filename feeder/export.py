@@ -4,7 +4,6 @@ offline viewer page (feeder/viewer.html with the models inlined)."""
 import base64
 import json
 import math
-import subprocess
 import tempfile
 import urllib.request
 from pathlib import Path
@@ -49,17 +48,17 @@ def _steps(cfg: Config) -> list[dict]:
         ("Exit insert and gate", "Exit insert from above into its shaft, its ledge in the deck recess: drop opening, funnel and spigot. Gate into the band gap, its ends behind the band ends. To swap the insert: cap, plate and gate off, thumb screw loose, lift it out."),
         ("Metal hub with the hub gauge", "Lay the gauge on the cup floor around the shaft, handle away from the set screws. Push the Pololu 2693 hub down onto it, tighten its 2 set screws on the D flat, slide the gauge out by its handle away from the shaft and lift it out."),
         ("Carrier on the hub flange", "Heat-set insert into the carrier top first. Screws into every other hub hole."),
-        ("Drive ring", "Female 45 deg cone on the carrier cone. Its floor carries the pressure disc, its flange and hex carry the plate, its 3-start thread takes the cap. It stays on the clutch when plates change."),
+        ("Drive ring", "Onto the carrier cone. It stays on the clutch when plates change."),
         (f"Pressure disc and {n} springs", f"Disc keyed to the carrier hex, bearing on the ring floor inside the ring. Gutekunst VD-127E-01 springs in the disc pockets, free length {cfg.spring.free_length} mm."),
         ("Knob and its screw", f"Tighten once at assembly until the knob sits on the carrier top: springs at {spring_len:.1f} mm, clamp {sc.clamp_force(n, cfg):.1f} N. Plate changes never touch it."),
-        ("Case plate", f"{layout.plate_r(cfg) * 2:.1f} mm, {layout.pocket_count(cfg)} notches, closed by the band. Lift it by the two tabs. Drops over the ring hex onto the flange, no tools. 9mm cases are drawn in some pockets."),
+        ("Case plate", f"{layout.plate_r(cfg) * 2:.1f} mm, {layout.pocket_count(cfg)} notches, closed by the band. Drops over the ring hex onto the flange; lift it by the key ring."),
         ("Cap", f"Twist on by hand until it sits on the plate: about {sc.cap_clamp_force(cfg):.0f} N clamp at 1 Nm (estimate) holds the plate against the brass on the low side. Twist off to change plates."),
         ("Drop tube", "Heat-set insert into the boss first. Socket over the exit spigot, thumb screw into the insert, hand tight on the spigot. M18 x 1 sensor between two lock nuts in the boss (not drawn)."),
         ("Yoke", "Screws from below into the heat-set inserts in the body's bottom plane."),
         ("Clamp on the 25 mm tube", "Slit clamp: screws on washers in the counterbores, nuts in the pockets. Tongue between the yoke ears on the pivot bolt, a washer on each side, the nylon nut sets the pivot friction."),
         ("Tilt link", f"Pin A in the yoke fork, pin B in the clamp fork, a washer on each side and a nylon nut each. Adjustable link: fixed rod end on a captive M6 nut and a jam nut, adjust end between two nuts on a {mount.rod_length(cfg):.0f} mm M6 threaded rod, {mt.tilt_range[0]:.0f} to {mt.tilt_range[1]:.0f} deg. Or one printed fixed link per angle ({', '.join(f'{t:.0f}' for t in mt.fixed_tilts)} deg) on the same pins."),
         ("Wall extender (optional)", f"Two halves, {cfg.body.extender_h:.0f} mm more wall at the low side, top at the wall slant. The sleeve slides {cfg.body.extender_lap:.0f} mm down over the outside of the wall top. Heat-set inserts into the posts of half 1 and a nut into each rib pocket first, then screw the halves together at both seam posts. Countersunk screws from inside the bowl through wall and sleeve into the rib nuts."),
-        ("Electronics box", f"On the stand tube {cfg.electronics.box_gap:.0f} mm below the clamp: slit collar like the clamp, screws on washers in the counterbores, nuts in the pockets. Toggle switch, PWM knob and DC jack in the front face, motor (2-pin) and sensor (3-pin) GX12 sockets in the side face, their cables tied to the tab above. Heat-set inserts into the corner posts first. Modules zip-tied to the lid, lid screws from below."),
+        ("Electronics box", f"Heat-set inserts into the collar, the corner posts and the relay standoffs first. Collar on the stand tube {cfg.electronics.box_gap:.0f} mm below the clamp like the clamp: screws on washers in the counterbores, nuts in the pockets. Box on the collar, screws from inside through the back wall. Relay onto its standoffs, GX12 sockets into the side face. PWM knob, toggle switch and DC jack into the lid, lid screws from the front."),
     ]
 
 
@@ -77,13 +76,6 @@ def _fastener_text(fs: list, step_of: dict) -> dict:
         counts = out.setdefault(step_of[f.host], {})
         counts[f.name] = counts.get(f.name, 0) + len(f.at)
     return {s: [f"{n} x {name}" for name, n in c.items()] for s, c in out.items()}
-
-
-def _commit() -> str:
-    try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True, check=True).stdout.strip()
-    except (OSError, subprocess.CalledProcessError):
-        return "unknown"
 
 
 def _libs(cache: Path) -> str:
@@ -152,8 +144,7 @@ def export_assembly(cfg: Config, out: Path, title: str, inline_libs: bool = True
     z, zc, n = layout.levels(cfg), sc.levels(cfg), cfg.clutch.springs_fitted
     info = dict(
         eyebrow=f"Feeder · 9mm case feeder · body {cfg.body.split.replace('_', ' ')}",
-        intro=f"{title}. Worm gear motor, metal-hub slip clutch with a drive ring and twist cap (plates drop on, no tools), base-down case plate, exit insert with drop tube, tilt mount on a 25 mm tube. The Tilted view turns the feeder about the M10 pivot until the tube is vertical. The exit is on the high side.",
-        note=f"Generated by build.py from feeder/config.py, commit {_commit()}. Fasteners are nominal: shank and head cylinders, hex prisms, inserts as tubes the size of their holes. Not drawn: hub set screws (part of the hub), M18 sensor and its lock nuts, hose, wiring, electronics modules and panel parts. The motor is an envelope from seller drawings, unverified. 9mm cases are plain cylinders. The stand tube is a 100 mm stub. The hub gauge shows only in its step. Slip torque and plate drag are estimates until tested on hardware.",
+        intro=f"{title}. Tilted view: as mounted, tube vertical.",
         labels={"body": {"arcs": "Body core", "halves": "Body halves", "one_piece": "Body"}[cfg.body.split]},
         steps=[dict(t=steps[s][0], d=steps[s][1], f=ftext.get(index[s], [])) for s in used],
         spring_step=step_of["slip_clutch_disc"], case_step=step_of[f"case_plate_{cfg.case_plate.caliber}"],

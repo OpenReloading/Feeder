@@ -25,7 +25,11 @@ Tick the parts off on the [BOM](bom.md) page, then follow the [assembly steps](a
 
 ## Tilt
 
-Start at 45 deg. [Tilt and capacity](tilt.md) lists when to go steeper, the sources and the capacity per angle.
+Start at 45 deg. [Tilt and capacity](tilt.md) lists when to go steeper and the capacity per angle.
+
+## When it does not work
+
+[Troubleshooting](troubleshooting.md) lists symptoms, causes and the config value or part to change.
 
 ## Printing
 

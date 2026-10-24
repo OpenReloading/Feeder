@@ -17,15 +17,36 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 2
+      # a pull request that changes only docs runs the README test, not the geometry tests (HEAD^1 is the base)
+      - id: scope
+        if: github.event_name == 'pull_request'
+        run: |
+          if git diff --name-only HEAD^1 HEAD | grep -qvE '^(docs/.*|guide/[^/]*\.md|[^/]*\.md|mkdocs\.yml|LICENSE)$'; then
+            echo "tests=tests" >> "$GITHUB_OUTPUT"
+          else
+            echo "tests=tests/test_guide.py" >> "$GITHUB_OUTPUT"
+          fi
       # as .devcontainer: libgl for OCP, the locked environment, the package itself
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglu1-mesa
       - run: |
           python3 -m venv .venv
           .venv/bin/pip install -r requirements.txt -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
-      - run: .venv/bin/python -m pytest -q
-      - run: .venv/bin/python build.py --no-test --guide
+      # guide data in the background while the test files run on the runner's cores
+      - env:
+          TESTS: ${{ steps.scope.outputs.tests || 'tests' }}
+        run: |
+          .venv/bin/python build.py --no-test --guide > guide.log 2>&1 &
+          guide=$!
+          tests=0
+          .venv/bin/python -m pytest -q -n auto --dist loadfile "$TESTS" || tests=$?
+          wait "$guide" || { cat guide.log; exit 1; }
+          exit "$tests"
+      # the header's repository facts come from the GitHub API at build time
       - run: .venv/bin/mkdocs build --strict
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site

@@ -1,6 +1,6 @@
 """Print orientation: how each part goes on the bed. The print exports, the bed check and the support check use it.
 
-Parts are modelled in print orientation unless listed in UPSIDE_DOWN or TOP_DOWN_SLANTED. Parts wider than the bed turn about z
+Parts are modelled in print orientation unless listed in UPSIDE_DOWN, TOP_DOWN_SLANTED or TURNED. Parts wider than the bed turn about z
 until they fit (body halves and extender halves go across the bed diagonal).
 """
 
@@ -9,8 +9,9 @@ from build123d import Part, Pos, Rot
 from feeder.config import CFG, Config
 from feeder.parts import body
 
-UPSIDE_DOWN = {"slip_clutch_cap", "body_track_gate", "body_exit_insert", "electronics_box"}
+UPSIDE_DOWN = {"slip_clutch_cap", "body_track_gate", "body_exit_insert"}
 TOP_DOWN_SLANTED = {"body_extender_0", "body_extender_1"}  # flat top falls at the wall slant
+TURNED = {"electronics_box": Rot(X=-90), "electronics_lid": Rot(X=90)}  # box on its back wall, lid on its outer face
 
 
 def fits(part: Part, cfg: Config = CFG) -> bool:
@@ -24,6 +25,8 @@ def on_bed(name: str, part: Part, cfg: Config = CFG) -> Part:
     fits (unturned if it fits as is), centred on the origin with its bottom at z = 0."""
     if name in UPSIDE_DOWN:
         part = Rot(X=180) * part
+    if name in TURNED:
+        part = TURNED[name] * part
     if name in TOP_DOWN_SLANTED:
         part = Rot(X=180 + body.wall_slant(cfg)) * part
     turned = (Rot(Z=a) * part for a in range(0, 180, 5))

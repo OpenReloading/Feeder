@@ -41,30 +41,17 @@ def motor_envelope(cfg: Config = CFG) -> Part:
     return Rot(Z=m.angle) * (gb + can)
 
 
-_cap_angles: dict = {}
-
-
-def cap_angle(cfg: Config = CFG, step: float = 3.0) -> tuple[float, float]:
-    """Rotation of the cap at its clamp face where its thread meshes with the ring (the helix phase is not
-    modelled), and the overlap left there. Only the thread band is intersected."""
-    key = (cfg.drive_ring, cfg.cap, cfg.plate_seat, cfg.clutch, cfg.case_plate.direction, cfg.print.fit, step)
-    if key not in _cap_angles:
-        dr, z = cfg.drive_ring, sc.levels(cfg)
-        band = Pos(0, 0, z.hex_top) * Cylinder(dr.thread_d, z.ring_top - z.hex_top, align=B)
-        ring = Pos(0, 0, z.ring_bottom) * sc.drive_ring(cfg) & band
-        cap = sc.cap(cfg) & Pos(0, 0, z.hex_top - z.cap_face) * Cylinder(dr.thread_d, z.ring_top - z.hex_top, align=B)
-        overlaps = []
-        for i in range(round(360 / dr.thread_starts / step)):
-            common = ring & Pos(0, 0, z.cap_face) * Rot(Z=i * step) * cap
-            overlaps.append((common.volume if common.solids() else 0.0, i * step))
-        volume, angle = min(overlaps)
-        _cap_angles[key] = (angle, volume)
-    return _cap_angles[key]
+def cap_angle(cfg: Config = CFG) -> float:
+    """Rotation of the cap at its clamp face where its thread meshes with the ring. Both threads start at angle 0 at
+    their lower ends, the cap's `cap_face - hex_top` higher, so its teeth sit half a pitch from the ring's there."""
+    dr, z = cfg.drive_ring, sc.levels(cfg)
+    hand = 1 if sc.thread_hand(cfg) == "right" else -1
+    return (hand * 360 * (z.cap_face - z.hex_top) / sc.thread_lead(cfg) + 180 / dr.thread_starts) % (360 / dr.thread_starts)
 
 
 def cap_on_ring(cfg: Config = CFG) -> Part:
     """Cap in the clutch frame at its clamp face, turned to mesh with the ring."""
-    return Pos(0, 0, sc.levels(cfg).cap_face) * Rot(Z=cap_angle(cfg)[0]) * sc.cap(cfg)
+    return Pos(0, 0, sc.levels(cfg).cap_face) * Rot(Z=cap_angle(cfg)) * sc.cap(cfg)
 
 
 def _hub(cfg: Config) -> Part:
@@ -119,6 +106,7 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
         Placed("stand_tube", stand_tube(tilt, cfg), "tube", 13, explode=down, bought=True),
         Placed("mount_tilt_link", mount.link_in_body(mount.adjustable_link(tilt, cfg), tilt, cfg), "link", 14, explode=(1.0, 0.0, 0.0)),
         Placed("electronics_box", electronics.box_frame(tilt, cfg) * electronics.box(cfg), "elec", 16, explode=down),
+        Placed("electronics_collar", electronics.box_frame(tilt, cfg) * electronics.collar(cfg), "elec", 16, explode=down),
         Placed("electronics_lid", electronics.box_frame(tilt, cfg) * electronics.lid(cfg), "lid", 16, explode=down),
     ]
     if split == "halves":  # the two halves part sideways in the exploded view
@@ -269,16 +257,23 @@ def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fast
     L, w = mount.clamp_layout(cfg), mount.clamp_width(cfg)
     wh, nut = fasteners.washer_data(mt.clamp_size)["h"], fasteners.nut_data(mt.clamp_size)
     box = electronics.box_frame(tilt, cfg)
-    for frame, zs, host in ((mount.clamp_frame(tilt, cfg), mount.clamp_screw_z(cfg), "mount_clamp"), (box, electronics.collar_screw_z(cfg), "electronics_box")):
+    for frame, zs, host in ((mount.clamp_frame(tilt, cfg), mount.clamp_screw_z(cfg), "mount_clamp"), (box, electronics.collar_screw_z(cfg), "electronics_collar")):
         for zz in zs:
             seat = frame * Pos(-w / 2 + mount.clamp_cb_depth(cfg), L["y_s"], zz) * Rot(Y=-90)
             items.append((f"ISO 7089 {mt.clamp_size} washer", "washer", _washer(mt.clamp_size), seat, host, 1))
             screw(mt.clamp_size, mount.clamp_bolt_length(cfg), seat * Pos(0, 0, wh), host)
             items.append((_nut_name(mt.clamp_size), "nut", _nut(mt.clamp_size, nut["s"], nut["m"]), frame * mount.clamp_nut_pocket(zz, cfg) * Pos(0, 0, -nut["m"]), host, 2))
-    e = cfg.electronics
-    for x, y in electronics.lid_screws(cfg):
-        insert(e.lid_screw_size, box * Pos(x, y, 0) * Rot(X=180), "electronics_box")
-        screw(e.lid_screw_size, electronics.lid_screw_length(cfg), box * Pos(x, y, -e.lid_t) * Rot(X=180), "electronics_lid")
+    e, o = cfg.electronics, electronics.outline(cfg)
+    for x, zz in electronics.lid_screws(cfg):  # into the box: +y in the box frame
+        insert(e.lid_screw_size, box * Pos(x, o["y0"], zz) * Rot(X=90), "electronics_box")
+        screw(e.lid_screw_size, electronics.lid_screw_length(cfg), box * Pos(x, o["y0"] - e.lid_t, zz) * Rot(X=90), "electronics_lid")
+    for zz in electronics.collar_screw_z(cfg):
+        insert(e.collar_screw_size, box * Pos(0, o["y1"], zz) * Rot(X=90), "electronics_collar")
+        screw(e.collar_screw_size, electronics.collar_screw_length(cfg), box * Pos(0, o["y1"] - e.box_wall, zz) * Rot(X=90), "electronics_box")
+    back = o["y1"] - e.box_wall - e.standoff_h
+    for x, zz in electronics.relay_screws(cfg):
+        insert(e.lid_screw_size, box * Pos(x, back, zz) * Rot(X=90), "electronics_box")
+        screw(e.lid_screw_size, electronics.relay_screw_length(cfg), box * Pos(x, back - e.relay_pcb_t, zz) * Rot(X=90), "electronics_box", 2)
     py, pz = mount.pivot_point(cfg)
     pivot = _pin_stack(mt.pivot_size, mount.pivot_bolt_length(cfg), mount.ear_gap(cfg) / 2 + mt.ear_t, mt.pivot_nut_af, mt.pivot_nut_h, "hex")
     items += [(n, kd, sh, Pos(0, py, pz) * loc, "mount_clamp", sq) for n, kd, sh, loc, sq in pivot]

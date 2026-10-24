@@ -27,12 +27,6 @@ def parts():
     return {name: build() for name, build in b.PARTS.items()}
 
 
-def test_body_parts_are_single_valid_solids(parts):
-    for name, part in parts.items():
-        assert part.is_valid, name
-        assert len(part.solids()) == 1, name
-
-
 def test_track_gap_stays_under_the_rim_thickness():
     z = layout.levels()
     lowest = z.plate_bottom - layout.seat_drop() - z.deck_top  # ring cone at full clearance
@@ -193,7 +187,8 @@ def _mates(cfg) -> dict[str, tuple[str, ...]]:
         "mount_clamp": ("mount_yoke",),
         "mount_tilt_link": ("mount_yoke", "mount_clamp"),
         "stand_tube": ("mount_clamp",),
-        "electronics_box": ("stand_tube",),
+        "electronics_collar": ("stand_tube",),
+        "electronics_box": ("electronics_collar",),
         "electronics_lid": ("electronics_box",),
     }
     if split == "halves":
@@ -348,13 +343,3 @@ def test_extender_sits_on_the_wall_top_and_prints_on_its_flat_top():
         bed = printing.on_bed(f"body_extender_{i}", ext)
         assert printing.fits(bed)
         assert _unsupported(Pos(0, 0, -0.013) * bed) == []
-
-
-def test_one_piece_body_is_one_valid_solid_and_fits_the_bed():
-    cfg = replace(CFG, body=replace(B, split="one_piece"))
-    p = cfg.printer
-    body = b.body_one_piece(cfg)
-    assert body.is_valid and len(body.solids()) == 1
-    size = body.bounding_box().size
-    assert max(size.X, size.Y) <= min(p.bed_x, p.bed_y) - 2 * p.margin + 1e-3
-

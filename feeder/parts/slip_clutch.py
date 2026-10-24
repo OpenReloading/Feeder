@@ -20,6 +20,7 @@ from bd_warehouse.thread import Thread
 from build123d import Align, Box, Compound, Cone, Cylinder, Part, Pos, RegularPolygon, Rot, extrude
 
 from feeder.config import CFG, Config
+from feeder.lib.cache import per_config
 from feeder.lib import fasteners
 from feeder.lib.features import hex_corner_r, hex_prism
 
@@ -197,6 +198,7 @@ def _thread(cfg: Config, external: bool) -> Part:
     return (thread & Cylinder(d, L, align=BOTTOM)) - cut
 
 
+@per_config
 def drive_ring(cfg: Config = CFG) -> Part:
     """Wear ring, ring frame z = 0 at the ring bottom. Print flange down."""
     dr, ps = cfg.drive_ring, cfg.plate_seat
@@ -213,6 +215,7 @@ def drive_ring(cfg: Config = CFG) -> Part:
     return body
 
 
+@per_config
 def cap(cfg: Config = CFG) -> Part:
     """Cap, frame z = 0 at its clamp face. Modelled face down, print top down."""
     cp, dr = cfg.cap, cfg.drive_ring
@@ -250,6 +253,7 @@ def _upper(cfg: Config) -> Part:
     return body
 
 
+@per_config
 def carrier(cfg: Config = CFG) -> Part:
     """Printed carrier for the Pololu 2693 hub."""
     c, mh = cfg.clutch, cfg.metal_hub
@@ -268,6 +272,7 @@ def _pocket_r(cfg: Config) -> float:
     return cfg.spring.bore_d / 2
 
 
+@per_config
 def disc(cfg: Config = CFG) -> Part:
     c = cfg.clutch
     body = Cylinder(c.disc_d / 2, c.disc_t, align=BOTTOM)
@@ -277,6 +282,7 @@ def disc(cfg: Config = CFG) -> Part:
     return body
 
 
+@per_config
 def knob(cfg: Config = CFG) -> Part:
     c = cfg.clutch
     body = Cylinder(c.knob_d / 2, c.knob_t, align=BOTTOM)
@@ -295,6 +301,7 @@ def gauge_slide(cfg: Config = CFG) -> float:
     return mh.boss_d / 2 + 1 + mh.flange_d / 2 + cfg.print.fit
 
 
+@per_config
 def hub_gauge(cfg: Config = CFG) -> Part:
     """Fork as thick as the floor gap under the hub boss, open toward -x around the shaft, a handle up past the deck
     beside the hub flange, `gauge_grip` above the plate bottom. Lay it on the cup floor, push the hub down onto it, tighten the set screws, slide it out

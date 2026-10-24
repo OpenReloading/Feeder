@@ -3,16 +3,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Case Feeder Assembly</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: one workbench column, viewer on top, controls and the numbered assembly sequence under it, side by side when wide */
 :root {
   --bg: #eef1f0; --panel: #ffffff; --fg: #18211f; --muted: #5a6764; --line: #cfd7d4; --accent: #1f7a6d; --accent-fg: #ffffff;
   --stage: #e3e8e6;
-  --f-display: "Saira Semi Condensed", "Arial Narrow", sans-serif;
-  --f-body: "IBM Plex Sans", system-ui, sans-serif;
-  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --f-display: system-ui, sans-serif;
+  --f-body: system-ui, sans-serif;
+  --f-mono: ui-monospace, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #121817; --panel: #1a2220; --fg: #e3ebe8; --muted: #93a39f; --line: #2c3835; --accent: #4fc2ae; --accent-fg: #0d1513; --stage: #1d2624; color-scheme: dark } }
@@ -59,7 +57,6 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
 .card p { margin: 0; max-width: 90ch }
 .card small { font-family: var(--f-mono); font-size: 12px; color: var(--muted) }
 [hidden] { display: none !important }
-.note { font-size: 13px; color: var(--muted); max-width: 90ch; margin: 0 }
 </style>
 
 <div class="wrap">
@@ -110,7 +107,6 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
     <ol class="steps" id="steps"></ol>
   </div>
 
-  <p class="note" id="note"></p>
 </div>
 
 <!-- LIBS -->
@@ -182,7 +178,6 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
   const shown = new Set([...INFO.parts.map(p => p.kind), "brass", "spring"]);
   for (const f of FS) shown.add(f.kind);
   document.getElementById("legend").innerHTML = Object.entries(MATS).filter(([k]) => shown.has(k)).map(([, m]) => m).map(m => `<div><i style="background:#${m.c.toString(16).padStart(6, "0")}"></i>${m.label}</div>`).join("");
-  document.getElementById("note").textContent = INFO.note;
   const stepsEl = document.getElementById("steps");
   stepsEl.innerHTML = STEPS.map(s => `<li tabindex="0"><div><b>${s.t}</b>${s.d}${s.f.length ? `<small>${s.f.join(" · ")}</small>` : ""}</div></li>`).join("");
 

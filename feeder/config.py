@@ -138,12 +138,16 @@ class CasePlate:
     bottom_chamfer: float = 0.5  # pocket bottom edge, so a case base does not hang on it
     channel_len: float = 25.0  # pickup channel on the top face, from each pocket toward the centre
     channel_depth: float = 1.5  # at the pocket, rising to the top face at the inner end. Shallow: the pocket wall still holds upright cases
-    rib_count: int = 6  # broad half-round radial ribs that stir the pile
+    ribs: str = "low"  # "low": rib_count broad half-round ribs stir the pile. "per_pocket": a ridge between every two pockets, rising toward them (A/B test)
+    rib_count: int = 6
     rib_r: float = 5.0  # rib radius
     rib_h: float = 3.0  # rib height above the top face
-    lift_tabs: int = 2  # upright tabs beside the cap: pinch both to lift the plate off the ring
-    lift_t: float = 4.0
-    lift_len: float = 20.0
+    ridge_h: float = 6.0  # per_pocket ridge height above the top face at its outer end
+    ridge_w: float = 3.0
+    pull_len: float = 10.0  # eye beside the cap recess for a split key ring: pull the plate off the ring hex by it
+    pull_t: float = 5.0
+    pull_h: float = 7.0  # eye top above the top face
+    pull_hole_d: float = 3.0  # for the ring wire, up to about 2 mm
     wall_gap: float = 1.25  # radial gap from plate to track band, room for a large printed plate that is not round
     flatness: float = 0.3  # peak to valley of a printed plate bottom that is not flat, half each way
     drag_mass: float = 1.0  # kg brass on the plate at the design fill, the most the load checks allow
@@ -354,21 +358,24 @@ GENERIC_8MM_FLANGE = MetalHub(
 
 @dataclass(frozen=True)
 class Electronics:
-    """Motor driver limit, and the box on the stand tube below the tilt clamp: own slit collar (the tilt clamp's
-    screws), panel parts in its walls, modules on the lid underneath. Panel hole sizes from seller listings,
-    unverified: measure on delivery."""
+    """Motor driver limit, and the box on the stand tube below the tilt clamp, on the exit side: upright, controls
+    in the front lid away from the tube, its own slit collar (the tilt clamp's screws). Panel hole and module sizes
+    from seller listings, unverified: measure on delivery."""
 
     current_limit_torque: float = 0.6  # Nm the driver current limit allows, calibrate with a scale test
     box_gap: float = 10.0  # below the tilt clamp
-    box_inner: tuple = (110.0, 70.0, 50.0)  # x, y away from the tube, z: roomy for a PWM module and a relay module up to about 70 x 50 each with their wiring, estimate
+    box_inner: tuple = (80.0, 50.0, 120.0)  # x across, y away from the tube, z along it: PWM board on its knob in the upper lid, timer relay on the back wall below, estimate
     box_wall: float = 2.4  # thin enough for the panel threads (6 mm and longer, unverified)
     lid_t: float = 3.0
-    lid_screw_size: str = "M3"  # ISO 4762 from below into heat-set inserts in the box corners
-    tie_slot: tuple = (4.0, 2.0)  # zip-tie slot, for ties up to 3.6 mm wide
-    tie_pitch: float = 20.0  # lid slot grid: two rows across the lid, a module goes between any two slots of a row
-    front_holes: tuple = (("toggle switch", 6.2), ("PWM knob", 7.2), ("DC jack", 11.0))  # -y face, operator side: MTS-102 6 mm, pot M7, DC-022B 5.5 x 2.1 (unverified)
-    side_holes: tuple = (("motor", 12.2), ("sensor", 12.2))  # +x face: GX12 2-pin (motor) and 3-pin (sensor), 12 mm (unverified). Different pin counts: the motor plug cannot go in the sensor socket
-    anchor_l: float = 12.0  # zip-tie tab on the +x face at the top, motor and sensor cables tied to it below their plugs
+    lid_screw_size: str = "M3"  # ISO 4762 through the lid into heat-set inserts in the box corners
+    collar_h: float = 40.0  # slit collar at the box top, on the tube
+    collar_screw_size: str = "M3"  # ISO 4762 from inside the box through the back wall into inserts in the collar
+    relay_holes: tuple = (44.0, 24.0)  # timer relay module mounting holes, x and z spacing (unverified, measure on delivery)
+    relay_pcb_t: float = 1.6
+    standoff_h: float = 8.0  # relay board above the back wall, room for its solder joints
+    relay_hole_depth: float = 7.7  # insert hole in the standoff, 1 deeper than usual so the M3 x 8 does not bottom out
+    front_holes: tuple = (("PWM knob", 7.2), ("toggle switch", 6.2), ("DC jack", 11.0))  # lid, top to bottom: pot M7, MTS-102 6 mm, DC-022B 5.5 x 2.1 (unverified)
+    side_holes: tuple = (("motor", 12.2), ("sensor", 12.2))  # +x face, low: GX12 2-pin (motor) and 3-pin (sensor), 12 mm (unverified). Different pin counts: the motor plug cannot go in the sensor socket
 
 
 @dataclass(frozen=True)
