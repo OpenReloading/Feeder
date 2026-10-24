@@ -26,6 +26,10 @@ theme:
 # header facts (latest tag, stars, forks): fetched from the GitHub API at build time, not in the browser
 hooks:
   - hooks/repo_facts.py
+  - hooks/configurator_files.py   # build/configurator/ (build.py --configurator) into site/configurator/data/
+
+extra_javascript:
+  - javascripts/configurator.js
 
 # build/guide/buildguide.json and guide/generated/ come from build.py --guide
 plugins:
@@ -39,6 +43,7 @@ markdown_extensions:
 
 nav:
   - Introduction: index.md
+  - Configurator: configurator.md
   - BOM: bom.md
   - Assembly: assembly.md
   - Wiring: wiring.md
