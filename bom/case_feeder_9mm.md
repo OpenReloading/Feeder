@@ -17,7 +17,7 @@ Default: split body, Pololu 2693 metal hub, simple PWM speed controller, no micr
 | `body_wall_0`, `body_wall_1`, `body_wall_2` | 1 each (split `arcs`) |
 | `body_half_0`, `body_half_1` | 1 each, instead of core and walls (split `halves`) |
 | `body` | 1, instead of core and walls (split `one_piece`, 233.0 mm plate) |
-| `body_extender_0`, `body_extender_1` | 1 each, optional, 60 mm more wall at the low side |
+| `body_extender` | 1, optional, 60 mm more wall over a 150 deg arc on the low side |
 | `body_track_gate` | 1 |
 | `body_exit_insert` | 1 |
 | `drop_tube` | 1 |
@@ -50,8 +50,6 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 |---|---|---|---|
 | CNC Kitchen heat-set insert M3 x 5.7 | 9 | body core, wall joints | split `arcs`. `halves`: 6 in the seam posts of half 1. `one_piece`: none |
 | ISO 4762 M3 x 12 | 9 | wall to core | split `arcs`. `halves`: 6 across the seam posts. `one_piece`: none |
-| CNC Kitchen heat-set insert M3 x 5.7 | 4 | extender seam posts | only with the extender, in `body_extender_1` |
-| ISO 4762 M3 x 12 | 4 | extender halves | only with the extender |
 | ISO 10642 M3 x 12 | 4 | extender to wall | only with the extender, from inside the bowl, head flush |
 | ISO 4032 M3 nut | 4 | extender to wall | only with the extender, captive in the ribs outside the sleeve |
 | CNC Kitchen heat-set insert M5 x 9.5 | 4 | body core, mount | |

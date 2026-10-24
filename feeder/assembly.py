@@ -227,16 +227,11 @@ def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fast
                 screw(b.joint_screw_size, b.joint_screw_length, Rot(Z=ang) * Pos(body.post_axis_r(cfg), s * (f / 2 + head), zz) * Rot(X=-90 * s), "body_half_0")
                 insert(b.joint_screw_size, Rot(Z=ang) * Pos(body.post_axis_r(cfg), -s * f / 2, zz) * Rot(X=-90 * s), "body_half_1")
     if b.extender_h:
-        for ang, zz in body.extender_screw_z(cfg):
-            s = dict(seam_ends)[ang]
-            screw(b.joint_screw_size, b.joint_screw_length, Rot(Z=ang) * Pos(body.extender_post_axis_r(cfg), s * (f / 2 + head), zz) * Rot(X=-90 * s), "body_extender_0")
-            insert(b.joint_screw_size, Rot(Z=ang) * Pos(body.extender_post_axis_r(cfg), -s * f / 2, zz) * Rot(X=-90 * s), "body_extender_1")
         size, length = b.joint_screw_size, body.extender_wall_screw_length(cfg)
         nut = fasteners.nut_data(size)
         for ang, zz in body.extender_wall_screws(cfg):  # countersunk from inside the bowl into a nut captive in the extender
-            host = f"body_extender_{_half(math.cos(math.radians(ang)), math.sin(math.radians(ang)), cfg)}"
-            items.append((_nut_name(size), "nut", _nut(size, nut["s"], nut["m"]), body.extender_nut_seat(ang, zz, cfg), host, 0))
-            items.append((f"ISO 10642 {size} x {length:g}", "screw", _countersunk_screw(size, length), body.extender_screw_seat(ang, zz, cfg), host, 1))
+            items.append((_nut_name(size), "nut", _nut(size, nut["s"], nut["m"]), body.extender_nut_seat(ang, zz, cfg), "body_extender", 0))
+            items.append((f"ISO 10642 {size} x {length:g}", "screw", _countersunk_screw(size, length), body.extender_screw_seat(ang, zz, cfg), "body_extender", 1))
     carrier = "slip_clutch_carrier_metal_hub"
     nut = fasteners.nut_data(mh.hole_size)
     for p in sc._around(mh.screws, mh.hole_pcd / 2):
