@@ -96,6 +96,8 @@ def wall_top(y: float, extender: bool, cfg: Config = CFG) -> float:
     if not extender:
         return top
     z, R = layout.levels(cfg), layout.bowl_r(cfg)
+    if y + R > b.extender_reach(cfg):  # the extender is an arc over the low side
+        return top
     return max(top, z.wall_top + cfg.body.extender_h - (y + R) * math.tan(math.radians(b.wall_slant(cfg))))
 
 

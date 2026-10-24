@@ -172,7 +172,7 @@ def _mates(cfg) -> dict[str, tuple[str, ...]]:
         "motor_shaft": ("motor",),
         **{n: ("motor",) for n in main},
         **{f"body_wall_{i}": ("body_core",) for i in range(B.wall_segments) if split == "arcs"},
-        **{f"body_extender_{i}": walls for i in range(2) if B.extender_h},
+        **({"body_extender": walls} if B.extender_h else {}),
         "body_track_gate": ("body_exit_insert",),
         "body_exit_insert": main,
         "pololu_hub": ("motor_shaft",),
@@ -264,17 +264,14 @@ def test_halves_seam_screws_pass_both_posts():
     assert layout.levels(cfg).bottom + b.post_h(cfg) < layout.levels(cfg).wall_top - B.extender_lap  # posts stay under the extender sleeve
 
 
-def test_extender_halves_screw_into_a_closed_ring():
-    e0, e1 = b.extender(0), b.extender(1)
-    head = b.post_lengths()[0]
-    r, d = b.extender_post_axis_r(), fasteners.nominal_d(B.joint_screw_size)
-    assert len(b.extender_screw_z()) == 2 * B.extender_screws
-    for ang, z in b.extender_screw_z():
-        s0 = 1 if ang == B.halves_seam else -1
-        centre = s0 * (FIT / 2 + head - B.joint_screw_length / 2)
-        screw = Rot(Z=ang) * Pos(r, centre, z) * Rot(X=90) * Cylinder(d / 2, B.joint_screw_length)
-        for e in (e0, e1):
-            assert screw.distance_to(e) < 1 and _overlap_volume(screw, e) < 1e-3, (ang, z)  # in the holes of both halves
+def test_extender_arc_stands_only_where_level_brass_at_the_steepest_tilt_clears_the_wall():
+    z, R = layout.levels(), layout.bowl_r()
+    half = b.extender_half_angle()
+    assert 0 < half < 90
+    u = R * (1 - math.cos(math.radians(half)))  # y + R at the arc ends
+    assert u == pytest.approx(b.extender_reach())
+    brass = z.wall_top + B.extender_h - u * math.tan(math.radians(CFG.mount.tilt_range[1]))
+    assert brass == pytest.approx(b.wall_top_at(-R + u), abs=0.05)  # level brass meets the wall top where the arc ends
     assert B.extender_lap >= 15
 
 
@@ -313,7 +310,7 @@ def test_wall_top_is_open_on_the_high_side_and_holds_level_brass():
     for y in range(-120, 121, 20):
         assert world(y, b.wall_top_at(y)) >= world(-R, z.wall_top) - 1e-6  # brass level with the low-side top stays in
         x = math.sqrt(R ** 2 - y ** 2) + B.wall_t / 2
-        top = (ring & Pos(x, y, 0) * Box(0.5, 0.5, 1000)).bounding_box().max.Z
+        top = (ring & Pos(x, y, 0) * Box(0.5, 0.05, 1000)).bounding_box().max.Z  # thin along y: the top falls with y, a wide probe reads its high edge
         assert top == pytest.approx(b.wall_top_at(y), abs=0.2), y  # the wall solid follows the profile
 
 
@@ -333,9 +330,10 @@ def test_extender_is_screwed_to_the_wall_through_the_sleeve_lap():
     head = fasteners.countersunk_screw(size, length).screw_data["dk"] / 2 + CFG.fasteners.head_fit - fasteners.clearance_d(size) / 2
     assert B.wall_t - head >= MW / 2  # countersink depth leaves wall behind it
     screws = b.extender_wall_screws()
-    assert len(screws) == 2 * B.extender_wall_screws
-    R = layout.bowl_r()
+    assert len(screws) == B.extender_wall_screws
+    R, half = layout.bowl_r(), b.extender_half_angle()
     for ang, z in screws:
+        assert abs(ang + 90) < half  # on the arc
         top = b.wall_top_at(R * math.sin(math.radians(ang)))
         assert top - B.extender_lap + 4 <= z <= top - 4  # inside the sleeve lap
         for seam in (B.halves_seam, B.halves_seam + 180):
@@ -344,10 +342,10 @@ def test_extender_is_screwed_to_the_wall_through_the_sleeve_lap():
 
 def test_extender_sits_on_the_wall_top_and_prints_on_its_flat_top():
     ring = b._wall_ring(CFG)
-    for i in range(2):
-        ext = b.extender(i)
-        assert (ext & ring).volume < 1e-3
-        assert (Pos(0, 0, -0.1) * ext & ring).volume > 10  # lowered 0.1 it meets the wall top
-        bed = printing.on_bed(f"body_extender_{i}", ext)
-        assert printing.fits(bed)
-        assert _unsupported(Pos(0, 0, -0.013) * bed) == []
+    ext = b.extender()
+    assert ext.is_valid and len(ext.solids()) == 1
+    assert (ext & ring).volume < 1e-3
+    assert (Pos(0, 0, -0.1) * ext & ring).volume > 10  # lowered 0.1 it meets the wall top
+    bed = printing.on_bed("body_extender", ext)
+    assert printing.fits(bed)
+    assert _unsupported(Pos(0, 0, -0.013) * bed) == []
