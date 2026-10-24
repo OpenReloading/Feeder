@@ -93,3 +93,11 @@ def test_ridge_plate_has_a_ridge_between_every_two_pockets_rising_to_the_pocket_
 def test_plate_fits_inside_the_band():
     assert layout.plate_r() + P.wall_gap <= layout.band_inner_r()
     assert layout.band_inner_r() + CFG.track.band_t + CFG.print.fit <= layout.bowl_r() + 1e-9
+
+
+def test_pull_eye_keeps_the_minimum_wall_above_its_hole(plate):
+    P = CFG.case_plate
+    h = layout.plate_h(CFG)
+    tip = h + P.pull_h - CFG.print.min_wall  # highest the roof tip may reach
+    probe = Rot(Z=cp.pocket_angles()[0]) * Pos(cp._inner_r(CFG) + P.pull_len / 2, 0, tip + 0.05) * Box(0.2, P.pull_t, 0.1)
+    assert (plate & probe).volume > 0.9 * 0.2 * P.pull_t * 0.1  # solid from the minimum wall up

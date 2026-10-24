@@ -88,7 +88,7 @@ def _pull_eye(cfg: Config, h: float) -> Part:
     """Eye along +x outside the cap recess, its hole across (teardrop, prints without supports)."""
     cp = cfg.case_plate
     eye = Pos(_inner_r(cfg), 0, h - 1) * Box(cp.pull_len, cp.pull_t, cp.pull_h + 1, align=(Align.MIN, Align.CENTER, Align.MIN))
-    z = h + cp.pull_h - cfg.print.min_wall - cp.pull_hole_d / 2
+    z = h + cp.pull_h - cfg.print.min_wall - cp.pull_hole_d / math.sqrt(2)  # the teardrop roof tip is above the hole centre by d / sqrt(2)
     return eye - Pos(_inner_r(cfg) + cp.pull_len / 2, -cp.pull_t, z) * Rot(Z=90) * teardrop(cp.pull_hole_d, 2 * cp.pull_t)
 
 
