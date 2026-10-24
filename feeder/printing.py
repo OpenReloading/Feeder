@@ -11,7 +11,7 @@ from feeder.parts import body
 
 UPSIDE_DOWN = {"slip_clutch_cap", "body_track_gate", "body_exit_insert"}
 TOP_DOWN_SLANTED = {"body_extender"}  # flat top falls at the wall slant
-TURNED = {"electronics_box": Rot(X=-90), "electronics_lid": Rot(X=90)}  # box on its back wall, lid on its outer face
+TURNED = {"electronics_box": Rot(X=-90), "electronics_box_left": Rot(X=-90), "electronics_lid": Rot(X=90)}  # box on its back wall, lid on its outer face
 
 
 def fits(part: Part, cfg: Config = CFG) -> bool:

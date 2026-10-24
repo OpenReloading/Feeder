@@ -373,8 +373,8 @@ class PanelPart:
 
 @dataclass(frozen=True)
 class Electronics:
-    """Motor driver limit, and the box on the stand tube below the tilt clamp, on the exit side: upright, controls
-    in the front lid away from the tube, its own slit collar (the tilt clamp's screws). Panel hole and module sizes
+    """Motor driver limit, and the box beside the stand tube below the tilt clamp: upright, controls in the front
+    lid toward the user (the low side), its own slit clamp on the tube (the tilt clamp's screws). Panel hole and module sizes
     from seller listings, unverified: measure on delivery."""
 
     current_limit_torque: float = 0.6  # Nm the driver current limit allows, calibrate with a scale test
@@ -383,8 +383,7 @@ class Electronics:
     box_wall: float = 2.4  # thin enough for the panel threads (6 mm and longer, unverified)
     lid_t: float = 3.0
     lid_screw_size: str = "M3"  # ISO 4762 through the lid into heat-set inserts in the box corners
-    collar_h: float = 40.0  # slit collar at the box top, on the tube
-    collar_screw_size: str = "M3"  # ISO 4762 from inside the box through the back wall into inserts in the collar
+    clamp_h: float = 40.0  # slit clamp on the tube in the box side wall, at the box top
     relay_holes: tuple = (44.0, 24.0)  # timer relay module mounting holes, x and z spacing (unverified, measure on delivery)
     relay_pcb_t: float = 1.6
     standoff_h: float = 8.0  # relay board above the back wall, room for its solder joints
