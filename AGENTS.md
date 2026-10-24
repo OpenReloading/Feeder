@@ -16,7 +16,12 @@ Parametric brass and bullet collator for reloading, built in build123d with metr
 - `feeder/config.py` holds every dimension and option; part modules in `feeder/parts/` use only config values and `feeder/lib/` features, no literal dimensions.
 - Each part module exposes `PARTS = {name: builder}`; `build.py` exports each to `build/<name>.stl` and `.step`.
 - Critical dimensions carry a one-line source note in `config.py`.
-- `reference/` is local research material, excluded in `.git/info/exclude`. Tracked files never depend on it and never copy from it. Dimensions come from standards, datasheets, caliber data and print tolerances.
+- `reference/` is a local folder, excluded in `.git/info/exclude`. Tracked files never depend on it and never copy from it. Dimensions come from standards, datasheets, caliber data and print tolerances.
+
+## Branches
+
+- `develop` is the default branch. Branch from it and open pull requests against it (squash merge).
+- `main` holds releases and is the Pages source. It changes only by a pull request from `develop`, merged with a merge commit.
 
 ## Agent skills
 

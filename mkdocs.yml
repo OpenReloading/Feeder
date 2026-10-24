@@ -1,12 +1,15 @@
 site_name: Feeder 9mm case feeder
 site_url: https://openreloading.github.io/Feeder/
 site_description: Parametric brass collator for reloading. Build guide, BOM and assembly steps generated from feeder/config.py.
+repo_url: https://github.com/OpenReloading/Feeder
+repo_name: OpenReloading/Feeder
 copyright: MIT licence
 docs_dir: guide
 exclude_docs: generated/steps.md   # snippet of index.md
 
 theme:
   name: material
+  custom_dir: overrides   # partials/source.html: header facts rendered at build time
   font: false   # system fonts: no requests to Google Fonts
   palette:
     - media: "(prefers-color-scheme: light)"
@@ -19,6 +22,10 @@ theme:
       primary: blue grey
       accent: deep orange
       toggle: {icon: material/weather-sunny, name: Light mode}
+
+# header facts (latest tag, stars, forks): fetched from the GitHub API at build time, not in the browser
+hooks:
+  - hooks/repo_facts.py
 
 # build/guide/buildguide.json and guide/generated/ come from build.py --guide
 plugins:
@@ -34,4 +41,6 @@ nav:
   - Introduction: index.md
   - BOM: bom.md
   - Assembly: assembly.md
+  - Wiring: wiring.md
   - Tilt and capacity: tilt.md
+  - Troubleshooting: troubleshooting.md
