@@ -1,23 +1,26 @@
 """Drop tube: continues the exit insert's spigot to a clear PVC hose, with a port for a tube-full sensor.
 
-- Socket over the spigot (fit `print.fit`) with a stop shoulder at the spigot end and one thumb screw into a
-  heat-set insert pressing on the spigot, so the exit insert comes out with no tools.
+- Bayonet socket over the spigot (fit `print.fit`): each of the spigot's two lugs enters an axial slot from the mouth,
+  turns `twist` along a groove and drops `lock_lift` into a notch at the stop. The stop fixes the sensor window; the
+  tube hangs on the notch floor, so gravity and hose pull hold it, and lifting the tube out of the notch turns it off.
+  A stop shoulder at the spigot end closes the socket.
 - Straight section with the sensor boss. The sensor sits in a plate between two M18x1 lock nuts: the
   inner nut in a slot loaded from the side, the outer nut on the plate. A `window_t` wall closes the bore.
 - Barb for the hose, the bore of the tube continues through it.
 
-Frame: print orientation, socket mouth on the bed at z = 0, +z along the case path, sensor on +x, screw
-boss on -x (the thumb screw head stays clear of the body bottom for the fingers). `placement` puts it on the
-body's spigot. The inner diameter never shrinks along the path: spigot bore, tube bore (wider by two fits), hose.
+Frame: print orientation, socket mouth on the bed at z = 0, +z along the case path, sensor on +x, the wide lug's
+slot on +x. `placement` puts it on the body's spigot (hanging in the notch). The inner diameter never shrinks along
+the path: spigot bore, tube bore (wider by two fits), hose.
 """
 
 from dataclasses import dataclass
 
-from build123d import Align, Box, Cone, Cylinder, Location, Part, Plane, Polygon, Pos, RegularPolygon, Rot, extrude
+import math
+
+from build123d import Align, Axis, Box, Cone, Cylinder, Location, Part, Plane, Polygon, Pos, Rot, extrude, revolve
 
 from feeder.config import CFG, Config
 from feeder.lib.cache import per_config
-from feeder.lib import fasteners
 from feeder.lib.features import teardrop
 from feeder.parts import body, layout
 from feeder.parts import slip_clutch as sc
@@ -42,17 +45,18 @@ class Dims:
     sensor_z: float
     boss_top: float
     tip: float  # outlet end
-    screw_z: float
-    screw_boss_t: float  # from the socket cavity wall to the boss face
-    screw_boss_r: float
+    r_groove: float  # outer wall of the slots, groove and notch
+    floor_z: float  # groove floor at the lug root radius, the lug hangs `lock_lift` below it in the notch
+    roof_z: float  # top of the groove at its outer wall
 
 
 def dims(cfg: Config = CFG) -> Dims:
     e, d, f = cfg.exit, cfg.drop_tube, cfg.print.fit
-    ins = cfg.fasteners.inserts[d.screw_size]
     r_spigot = body.bore_d(cfg) / 2 + e.wall
     r_socket = r_spigot + f
-    depth = e.spigot_len + f
+    r_groove = r_spigot + d.lug_h + f
+    floor_z = d.lug_z + d.lock_lift
+    depth = e.spigot_len + f + d.lock_lift  # the tube hangs `lock_lift` + a fit off the shoulder
     socket_top = depth + e.wall
     r_bore = body.bore_d(cfg) / 2 + f
     window_x = r_bore + d.window_t
@@ -61,11 +65,10 @@ def dims(cfg: Config = CFG) -> Dims:
     half_h = d.nut_af / 2 + cfg.fasteners.head_fit + d.boss_wall
     sensor_z = socket_top + half_h + (plate_x - r_bore)  # the 45 deg underside of the boss starts at the socket top
     boss_top = sensor_z + half_h
-    boss_t = ins.hole_depth + cfg.print.min_wall / 2
     return Dims(
         r_spigot=r_spigot,
         r_socket=r_socket,
-        r_socket_out=r_socket + e.wall,
+        r_socket_out=r_groove + e.wall,
         depth=depth,
         socket_top=socket_top,
         r_bore=r_bore,
@@ -78,9 +81,9 @@ def dims(cfg: Config = CFG) -> Dims:
         sensor_z=sensor_z,
         boss_top=boss_top,
         tip=max(boss_top + d.barb_len, sensor_z + layout.caliber(cfg).case_length + d.sensor_margin),  # long cases: longer tube under the barb
-        screw_z=depth / 2,
-        screw_boss_t=boss_t,
-        screw_boss_r=(ins.hole_d / 2 + ins.min_wall) * 2**0.5,
+        r_groove=r_groove,
+        floor_z=floor_z,
+        roof_z=floor_z + d.lug_h + d.lug_tip + 2 * f,
     )
 
 
@@ -88,12 +91,6 @@ def bore_profile(cfg: Config = CFG) -> list[tuple[float, float]]:
     """(z where it starts, inner diameter) along the case path: spigot bore, tube bore, hose."""
     k = dims(cfg)
     return [(0.0, body.bore_d(cfg)), (k.depth, 2 * k.r_bore), (k.tip, cfg.drop_tube.hose_id)]
-
-
-def screw_mouth(cfg: Config = CFG) -> Location:
-    """Set screw insert mouth on the boss face, +z out of the hole, drop tube frame."""
-    k = dims(cfg)
-    return Pos(-k.r_socket - k.screw_boss_t, 0, k.screw_z) * Rot(Y=-90)
 
 
 def sensor_frame(cfg: Config = CFG) -> Location:
@@ -129,17 +126,48 @@ def _barb(k: Dims, cfg: Config) -> Part:
     return solid
 
 
+def _plan(angle: float, length: float, width: float) -> Part:
+    """Tall slab along the azimuth `angle` deg from the axis, `width` across."""
+    return Rot(Z=angle) * Box(length, width, 40, align=(Align.MIN, Align.CENTER, Align.CENTER))
+
+
+def slot_angles(cfg: Config = CFG) -> tuple[float, float]:
+    """(slot azimuth, stop azimuth) of the wide lug's L slot in the tube frame, deg. The narrow lug's lies 180 deg on."""
+    return cfg.drop_tube.twist_dir * cfg.drop_tube.twist, 0.0
+
+
+def _bayonet(k: Dims, cfg: Config) -> Part:
+    """What the socket wall gives up for the lugs: per lug an axial slot from the mouth, a groove over the twist with a
+    45 deg floor and a 45 deg roof (both print without support) and a notch below the floor at the stop. The
+    groove is the lug's underside and top shifted over the lug's travel, one fit of play all round."""
+    d, f = cfg.drop_tube, cfg.print.fit
+    r_in, r_out = k.r_socket - 0.3, k.r_groove
+    zf = k.floor_z
+    pts = [(r_in, zf + r_in - k.r_spigot), (r_out, zf + r_out - k.r_spigot), (r_out, k.roof_z), (r_in, k.roof_z + r_out - r_in)]
+    ring = revolve(Plane.XZ * Polygon(*pts, align=None), axis=Axis.Z)
+    notch = Pos(0, 0, -d.lock_lift) * ring
+    far = 2 * r_out
+    cut = None
+    for turn, w in zip((0, 180), d.lug_w):
+        a_in, a_stop = (a + turn for a in slot_angles(cfg))
+        wc = w + 2 * f
+        rays = [(far * math.cos(math.radians(a)), far * math.sin(math.radians(a))) for a in (a_in, a_stop)]
+        sweep = extrude(Polygon((0, 0), *rays, align=None), 20, both=True)
+        plan = sweep + _plan(a_in, far, wc) + _plan(a_stop, far, wc)
+        slot = Pos(0, 0, -1) * Cylinder(r_out, k.roof_z + 1, align=BOTTOM) & _plan(a_in, far, wc)
+        piece = (ring & plan) + (notch & _plan(a_stop, far, wc)) + slot
+        cut = piece if cut is None else cut + piece
+    return cut
+
+
 @per_config
 def drop_tube(cfg: Config = CFG) -> Part:
     d, f = cfg.drop_tube, cfg.print.fit
     k = dims(cfg)
-    ins = cfg.fasteners.inserts[d.screw_size]
     part = Cylinder(k.r_socket_out, k.socket_top, align=BOTTOM)
     part += Cylinder(k.r_tube, k.tip - d.barb_len, align=BOTTOM)
     part += _boss(k, cfg)
     part += _barb(k, cfg)
-    diamond = Plane(origin=(0, 0, k.screw_z), x_dir=(0, 1, 0), z_dir=(-1, 0, 0)) * RegularPolygon(k.screw_boss_r, 4)
-    part += extrude(diamond, k.r_socket + k.screw_boss_t)
 
     part -= Cylinder(k.r_socket, k.depth, align=BOTTOM)
     part -= Pos(0, 0, k.depth) * Cone(k.r_socket, k.r_bore, k.r_socket - k.r_bore, align=BOTTOM)  # 45 deg stop shoulder, prints without supports
@@ -150,8 +178,7 @@ def drop_tube(cfg: Config = CFG) -> Part:
     r = d.sensor_hole_d / 2
     hole = teardrop(d.sensor_hole_d, d.plate_t + 2) & Pos(0, 0, -r) * Box(d.plate_t + 2, 2 * r, r + roof, align=(Align.MIN, Align.CENTER, Align.MIN))
     part -= Pos(k.window_x + k.slot_h - 1, 0, k.sensor_z) * hole
-    part -= screw_mouth(cfg) * fasteners.insert_hole(d.screw_size)
-    part -= screw_mouth(cfg) * Pos(0, 0, -ins.hole_depth) * fasteners.clearance_hole(d.screw_size, k.screw_boss_t - ins.hole_depth + 1)
+    part -= _bayonet(k, cfg)
     return part
 
 

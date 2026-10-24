@@ -75,8 +75,6 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 
 | Item | Qty | Used in | Note |
 |---|---|---|---|
-| CNC Kitchen heat-set insert M3 x 5.7 | 1 | drop tube | |
-| DIN 464 M3 x 10 thumb screw | 1 | drop tube on the spigot, hand tight | knurled, high type ([DIN 464 sizes](https://www.fasten.it/en/norms/norm/din_464)), M3 x 10 stock unverified |
 | Inductive sensor LJ18A3-8-Z/AX, M18x1, NPN NC, 6 to 36 V (unverified) | 1 | drop tube, tube-full | body (65 mm long) and lock nuts unverified (24 AF x 4) |
 | Lock nut M18 x 1 | 2 | sensor in the drop tube | one each side of the printed plate, supplied with the sensor. 24 AF x 4 unverified |
 | Clear PVC hose 14 mm ID x 18 mm OD | length to the press | drop tube barb | unverified |

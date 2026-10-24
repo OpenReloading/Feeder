@@ -28,7 +28,7 @@ Band, gate and exit insert print top down. Skirt, no brim: a brim takes the band
 
 import math
 
-from build123d import Align, Box, Circle, Cylinder, Part, Plane, Polygon, Pos, Rot, Vector, extrude, loft
+from build123d import Align, Axis, Box, Circle, Cylinder, Part, Plane, Polygon, Pos, Rot, Vector, extrude, loft, revolve
 from shapely.geometry import MultiPoint
 from shapely.geometry.polygon import orient
 
@@ -117,6 +117,27 @@ def _funnel(cfg: Config, grow: float, up: float = 0.0) -> Part:
     return solid
 
 
+def spigot_lugs(cfg: Config = CFG, grow: float = 0.0) -> Part:
+    """Bayonet lugs of the spigot, spigot frame (z along the spigot from its start): the wide one on +x, the narrow
+    one opposite, each with a 45 deg underside toward the body. `grow` widens them for plan outlines."""
+    d = cfg.drop_tube
+    rs = bore_d(cfg) / 2 + cfg.exit.wall
+    z, h = d.lug_z, d.lug_h + grow
+    section = Polygon((rs - 0.5, z), (rs, z), (rs + h, z + h), (rs + h, z + h + d.lug_tip), (rs - 0.5, z + h + d.lug_tip), align=None)
+    ring = revolve(Plane.XZ * section, axis=Axis.Z)
+    lugs = None
+    for turn, w in zip((0, 180), d.lug_w):
+        slab = Rot(Z=turn) * Box(rs + h + 1, w + 2 * grow, z + 2 * h + d.lug_tip, align=(Align.MIN, Align.CENTER, Align.MIN))
+        lug = ring & slab
+        lugs = lug if lugs is None else lugs + lug
+    return lugs
+
+
+def _spigot_frame(cfg: Config) -> Plane:
+    o, d = outlet(cfg)
+    return Plane(origin=o, x_dir=(1, 0, 0), z_dir=d)
+
+
 @per_config
 def exit_insert(cfg: Config = CFG) -> Part:
     e, f = cfg.exit, cfg.print.fit
@@ -126,6 +147,7 @@ def exit_insert(cfg: Config = CFG) -> Part:
     body += Pos(0, 0, z.deck_top - e.seat_t) * extrude(_exit_outline(cfg, e.seat_w - f), e.seat_t)  # ledge in the deck recess
     body = body & Cylinder(layout.bowl_r(cfg) - f, 1000)
     body += _funnel(cfg, e.wall) - Pos(0, 0, z.bottom) * Box(1000, 1000, 1000, align=BOTTOM)  # funnel end and spigot below the body
+    body += _spigot_frame(cfg) * spigot_lugs(cfg)
     body -= _funnel(cfg, 0.0)
     return body
 
@@ -139,7 +161,7 @@ def _funnel_plan(cfg: Config) -> list[tuple[float, float]]:
     if key not in _outline_pts:
         pts = []
         for s in layout.plate_sets(cfg):
-            verts, _ = _funnel(s, s.exit.wall + s.print.fit).tessellate(0.05)
+            verts, _ = (_funnel(s, s.exit.wall + s.print.fit) + _spigot_frame(s) * spigot_lugs(s, s.print.fit)).tessellate(0.05)
             pts += [(v.X, v.Y) for v in verts]
         _outline_pts[key] = pts
     return _outline_pts[key]
