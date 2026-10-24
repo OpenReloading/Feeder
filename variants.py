@@ -58,7 +58,7 @@ BOM_DEPENDS = ("split", "extender", "link", "hub")
 
 
 def combinations(options: dict = OPTIONS) -> list[dict]:
-    return [dict(zip(options, values)) for values in itertools.product(*options.values())]
+    return [dict(zip(options, values)) for values in itertools.product(*options.values())]  # noqa: B905
 
 
 def config(choice: dict) -> Config:

@@ -22,7 +22,7 @@ def test_plate_is_a_single_valid_solid(plate):
     assert plate.is_valid
     assert len(plate.solids()) == 1
     holes = cp.plate(HOLES)
-    assert holes.is_valid and len(holes.solids()) == 1
+    assert holes.is_valid and len(holes.solids()) == 1  # noqa: PT018
 
 
 def test_pockets_hold_one_case_with_walls_between():
@@ -33,7 +33,7 @@ def test_pockets_hold_one_case_with_walls_between():
     assert chord - d - 2 * P.top_chamfer >= CFG.print.min_wall
     assert r + d / 2 == pytest.approx(layout.band_inner_r())  # notches: the band closes the pocket
     assert layout.pocket_count() > layout.pocket_count(HOLES)  # notches put the pockets further out
-    assert layout.pocket_circle_r(HOLES) + d / 2 + P.rim_wall <= layout.plate_r(HOLES) and P.rim_wall >= CFG.print.min_wall
+    assert layout.pocket_circle_r(HOLES) + d / 2 + P.rim_wall <= layout.plate_r(HOLES) and P.rim_wall >= CFG.print.min_wall  # noqa: PT018
 
 
 def test_plate_height_keeps_mouth_down_cases_high():
@@ -71,17 +71,17 @@ def test_ribs_and_pull_eye_sit_between_cap_and_channels(plate):
     assert cp._inner_r(CFG) + P.pull_len < rib_end
     zc = sc.levels()
     assert h + P.pull_h < zc.cap_top - zc.plate_bottom  # the eye stands lower than the cap
-    assert plate.bounding_box().max.Z == pytest.approx(h + P.pull_h, abs=0.01)
+    assert plate.bounding_box().max.Z == pytest.approx(h + P.pull_h, abs=0.01)  # noqa: SIM300
     eye = Rot(Z=cp.pocket_angles()[0]) * Pos(cp._inner_r(CFG) + P.pull_len / 2, 0, h + P.pull_h / 2) * Box(0.2, 2 * P.pull_t, 0.2)
     assert (plate & eye).volume < 0.2 * 0.2 * P.pull_t  # the ring passes through the eye
     rib_angle = 90 + 360 * 0.5 / P.rib_count
     assert _top_at(plate, (cp._inner_r(CFG) + rib_end) / 2, rib_angle) == pytest.approx(h + P.rib_h, abs=0.05)
-    assert plate.bounding_box().min.Z == pytest.approx(0, abs=1e-6)  # nothing under the plate
+    assert plate.bounding_box().min.Z == pytest.approx(0, abs=1e-6)  # nothing under the plate  # noqa: SIM300
 
 
 def test_ridge_plate_has_a_ridge_between_every_two_pockets_rising_to_the_pocket_mouths():
     plate, h, n = cp.plate(RIDGES), layout.plate_h(RIDGES), layout.pocket_count(RIDGES)
-    assert plate.is_valid and len(plate.solids()) == 1
+    assert plate.is_valid and len(plate.solids()) == 1  # noqa: PT018
     r0, r1 = cp._inner_r(RIDGES), cp.ridge_end_r(RIDGES)
     for a in cp.pocket_angles(RIDGES)[1:4]:
         land = a + 180 / n

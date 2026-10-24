@@ -17,7 +17,7 @@ links and rod ends flat (pin axis along z, link axis along +y from pin A at the 
 `clamp_in_body` and `link_in_body` place them in the body frame.
 """
 
-import math
+import math  # noqa: I001
 
 from build123d import Box, Circle, Cylinder, Location, Part, Plane, Polygon, Pos, Rectangle, Rot, Vector, extrude
 
@@ -349,7 +349,7 @@ def clamp_screw_z(cfg: Config = CFG) -> list[float]:
     return [mt.clamp_h * (i + 0.5) / mt.clamp_screws for i in range(mt.clamp_screws)]
 
 
-def clamp_nut_pocket(z: float, cfg: Config = CFG, roof: Location = Pos()) -> Location:
+def clamp_nut_pocket(z: float, cfg: Config = CFG, roof: Location = Pos()) -> Location:  # noqa: B008
     """Nut pocket mouth on the +x face of the clamp, a flat up (`roof` turns it about the screw axis), +z out of the pocket."""
     return Pos(clamp_width(cfg) / 2, clamp_layout(cfg)["y_s"], z) * roof * Rot(Y=90) * Rot(Z=90)
 
@@ -420,7 +420,7 @@ def fixed_link(tilt: float, cfg: Config = CFG) -> Part:
 
 
 def _rod_end(cfg: Config, kind: str) -> Part:
-    mt, f = cfg.mount, cfg.print.fit
+    mt, f = cfg.mount, cfg.print.fit  # noqa: F841
     d = rod_end_dims(cfg)[kind]
     t = mt.link_t
     window_w = link_w(cfg) - 4 * cfg.print.min_wall
