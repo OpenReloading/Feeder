@@ -1,6 +1,8 @@
 """Simulation: the model has the CAD's opening and plate, and a short run keeps every case in the bowl."""
 
 import math
+import subprocess
+import sys
 
 import mujoco
 import pytest
@@ -87,3 +89,11 @@ def test_short_run_keeps_the_cases_and_the_plate_speed():
     assert math.isfinite(r["torque_max"]) and r["torque_max"] > 0
     assert abs(r["speed_ratio"] - 1) < 0.05
     assert r["deepest_mm"] < 3  # contact penetration stays below a case wall plus the hull error
+
+
+def test_cli_sweep_runs_a_point_in_worker_processes(tmp_path):
+    out = tmp_path / "sweep.csv"
+    cmd = [sys.executable, "-m", "sim", "sweep", "--tilt", "45", "--rpm", "6", "--cases", "5", "--revs", "0.2", "--workers", "2", "--out", str(out)]
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+    assert r.returncode == 0, r.stderr[-800:]
+    assert len(out.read_text().splitlines()) == 2  # header and the one point

@@ -6,6 +6,7 @@ Run in the dev container from the project root:
     .venv/bin/python build.py --assembly   # also build/assembly/: feeder.step, feeder.3mf, viewer.html
     .venv/bin/python build.py --variants   # also build/variants/<split>/: body and plate for each body split, with assembly
     .venv/bin/python build.py --plates     # also build/plates/<set>/: plate, exit insert and drop tube per plate
+    .venv/bin/python build.py --configurator  # also build/configurator/: print files by content hash and manifest.json for the configurator (variants.py)
     .venv/bin/python build.py --guide      # also the build guide data and assembly for mkdocs build (mkdocs.yml)
 
 build/<name>.stl and .step are in the modelled orientation, build/print/<name>.stl as the part goes on the bed.
@@ -78,6 +79,7 @@ def main() -> int:
     parser.add_argument("--assembly", action="store_true", help="also export the assembled feeder to build/assembly/")
     parser.add_argument("--variants", action="store_true", help="also build body and plate for each body split to build/variants/")
     parser.add_argument("--plates", action="store_true", help="also build each plate set to build/plates/")
+    parser.add_argument("--configurator", action="store_true", help="also write every option combination's print files and manifest.json to build/configurator/")
     parser.add_argument("--guide", action="store_true", help="also write build/guide/buildguide.json and guide/generated/ for mkdocs build")
     args = parser.parse_args()
     print(f"{build_all()} parts in {BUILD}")
@@ -95,6 +97,10 @@ def main() -> int:
         for cfg in layout.plate_sets(CFG):
             out = BUILD / "plates" / cfg.case_plate.caliber
             print(f"{build_all(cfg, out, parts=plate_set_parts(cfg))} parts in {out}")
+    if args.configurator:
+        import variants
+
+        variants.build_configurator()
     if args.guide:
         import json
 
