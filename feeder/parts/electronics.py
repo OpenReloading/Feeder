@@ -15,8 +15,8 @@ exit side. The box prints on its back wall, the collar upright, the lid flat.
 from build123d import Box, Cylinder, Location, Part, Pos, Rot
 
 from feeder.config import CFG, Config
-from feeder.lib.cache import per_config
 from feeder.lib import fasteners
+from feeder.lib.cache import per_config
 from feeder.lib.features import teardrop
 from feeder.parts import mount
 from feeder.parts.slip_clutch import BOTTOM
@@ -133,6 +133,7 @@ def box(cfg: Config = CFG) -> Part:
     return body
 
 
+@per_config
 def collar(cfg: Config = CFG) -> Part:
     """Slit collar on the tube, box frame: from `collar_face` to the clamp's +y side, at the box top."""
     e, L = cfg.electronics, mount.clamp_layout(cfg)
