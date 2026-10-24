@@ -13,7 +13,7 @@ slot on +x. `placement` puts it on the body's spigot (hanging in the notch). The
 the path: spigot bore, tube bore (wider by two fits), hose.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass  # noqa: I001
 
 import math
 
@@ -144,11 +144,11 @@ def _bayonet(k: Dims, cfg: Config) -> Part:
     r_in, r_out = k.r_socket - 0.3, k.r_groove
     zf = k.floor_z
     pts = [(r_in, zf + r_in - k.r_spigot), (r_out, zf + r_out - k.r_spigot), (r_out, k.roof_z), (r_in, k.roof_z + r_out - r_in)]
-    ring = revolve(Plane.XZ * Polygon(*pts, align=None), axis=Axis.Z)
+    ring = revolve((Plane.XZ * Polygon(*pts, align=None)).face(), axis=Axis.Z)
     notch = Pos(0, 0, -d.lock_lift) * ring
     far = 2 * r_out
     cut = None
-    for turn, w in zip((0, 180), d.lug_w):
+    for turn, w in zip((0, 180), d.lug_w, strict=True):
         a_in, a_stop = (a + turn for a in slot_angles(cfg))
         wc = w + 2 * f
         rays = [(far * math.cos(math.radians(a)), far * math.sin(math.radians(a))) for a in (a_in, a_stop)]
@@ -157,12 +157,12 @@ def _bayonet(k: Dims, cfg: Config) -> Part:
         slot = Pos(0, 0, -1) * Cylinder(r_out, k.roof_z + 1, align=BOTTOM) & _plan(a_in, far, wc)
         piece = (ring & plan) + (notch & _plan(a_stop, far, wc)) + slot
         cut = piece if cut is None else cut + piece
-    return cut
+    return Part(cut)
 
 
 @per_config
 def drop_tube(cfg: Config = CFG) -> Part:
-    d, f = cfg.drop_tube, cfg.print.fit
+    d, f = cfg.drop_tube, cfg.print.fit  # noqa: F841
     k = dims(cfg)
     part = Cylinder(k.r_socket_out, k.socket_top, align=BOTTOM)
     part += Cylinder(k.r_tube, k.tip - d.barb_len, align=BOTTOM)

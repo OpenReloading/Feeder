@@ -26,7 +26,7 @@ Frame: `layout` body frame (z = 0 at the cup floor top, +y toward the exit). Cor
 Band, gate and exit insert print top down. Skirt, no brim: a brim takes the band past the bed.
 """
 
-import math
+import math  # noqa: I001
 from dataclasses import replace
 
 from build123d import Align, Axis, Box, Circle, Cylinder, Part, Plane, Polygon, Pos, Rot, Vector, extrude, loft, revolve
@@ -133,13 +133,13 @@ def spigot_lugs(cfg: Config = CFG, grow: float = 0.0) -> Part:
     rs = bore_d(cfg) / 2 + cfg.exit.wall
     z, h = d.lug_z, d.lug_h + grow
     section = Polygon((rs - 0.5, z), (rs, z), (rs + h, z + h), (rs + h, z + h + d.lug_tip), (rs - 0.5, z + h + d.lug_tip), align=None)
-    ring = revolve(Plane.XZ * section, axis=Axis.Z)
+    ring = revolve((Plane.XZ * section).face(), axis=Axis.Z)
     lugs = None
-    for turn, w in zip((0, 180), d.lug_w):
+    for turn, w in zip((0, 180), d.lug_w, strict=True):
         slab = Rot(Z=turn) * Box(rs + h + 1, w + 2 * grow, z + 2 * h + d.lug_tip, align=(Align.MIN, Align.CENTER, Align.MIN))
         lug = ring & slab
         lugs = lug if lugs is None else lugs + lug
-    return lugs
+    return Part(lugs)
 
 
 def _spigot_frame(cfg: Config) -> Plane:
@@ -151,7 +151,7 @@ def _spigot_frame(cfg: Config) -> Plane:
 def exit_insert(cfg: Config = CFG) -> Part:
     e, f = cfg.exit, cfg.print.fit
     z = layout.levels(cfg)
-    length, r0, r1 = opening(cfg)
+    length, r0, r1 = opening(cfg)  # noqa: RUF059
     body = Pos(0, 0, z.bottom) * extrude(_exit_outline(cfg, -f), z.deck_top - z.bottom)  # fills the shaft up to one flat top (prints top down)
     body += Pos(0, 0, z.deck_top - e.seat_t) * extrude(_exit_outline(cfg, e.seat_w - f), e.seat_t)  # ledge in the deck recess
     body = body & Cylinder(layout.bowl_r(cfg) - f, 1000)

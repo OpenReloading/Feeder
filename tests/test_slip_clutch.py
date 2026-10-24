@@ -53,7 +53,7 @@ def test_hub_gauge_carries_the_hub_fits_the_cup_and_slides_out_from_under_it():
     gauge, hub = placed["slip_clutch_hub_gauge"], placed["pololu_hub"]
     fixed = [placed[n] for n in ("body_core", "pololu_hub", "motor_shaft")]
     assert gauge.distance_to(hub) < 1e-6  # the boss rests on the fork
-    assert gauge.bounding_box().max.Z >= layout.levels().deck_top + C.gauge_grip - 1  # handle up past the deck
+    assert gauge.bounding_box().max.Z >= layout.levels().deck_top + C.gauge_grip - 1  # handle up past the deck  # noqa: SIM300
     s = sc.gauge_slide()
     path = [Pos(s * i / 4, 0, 0) for i in range(5)] + [Pos(s, 0, dz) for dz in (5, 20, 40)]
     for loc in path:
@@ -90,7 +90,7 @@ def test_hub_screws_match_the_hub_hole_pattern(mh):
 
 def test_generic_hub_carrier_builds():
     part = sc.carrier(replace(CFG, metal_hub=GENERIC_8MM_FLANGE))
-    assert part.is_valid and len(part.solids()) == 1
+    assert part.is_valid and len(part.solids()) == 1  # noqa: PT018
 
 
 def test_hex_corners_point_at_the_hub_screws():
@@ -140,11 +140,11 @@ def test_drive_ring_walls_and_thread():
     assert PS.drive_af / 2 - sc.tube_bore_r() >= MW
     assert PS.drive_af - 2 * PS.lead_in > DR.thread_d  # the plate hole passes over the thread
     assert DR.flange_d / 2 - hex_corner_r(PS.drive_af + 2 * FIT) - PS.lead_in >= MW  # plate seat beyond the hole corners
-    assert DR.flange_t >= MW and z.ring_floor - z.plate_bottom >= MW  # flange, floor above the cone
+    assert DR.flange_t >= MW and z.ring_floor - z.plate_bottom >= MW  # flange, floor above the cone  # noqa: PT018
     assert DR.floor_h - sc.female_cone_h() >= MW - 1e-9  # floor at its hole edge
     assert z.hex_top - PS.lead_in > z.plate_bottom
     assert z.ring_top < z.top  # the knob, wider than the tube bore, sits above the tube
-    assert sc.tube_bore_r() > C.disc_d / 2 and C.disc_t + z.ring_floor <= z.ring_top
+    assert sc.tube_bore_r() > C.disc_d / 2 and C.disc_t + z.ring_floor <= z.ring_top  # noqa: PT018
 
 
 def test_cap_passes_the_knob_and_clamps_the_plate_without_play():

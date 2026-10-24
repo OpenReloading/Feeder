@@ -71,7 +71,7 @@ def test_barb_is_thick_enough_and_fits_its_length(part):
     assert K.r_barb - K.r_bore >= CFG.print.min_wall
     assert D.barb_ridges * D.barb_ridge_pitch <= D.barb_len
     assert K.r_barb == pytest.approx((D.hose_id + D.barb_grip) / 2)
-    assert part.bounding_box().max.Z == pytest.approx(K.tip)
+    assert part.bounding_box().max.Z == pytest.approx(K.tip)  # noqa: SIM300
 
 
 def test_sensor_window_is_as_thin_as_configured(part):
@@ -79,8 +79,8 @@ def test_sensor_window_is_as_thin_as_configured(part):
     hits = (probe & part).solids()
     assert len(hits) == 1  # the plate hole is open, only the window is hit
     bb = hits[0].bounding_box()
-    assert bb.min.X == pytest.approx(K.r_bore, abs=0.01)
-    assert bb.max.X - bb.min.X == pytest.approx(D.window_t, abs=0.01)
+    assert bb.min.X == pytest.approx(K.r_bore, abs=0.01)  # noqa: SIM300
+    assert bb.max.X - bb.min.X == pytest.approx(D.window_t, abs=0.01)  # noqa: SIM300
 
 
 def test_sensor_clears_the_last_dropped_case():
@@ -139,7 +139,8 @@ def test_notch_detent_and_the_turn_between_slot_and_stop(part):
         assert _clear(LIFT + FIT / 2, turn, part), turn  # and free to turn all the way to the slots
     beyond = math.copysign(8.0, -SLOT)  # past the stop: the notch end is a wall at any lift
     assert not _clear(LIFT + FIT / 2, beyond, part)
-    assert not _clear(0.02, math.copysign(8.0, SLOT), part) and not _clear(0.02, beyond, part)  # in the notch, turning needs the lift
+    assert not _clear(0.02, math.copysign(8.0, SLOT), part)  # in the notch, turning needs the lift
+    assert not _clear(0.02, beyond, part)
 
 
 def test_lugs_slide_in_through_the_slots_only(part):
@@ -147,7 +148,8 @@ def test_lugs_slide_in_through_the_slots_only(part):
         assert _clear(dz, SLOT, part), dz
     assert _clear(LIFT + FIT / 2, SLOT, part)
     assert not _clear(0.5, SLOT + 180, part)  # wide lug on the narrow slot: the tube goes on one way only
-    assert not _clear(0.5, SLOT + 90, part) and not _clear(0.5, SLOT + 20, part)  # no slot elsewhere
+    assert not _clear(0.5, SLOT + 90, part)  # no slot elsewhere
+    assert not _clear(0.5, SLOT + 20, part)
 
 
 def test_land_between_slot_and_notch_holds_on_every_plate_set():
@@ -196,7 +198,7 @@ def test_exit_spigot_radius_matches_the_socket():
     pl = dt.placement()
     slab = pl * (Pos(0, 0, D.lug_z + D.lug_h + D.lug_tip + 1) * Box(80, 80, 0.2))  # past the lugs
     section = b.exit_insert() & slab
-    assert section.bounding_box().size.X / 2 == pytest.approx(K.r_spigot, abs=0.01)
+    assert section.bounding_box().size.X / 2 == pytest.approx(K.r_spigot, abs=0.01)  # noqa: SIM300
 
 
 def test_sensor_envelope_runs_through_both_lock_nuts_and_out_of_the_plate():
@@ -206,4 +208,4 @@ def test_sensor_envelope_runs_through_both_lock_nuts_and_out_of_the_plate():
     # sensor frame: face on the window outer face, axis along the drop tube +x at the sensor height
     f = dt.sensor_frame()
     local = dt.placement().location.inverse() * f
-    assert (local.position.X, local.position.Y, local.position.Z) == pytest.approx((K.window_x, 0, K.sensor_z), abs=1e-6)
+    assert (local.position.X, local.position.Y, local.position.Z) == pytest.approx((K.window_x, 0, K.sensor_z), abs=1e-6)  # noqa: SIM300

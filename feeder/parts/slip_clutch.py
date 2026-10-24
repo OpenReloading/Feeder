@@ -12,7 +12,7 @@ Hub: printed carrier bolted onto a Pololu 2693 aluminium hub (set screws on the 
 Frame: z = 0 at the bottom of the carrier, +z up the shaft, flat of the D shaft facing +x.
 """
 
-import copy
+import copy  # noqa: I001
 import math
 from dataclasses import dataclass
 

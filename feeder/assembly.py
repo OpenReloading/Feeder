@@ -96,7 +96,7 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
     """Every part of the feeder in the body frame, in assembly order."""
     tilt = body_tilt(cfg) if tilt is None else tilt
     link, adjustable = link_name(tilt, cfg), mount.link_angle(cfg) is None
-    m, c = cfg.motor, cfg.clutch
+    m, c = cfg.motor, cfg.clutch  # noqa: F841
     zc, z = sc.levels(cfg), layout.levels(cfg)
     off = Pos(0, 0, -zc.floor_top)  # clutch frame to body frame
     down = (0.0, 0.0, -1.0)
@@ -214,7 +214,7 @@ def _half(x: float, y: float, cfg: Config) -> int:
     return 0 if -x * math.sin(a) + y * math.cos(a) > 0 else 1
 
 
-def _pin_stack(size: str, length: float, face: float, nut_af: float, nut_h: float, head: str) -> list[tuple]:
+def _pin_stack(size: str, length: float, face: float, nut_af: float, nut_h: float, head: str) -> list[tuple]:  # noqa: PLR0913
     """Bolt along x through ears whose outer faces are at +-`face`, head at -x, washer on both sides and a DIN 985
     nut: (name, kind, shape, location about the pin centre, seq)."""
     wh = fasteners.washer_data(size)["h"]
@@ -228,7 +228,7 @@ def _pin_stack(size: str, length: float, face: float, nut_af: float, nut_h: floa
     ]
 
 
-def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fastener]:
+def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fastener]:  # noqa: C901, PLR0912, PLR0915
     """Every bought screw, bolt, nut, washer and heat-set insert, body frame, grouped by name, host and seq."""
     tilt = body_tilt(cfg) if tilt is None else tilt
     b, m, c, mt, mh, f = cfg.body, cfg.motor, cfg.clutch, cfg.mount, cfg.metal_hub, cfg.print.fit

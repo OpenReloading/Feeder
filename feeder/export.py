@@ -11,7 +11,7 @@ from pathlib import Path
 from build123d import Color, Compound, Mesher, export_step, export_stl
 
 from feeder import assembly
-from feeder.config import CFG, Config
+from feeder.config import CFG, Config  # noqa: F401
 from feeder.parts import case_plate, layout, mount
 from feeder.parts import slip_clutch as sc
 
@@ -135,26 +135,26 @@ def export_assembly(cfg: Config, out: Path, title: str, inline_libs: bool = True
     with tempfile.TemporaryDirectory() as tmp:
         for p in placed:
             stl(p.name, p.shape)
-            parts.append(dict(name=p.name, kind=p.kind, step=index[p.step], dir=list(p.explode), tool=p.tool))
+            parts.append(dict(name=p.name, kind=p.kind, step=index[p.step], dir=list(p.explode), tool=p.tool))  # noqa: C408
         for i, f in enumerate(fs):  # one mesh per group, instanced along its locations
             stl(f"fastener_{i}", f.shape)
-            fasteners.append(dict(model=f"fastener_{i}", kind=f.kind, host=names.index(f.host), seq=f.seq,
+            fasteners.append(dict(model=f"fastener_{i}", kind=f.kind, host=names.index(f.host), seq=f.seq,  # noqa: C408
                                   lift=round(f.shape.bounding_box().size.Z + 10, 1), m=[_matrix(loc) for loc in f.at]))
     ftext = _fastener_text(fs, step_of)
     pc = layout.pocket_circle_r(cfg)
     ang = [a for a in case_plate.pocket_angles(cfg) if abs((a - 270 + 180) % 360 - 180) <= 80][::2]
     z, zc, n = layout.levels(cfg), sc.levels(cfg), cfg.clutch.springs_fitted
-    info = dict(
+    info = dict(  # noqa: C408
         eyebrow=f"Feeder · 9mm case feeder · body {cfg.body.split.replace('_', ' ')}",
         intro=f"{title}. Tilted view: as mounted, tube vertical.",
         labels={"body": {"arcs": "Body core", "halves": "Body halves", "one_piece": "Body"}[cfg.body.split]},
-        steps=[dict(t=steps[s][0], d=steps[s][1], f=ftext.get(index[s], [])) for s in used],
+        steps=[dict(t=steps[s][0], d=steps[s][1], f=ftext.get(index[s], [])) for s in used],  # noqa: C408
         spring_step=step_of["slip_clutch_disc"], case_step=step_of[f"case_plate_{cfg.case_plate.caliber}"],
         parts=parts, fasteners=fasteners, tilt=tilt, tilt_range=list(cfg.mount.tilt_range), pivot=list(mount.pivot_point(cfg)),
         tube_axis=list(assembly.pivot_axis(tilt, cfg)),
-        cases=dict(rim_d=layout.caliber(cfg).rim_d, length=layout.caliber(cfg).case_length, z0=z.deck_top, r=pc,
+        cases=dict(rim_d=layout.caliber(cfg).rim_d, length=layout.caliber(cfg).case_length, z0=z.deck_top, r=pc,  # noqa: C408
                    xy=[[pc * math.cos(math.radians(a)), pc * math.sin(math.radians(a))] for a in ang]),
-        springs=dict(count=n, pcd=cfg.clutch.spring_pcd, od=cfg.spring.od, free=cfg.spring.free_length, rate=cfg.spring.rate,
+        springs=dict(count=n, pcd=cfg.clutch.spring_pcd, od=cfg.spring.od, free=cfg.spring.free_length, rate=cfg.spring.rate,  # noqa: C408
                      working=sc.spring_working_length(cfg), bottom=zc.ring_floor + cfg.clutch.disc_t - cfg.clutch.spring_pocket_depth_disc - zc.floor_top),
         slip=[round(sc.slip_torque(n, mu, cfg), 2) for mu in cfg.clutch.friction_mu], clamp=round(sc.clamp_force(n, cfg), 1),
         plate_d=round(layout.plate_r(cfg) * 2, 1), pockets=layout.pocket_count(cfg), drag=round(layout.plate_drag_torque(cfg), 2),

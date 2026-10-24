@@ -1,6 +1,6 @@
 """Bought fasteners: the assembly places every one the BOM lists, each in its holes."""
 
-import re
+import re  # noqa: I001
 from dataclasses import replace
 from pathlib import Path
 
@@ -28,7 +28,8 @@ def test_fastener_counts_match_the_bom():
 def test_drop_tube_twists_on_without_a_screw_or_insert():
     on_tube = [f.name for f in assembly.fasteners_in_body(CFG) if f.host == "drop_tube"]
     assert on_tube == [f"Lock nut {CFG.drop_tube.sensor_thread}"]  # the sensor nut only
-    assert "DIN 464" not in BOM.read_text() and "thumb" not in BOM.read_text().lower()
+    assert "DIN 464" not in BOM.read_text()
+    assert "thumb" not in BOM.read_text().lower()
 
 
 def _counts(cfg, host: str | None = None) -> dict:
@@ -46,14 +47,14 @@ def test_fixed_link_replaces_the_rod_nuts_and_sets_the_tilt(tilt):
     adjustable = _counts(CFG, "mount_tilt_link")
     fixed = _counts(cfg, link)
     assert assembly.body_tilt(cfg) == tilt
-    assert link in {p.name for p in assembly.placed(cfg)} and "mount_tilt_link" not in {p.name for p in assembly.placed(cfg)}
+    assert link in {p.name for p in assembly.placed(cfg)} and "mount_tilt_link" not in {p.name for p in assembly.placed(cfg)}  # noqa: PT018
     assert {f.host for f in assembly.fasteners_in_body(cfg)} <= {p.name for p in assembly.placed(cfg)}
     assert fixed == {k: v for k, v in adjustable.items() if k != "ISO 4032 M6 nut"}  # the pins and their washers and nuts stay
-    assert adjustable["ISO 4032 M6 nut"] == 4 and not [f for f in assembly.fasteners_in_body(cfg) if f.name == "ISO 4032 M6 nut"]
+    assert adjustable["ISO 4032 M6 nut"] == 4 and not [f for f in assembly.fasteners_in_body(cfg) if f.name == "ISO 4032 M6 nut"]  # noqa: PT018
 
 
 def test_default_link_is_the_adjustable_one_at_the_plate_tilt():
-    assert CFG.mount.link == "adjustable" and assembly.body_tilt(CFG) == CFG.case_plate.tilt
+    assert CFG.mount.link == "adjustable" and assembly.body_tilt(CFG) == CFG.case_plate.tilt  # noqa: PT018
     assert "mount_tilt_link" in {p.name for p in assembly.placed(CFG)}
 
 
@@ -66,8 +67,8 @@ def test_generic_hub_takes_two_screws_with_nuts_under_the_flange():
     cfg = replace(CFG, metal_hub=GENERIC_8MM_FLANGE)
     hub = _counts(cfg, "slip_clutch_carrier_metal_hub")
     default = _counts(CFG, "slip_clutch_carrier_metal_hub")
-    assert hub["ISO 4762 M3 x 12"] == 2 and hub["ISO 4032 M3 nut"] == 2  # README: 2 x ISO 4762 M3 x 12 with ISO 4032 M3 nuts
-    assert default["ISO 4762 M3 x 10"] == 3 and "ISO 4032 M3 nut" not in default  # tapped holes
+    assert hub["ISO 4762 M3 x 12"] == 2 and hub["ISO 4032 M3 nut"] == 2  # README: 2 x ISO 4762 M3 x 12 with ISO 4032 M3 nuts  # noqa: PT018
+    assert default["ISO 4762 M3 x 10"] == 3 and "ISO 4032 M3 nut" not in default  # tapped holes  # noqa: PT018
     assert {k: v for k, v in hub.items() if not k.startswith(("ISO 4762 M3", "ISO 4032"))} == {k: v for k, v in default.items() if not k.startswith("ISO 4762 M3")}
 
 
@@ -102,9 +103,9 @@ def test_fasteners_sit_in_their_holes_without_cutting_printed_parts(name):
 def test_every_electronics_envelope_has_its_nuts():
     # sensor: two lock nuts, one each side of the plate; each panel part: one panel nut on its host's inner face
     placed = {p.name: p for p in assembly.placed(CFG)}
-    assert set(ENVELOPES) <= set(placed) and all(placed[n].bought for n in ENVELOPES)
+    assert set(ENVELOPES) <= set(placed) and all(placed[n].bought for n in ENVELOPES)  # noqa: PT018
     nuts = {(f.name, f.host): len(f.at) for f in assembly.fasteners_in_body(CFG) if f.kind == "nut"}
-    assert nuts[(f"Lock nut {CFG.drop_tube.sensor_thread}", "drop_tube")] == 1 and nuts[(f"Lock nut {CFG.drop_tube.sensor_thread}", "level_sensor")] == 1
+    assert nuts[(f"Lock nut {CFG.drop_tube.sensor_thread}", "drop_tube")] == 1 and nuts[(f"Lock nut {CFG.drop_tube.sensor_thread}", "level_sensor")] == 1  # noqa: PT018
     for _, pp in CFG.electronics.panel_parts:
         assert sum(n for (name, _), n in nuts.items() if name == f"Panel nut, {pp.label}") == 1, pp.label
 
