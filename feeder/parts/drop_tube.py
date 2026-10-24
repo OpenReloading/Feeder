@@ -96,6 +96,11 @@ def screw_mouth(cfg: Config = CFG) -> Location:
     return Pos(-k.r_socket - k.screw_boss_t, 0, k.screw_z) * Rot(Y=-90)
 
 
+def sensor_frame(cfg: Config = CFG) -> Location:
+    """Sensing face of the sensor against the window, body frame, +z out along the sensor axis (drop tube +x)."""
+    return placement(cfg).location * Pos(dims(cfg).window_x, 0, dims(cfg).sensor_z) * Rot(Y=90)
+
+
 def placement(cfg: Config = CFG) -> Plane:
     """Socket mouth on the start of the spigot, +z down the drop, sensor sideways (+x)."""
     o, d = body.outlet(cfg)
