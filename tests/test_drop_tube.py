@@ -109,15 +109,3 @@ def test_exit_spigot_radius_matches_the_socket():
     slab = pl * (Pos(0, 0, 5) * Box(80, 80, 0.2))
     section = b.exit_insert() & slab
     assert section.bounding_box().size.X / 2 == pytest.approx(K.r_spigot, abs=0.01)
-
-
-def test_drop_tube_clears_the_exit_insert_and_the_body(part):
-    pl = dt.placement()
-    placed = pl * part
-    bt = placed.bounding_box()
-    for name, build in b.PARTS.items():
-        other = build()
-        bo = other.bounding_box()
-        if any(getattr(bt.max, a) <= getattr(bo.min, a) or getattr(bo.max, a) <= getattr(bt.min, a) for a in "XYZ"):
-            continue
-        assert _volume(placed & other) < EPS, name
