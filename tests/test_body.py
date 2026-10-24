@@ -190,6 +190,14 @@ def _mates(cfg) -> dict[str, tuple[str, ...]]:
         "electronics_collar": ("stand_tube",),
         "electronics_box": ("electronics_collar",),
         "electronics_lid": ("electronics_box",),
+        "timer_relay": ("electronics_box",),
+        "gx12_2_pin_socket": ("electronics_box",),
+        "gx12_3_pin_socket": ("electronics_box",),
+        "pwm_knob": ("electronics_lid",),
+        "toggle_switch": ("electronics_lid",),
+        "dc_jack": ("electronics_lid",),
+        "pwm_controller": ("pwm_knob",),
+        "level_sensor": ("drop_tube",),
     }
     if split == "halves":
         out["body_half_1"] = ("body_half_0",)
