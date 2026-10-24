@@ -71,6 +71,17 @@ def stand_tube(tilt: float, cfg: Config = CFG, stub: float = 100.0) -> Part:
     return mount.clamp_in_body(Pos(0, 0, -stub) * tube, tilt, cfg)
 
 
+def body_tilt(cfg: Config = CFG) -> float:
+    """Tilt of the assembled feeder: the angle of the fixed link, else `case_plate.tilt`."""
+    angle = mount.link_angle(cfg)
+    return cfg.case_plate.tilt if angle is None else angle
+
+
+def link_name(tilt: float, cfg: Config = CFG) -> str:
+    """Name of the placed tilt link: the assembled adjustable link, or the printed fixed link for `tilt`."""
+    return "mount_tilt_link" if mount.link_angle(cfg) is None else f"mount_link_{tilt:.0f}"
+
+
 def _dir(loc, v: tuple) -> tuple:
     """Direction `v` of the frame `loc`, in the body frame."""
     p = (loc * Pos(*v)).position - loc.position
@@ -83,7 +94,8 @@ def _slug(label: str) -> str:
 
 def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
     """Every part of the feeder in the body frame, in assembly order."""
-    tilt = cfg.case_plate.tilt if tilt is None else tilt
+    tilt = body_tilt(cfg) if tilt is None else tilt
+    link, adjustable = link_name(tilt, cfg), mount.link_angle(cfg) is None
     m, c = cfg.motor, cfg.clutch
     zc, z = sc.levels(cfg), layout.levels(cfg)
     off = Pos(0, 0, -zc.floor_top)  # clutch frame to body frame
@@ -117,7 +129,8 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
         Placed("mount_yoke", mount.yoke_in_body(mount.yoke(cfg), cfg), "yoke", 12, explode=down),
         Placed("mount_clamp", mount.clamp_in_body(mount.clamp(cfg), tilt, cfg), "clamp", 13, explode=down),
         Placed("stand_tube", stand_tube(tilt, cfg), "tube", 13, explode=down, bought=True),
-        Placed("mount_tilt_link", mount.link_in_body(mount.adjustable_link(tilt, cfg), tilt, cfg), "link", 14, explode=(1.0, 0.0, 0.0)),
+        Placed(link, mount.link_in_body(mount.adjustable_link(tilt, cfg) if adjustable else mount.fixed_link(tilt, cfg), tilt, cfg),
+               "link", 14, explode=(1.0, 0.0, 0.0)),
         Placed("electronics_box", box * electronics.box(cfg), "elec", 16, explode=down),
         Placed("timer_relay", box * electronics.relay_board(cfg), "board", 16, explode=_dir(box, (0, -1, 0)), bought=True),
     ]
@@ -217,7 +230,7 @@ def _pin_stack(size: str, length: float, face: float, nut_af: float, nut_h: floa
 
 def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fastener]:
     """Every bought screw, bolt, nut, washer and heat-set insert, body frame, grouped by name, host and seq."""
-    tilt = cfg.case_plate.tilt if tilt is None else tilt
+    tilt = body_tilt(cfg) if tilt is None else tilt
     b, m, c, mt, mh, f = cfg.body, cfg.motor, cfg.clutch, cfg.mount, cfg.metal_hub, cfg.print.fit
     z, zc = layout.levels(cfg), sc.levels(cfg)
     off = Pos(0, 0, -zc.floor_top)
@@ -296,11 +309,12 @@ def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fast
     pivot = _pin_stack(mt.pivot_size, mount.pivot_bolt_length(cfg), mount.ear_gap(cfg) / 2 + mt.ear_t, mt.pivot_nut_af, mt.pivot_nut_h, "hex")
     items += [(n, kd, sh, Pos(0, py, pz) * loc, "mount_clamp", sq) for n, kd, sh, loc, sq in pivot]
     pins = _pin_stack(mt.link_pin_size, mount.link_pin_length(cfg), mount.link_gap(cfg) / 2 + mt.ear_t, mt.link_nut_af, mt.link_nut_h, "socket")
+    link = link_name(tilt, cfg)
     for y, zz in mount.link_pin_centres(tilt, cfg):
-        items += [(n, kd, sh, Pos(0, y, zz) * loc, "mount_tilt_link", sq) for n, kd, sh, loc, sq in pins]
+        items += [(n, kd, sh, Pos(0, y, zz) * loc, link, sq) for n, kd, sh, loc, sq in pins]
     nut = fasteners.nut_data(mt.link_rod_size)
-    for loc in mount.rod_nuts(tilt, cfg):
-        items.append((_nut_name(mt.link_rod_size), "nut", _nut(mt.link_rod_size, nut["s"], nut["m"]), loc, "mount_tilt_link", 0))
+    for loc in mount.rod_nuts(tilt, cfg) if mount.link_angle(cfg) is None else []:  # a printed fixed link has no rod
+        items.append((_nut_name(mt.link_rod_size), "nut", _nut(mt.link_rod_size, nut["s"], nut["m"]), loc, link, 0))
     groups: dict = {}
     for name, kind, shape, loc, host, seq in items:
         groups.setdefault((name, host, seq), (kind, shape, []))[2].append(loc)

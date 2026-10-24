@@ -6,11 +6,10 @@ from pathlib import Path
 
 import pytest
 from build123d import Pos
+from test_body import CONFIGS
 
 from feeder import assembly, export, guide
-from feeder.config import CFG
-
-SPLITS = ("arcs", "halves", "one_piece")
+from feeder.config import CFG, GENERIC_8MM_FLANGE
 GAP = 0.5  # mm, as in test_body: hole clearances and fits
 BOM = Path(__file__).parent.parent / "bom" / "case_feeder_9mm.md"
 ENVELOPES = ("level_sensor", "timer_relay", "pwm_controller", "pwm_knob", "toggle_switch", "dc_jack", "gx12_2_pin_socket", "gx12_3_pin_socket")  # bought electronics: nuts and screws must not cut them either
@@ -32,14 +31,54 @@ def test_drop_tube_twists_on_without_a_screw_or_insert():
     assert "DIN 464" not in BOM.read_text() and "thumb" not in BOM.read_text().lower()
 
 
+def _counts(cfg, host: str | None = None) -> dict:
+    out: dict = {}
+    for f in assembly.fasteners_in_body(cfg):
+        if host in (None, f.host):
+            out[f.name] = out.get(f.name, 0) + len(f.at)
+    return out
+
+
+@pytest.mark.parametrize("tilt", CFG.mount.fixed_tilts)
+def test_fixed_link_replaces_the_rod_nuts_and_sets_the_tilt(tilt):
+    cfg = replace(CFG, mount=replace(CFG.mount, link=tilt))
+    link = f"mount_link_{tilt:.0f}"
+    adjustable = _counts(CFG, "mount_tilt_link")
+    fixed = _counts(cfg, link)
+    assert assembly.body_tilt(cfg) == tilt
+    assert link in {p.name for p in assembly.placed(cfg)} and "mount_tilt_link" not in {p.name for p in assembly.placed(cfg)}
+    assert {f.host for f in assembly.fasteners_in_body(cfg)} <= {p.name for p in assembly.placed(cfg)}
+    assert fixed == {k: v for k, v in adjustable.items() if k != "ISO 4032 M6 nut"}  # the pins and their washers and nuts stay
+    assert adjustable["ISO 4032 M6 nut"] == 4 and not [f for f in assembly.fasteners_in_body(cfg) if f.name == "ISO 4032 M6 nut"]
+
+
+def test_default_link_is_the_adjustable_one_at_the_plate_tilt():
+    assert CFG.mount.link == "adjustable" and assembly.body_tilt(CFG) == CFG.case_plate.tilt
+    assert "mount_tilt_link" in {p.name for p in assembly.placed(CFG)}
+
+
+def test_link_angle_must_be_a_printed_fixed_link():
+    with pytest.raises(ValueError, match="fixed_tilts"):
+        assembly.body_tilt(replace(CFG, mount=replace(CFG.mount, link=47.0)))
+
+
+def test_generic_hub_takes_two_screws_with_nuts_under_the_flange():
+    cfg = replace(CFG, metal_hub=GENERIC_8MM_FLANGE)
+    hub = _counts(cfg, "slip_clutch_carrier_metal_hub")
+    default = _counts(CFG, "slip_clutch_carrier_metal_hub")
+    assert hub["ISO 4762 M3 x 12"] == 2 and hub["ISO 4032 M3 nut"] == 2  # README: 2 x ISO 4762 M3 x 12 with ISO 4032 M3 nuts
+    assert default["ISO 4762 M3 x 10"] == 3 and "ISO 4032 M3 nut" not in default  # tapped holes
+    assert {k: v for k, v in hub.items() if not k.startswith(("ISO 4762 M3", "ISO 4032"))} == {k: v for k, v in default.items() if not k.startswith("ISO 4762 M3")}
+
+
 def _apart(ba, bb, gap=0.0) -> bool:
     return any(getattr(ba.max, a) + gap < getattr(bb.min, a) or getattr(bb.max, a) + gap < getattr(ba.min, a) for a in "XYZ")
 
 
-@pytest.mark.parametrize("split", SPLITS)
-def test_fasteners_sit_in_their_holes_without_cutting_printed_parts(split):
+@pytest.mark.parametrize("name", CONFIGS)
+def test_fasteners_sit_in_their_holes_without_cutting_printed_parts(name):
     # nominal shank, head, nut and insert outer diameters: a misplaced fastener cuts solid material or floats
-    cfg = replace(CFG, body=replace(CFG.body, split=split))
+    cfg = CONFIGS[name]
     placed = assembly.placed(cfg)
     names = {p.name for p in placed}
     printed = [(p.name, p.shape, p.shape.bounding_box()) for p in placed if (not p.bought or p.name in ENVELOPES) and not p.tool]
