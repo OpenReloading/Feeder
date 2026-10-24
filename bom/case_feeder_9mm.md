@@ -25,8 +25,7 @@ Default: split body, Pololu 2693 metal hub, simple PWM speed controller, no micr
 | `mount_clamp` | 1 |
 | `mount_rod_end_adjust`, `mount_rod_end_fixed` | 1 each, adjustable link |
 | `mount_link_45`, `mount_link_50`, `mount_link_55` | 1 each, optional fixed links |
-| `electronics_box` | 1 |
-| `electronics_collar` | 1 |
+| `electronics_box` or `electronics_box_left` | 1, right or left of the tube as the user sees it |
 | `electronics_lid` | 1 |
 
 Other calibers: plate, exit insert and drop tube come per plate set from `build/plates/<set>/` (README, Plate sets). The rest stays.
@@ -96,11 +95,11 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 
 | Item | Qty | Used in | Note |
 |---|---|---|---|
-| ISO 4762 M5 x 35 | 2 | box collar on the tube | |
-| ISO 7089 M5 washer | 2 | box collar, under the screw heads | |
-| ISO 4032 M5 nut | 2 | box collar | |
-| CNC Kitchen heat-set insert M3 x 5.7 | 10 | 4 box corner posts, 2 collar, 4 relay standoffs | |
-| ISO 4762 M3 x 8 | 10 | 4 lid to box, 2 box to collar from inside, 4 relay to its standoffs | |
+| ISO 4762 M5 x 35 | 2 | box clamp on the tube | |
+| ISO 7089 M5 washer | 2 | box clamp, under the screw heads | |
+| ISO 4032 M5 nut | 2 | box clamp | |
+| CNC Kitchen heat-set insert M3 x 5.7 | 8 | 4 box corner posts, 4 relay standoffs | |
+| ISO 4762 M3 x 8 | 8 | 4 lid to box, 4 relay to its standoffs | |
 | Toggle switch MTS-102, 6 mm panel hole | 1 | power, front face | rating for 12 V DC 3 A unverified |
 | DC panel jack DC-022B, 5.5 x 2.1 mm, 11 mm panel hole | 1 | 12 V in, front face | hole size unverified |
 | GX12 2-pin panel socket and plug | 1 | motor, side face | 12 mm hole unverified |
