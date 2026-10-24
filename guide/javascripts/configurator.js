@@ -33,7 +33,7 @@
   async function render() {
     const c = (current = choice());
     const { parts, bom } = resolve(c);
-    const names = Object.keys(parts).sort();
+    const names = Object.keys(parts).sort((a, b) => a.localeCompare(b));
     $("configurator-result").hidden = !names.length || !bom;
     if (!names.length || !bom) return;
     const bytes = await Promise.all(names.map((n) => size(parts[n])));
@@ -118,7 +118,7 @@
         data.set(hash, new Uint8Array(await r.arrayBuffer()));
         status.textContent = `Fetched ${++done} of ${new Set(Object.values(parts)).size} files`;
       }));
-      const files = Object.keys(parts).sort().map((n) => ({ name: `${n}.stl`, data: data.get(parts[n]) }));
+      const files = Object.keys(parts).sort((a, b) => a.localeCompare(b)).map((n) => ({ name: `${n}.stl`, data: data.get(parts[n]) }));
       const a = document.createElement("a");
       a.href = URL.createObjectURL(zip(files));
       a.download = `feeder-${Object.values(c).join("-")}.zip`;
@@ -144,7 +144,7 @@
     }
     form.addEventListener("change", render);
     $("configurator-download").addEventListener("click", download);
-    render();
+    void render();
   }
-  init();
+  void init();
 })();
