@@ -37,7 +37,7 @@ The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenRe
 .venv/bin/mkdocs build --strict               # site/
 ```
 
-`.github/workflows/pages.yml` runs the tests, builds the guide and deploys `site/` to GitHub Pages on every push to `main` (pull requests build only).
+`.github/workflows/pages.yml` runs the tests, builds the guide and deploys it to GitHub Pages on every push to `main` or `develop` (pull requests build only). One deployment holds two sites: `main` at the root (the released site) and `develop` under `/develop/` (the development preview). Each ref is built by its own job and `assemble` merges them. The preview is built with `mkdocs-preview.yml` (`mkdocs build --strict -f mkdocs-preview.yml`): `hooks/preview.py` moves `site_url` to `<site_url>develop/`, adds `noindex` to every page and drops the sitemap, and `overrides/main.html` shows a banner that it is not the released site. The preview has no configurator print files (that page shows its notice). If the `develop` build fails, the root deploys without the preview and the run shows a warning; if the `main` build fails, nothing is deployed. A push to `develop` redeploys the root from `main`. The `github-pages` environment must allow deployments from `main` and `develop`.
 
 The configurator page (`guide/configurator.md`, `guide/javascripts/configurator.js`) picks the options, lists the parts and the BOM for the choice and zips the print files in the browser. It reads `build/configurator/` through `hooks/configurator_files.py`: run `build.py --no-test --configurator` before `mkdocs build` to see it locally. A push to `main` builds those files in CI; other builds and local builds without them show a notice instead.
 

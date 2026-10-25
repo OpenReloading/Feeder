@@ -21,3 +21,10 @@
   <meta name="twitter:description" content="{{ description }}">
   <meta name="twitter:image" content="{{ image }}">
 {% endblock %}
+
+{#- The development preview (mkdocs-preview.yml) says so on every page; the released build renders nothing here, byte for byte. -#}
+{%- block announce -%}
+  {%- if config.extra.preview -%}
+    Development preview of the <code>develop</code> branch, not the released site. <a href="{{ config.extra.release_url }}">Open the released site</a>
+  {%- endif -%}
+{%- endblock -%}

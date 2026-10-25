@@ -35,6 +35,7 @@ hooks:
   - hooks/repo_facts.py
   - hooks/table_layout.py   # <wbr> in inline code, data-label and data-stack on long tables
   - hooks/configurator_files.py   # build/configurator/ (build.py --configurator) into site/configurator/data/
+  - hooks/preview.py   # only for mkdocs-preview.yml: site_url under develop/, noindex, no sitemap
 
 extra:
   social:
