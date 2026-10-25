@@ -48,6 +48,7 @@ extra_javascript:
 
 # build/guide/buildguide.json and guide/generated/ come from build.py --guide
 plugins:
+  - search   # listing plugins replaces the default search
   - buildguide:
       data: build/guide/buildguide.json
 
