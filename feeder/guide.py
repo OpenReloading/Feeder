@@ -86,7 +86,7 @@ WIRING_PARTS = {
     "XP": _part("join", "XP +12 V", "", (230, 240), (150, 30), bottom=["1", "2", "3", "4"]),
     "XN": _part("join", "XN 0 V", "", (420, 240), (150, 30), bottom=["1", "2", "3", "4"]),
     "U1": _part("box", "U1 PWM controller", "knob in the front face", (260, 420), (130, 110), left=["V+", "V-"], right=["M+", "M-"]),
-    "K1": _part("box", "K1 timer relay", "off-delay, about 2 s", (580, 420), (150, 110), left=["VCC", "GND", "IN"], right=["COM", "NO", "NC"]),
+    "K1": _part("box", "K1 timer relay", "DROK 200391, mode P8, about 2 s", (580, 420), (150, 110), left=["VCC", "GND", "IN"], right=["OUT1", "OUT2"]),
 }
 
 # (step id, title, note, [(no, a, b, colour)])
@@ -97,15 +97,15 @@ WIRING_STEPS = [
       ("5", "J1:-", "XN:1", "BK")]),
     ("B", "PWM controller", "Turn the knob to the lowest setting before the first power-up.",
      [("6", "XP:2", "U1:V+", "RD"), ("7", "XN:2", "U1:V-", "BK")]),
-    ("C", "Timer relay supply", "",
+    ("C", "Timer relay supply", "Set the module to mode P8 and OP to about 2 s. IN is its low-level trigger terminal.",
      [("8", "XP:3", "K1:VCC", "RD"), ("9", "XN:3", "K1:GND", "BK")]),
     ("D", "Sensor socket", "The sensor output pulls the relay input to 0 V while no brass is in front of it. "
-     "Check the relay module takes a low input (unverified).",
+     "Check the sensor type and its on-state voltage first (see above).",
      [("10", "XP:4", "X2:S1", "BN"), ("11", "XN:4", "X2:S2", "BU"), ("12", "X2:S3", "K1:IN", "BK")]),
     ("E", "Motor line", "The motor runs only while the relay holds. The flyback diode D2 sits across the motor plug, after "
      "the relay contact, cathode (band) on the + pin. The cap thread follows the plate direction, so the motor turns one way "
      "only: set `case_plate.direction` in the configuration and print the matching plate and cap.",
-     [("13", "U1:M+", "K1:COM", "RD"), ("14", "K1:NO", "X1:S1", "RD"), ("15", "U1:M-", "X1:S2", "BK"),
+     [("13", "U1:M+", "K1:OUT1", "RD"), ("14", "K1:OUT2", "X1:S1", "RD"), ("15", "U1:M-", "X1:S2", "BK"),
       ("16", "D2:K", "X1:S1", "RD"), ("17", "D2:A", "X1:S2", "BK")]),
     ("F", "Plugs", "Solder the sensor cable and the motor cable to the plugs: brown, blue, black to pins 1, 2, 3; "
      "motor + to pin 1.",

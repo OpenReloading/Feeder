@@ -92,7 +92,7 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 | Motor cable, 2 cores 0.75 mm² | length to the motor | box to motor, soldered to the motor terminals and the GX12 plug. Current rating unverified |
 | Wire end ferrule 0.75 mm², DIN 46228-1 | 6 | screw terminals of the controller (4) and the relay contact (2). Sleeve length unverified: fit to the terminal |
 | Wire end ferrule 0.34 mm², DIN 46228-1 | 3 | relay supply and input screw terminals. Sleeve length unverified: fit to the terminal |
-| 12 V off-delay timer relay module (output holds for the set delay after the input drops, a returning input resets it), normally open contact in the motor line | 1 | input from the sensor output. The NC sensor conducts while no brass is in front of it, so the relay holds and the motor runs. Brass in front for longer than the delay (set about 2 s), a broken wire or no sensor power stops the motor. Each falling case blinks the sensor for about 0.1 s, which the delay ignores. Module type, input current and delay mode unverified: check against the sensor output |
+| [DROK delay relay module SKU 200391, 6 to 30 V, LCD, 71 x 39 x 25 mm](https://m.media-amazon.com/images/I/91rcHqMUeoL.pdf) | 1 | off-delay timer, one dry relay contact (30 V DC 10 A) in the motor + line, the second contact terminal is the other end of that line. Set mode P8 (signal holding: the relay stays on while the trigger is present, and drops OP after it disappears, a returning trigger clears the timing) and OP to about 2 s. The NC sensor pulls the low-level trigger input (0.0 to 0.2 V) to 0 V while no brass is in front of it, so the relay holds and the motor runs. Brass in front for longer than OP, a broken wire or no sensor power stops the motor. Each falling case blinks the sensor for about 0.1 s, which OP ignores. Isolated input, 15 mA idle and 50 mA working current from the supply. Trigger input current and mounting hole spacing are not in the sheet, unverified. The sensor's on-state voltage must stay below 0.2 V: check it before the first run (Wiring page). This module is adjustable and switches either line, so it suits the topology; a module with a bare transistor output that can only switch the 0 V line does not |
 
 ## Electronics box
 
@@ -103,8 +103,8 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 | ISO 4032 M5 nut | 2 | box clamp | |
 | CNC Kitchen heat-set insert M3 x 5.7 | 8 | 4 box corner posts, 4 relay standoffs | |
 | ISO 4762 M3 x 8 | 8 | 4 lid to box, 4 relay to its standoffs | |
-| Toggle switch MTS-102, 6 mm panel hole | 1 | power, front face | rating for 12 V DC 3 A unverified |
-| DC panel jack DC-022B, 5.5 x 2.1 mm, 11 mm panel hole | 1 | 12 V in, front face | hole size unverified |
+| [E-Switch 100SP1T1B1M1QEH toggle switch, SPDT used as on-off, 1/4-40 bushing](https://configured-product-images.s3.amazonaws.com/Datasheets/100.pdf) | 1 | power, front face, 6.6 mm panel hole | 5 A resistive at 28 V DC (datasheet, silver contacts). The motor is an inductive load, derate: it carries at most the 2.7 A stall plus relay and sensor. Nut size unverified |
+| [Switchcraft L722A DC panel jack, 2.1 mm centre pin, 5.5 mm barrel](https://media.e-sonic.com/productfiles/mf-sc/plf6.pdf) | 1 | 12 V in, front face, 8.2 mm panel hole (.313 in hole, panel up to .125 in, longer .319 in bushing) | 5 A at 12 V DC resistive (datasheet). Body size unverified |
 | GX12 2-pin panel socket and plug | 1 | motor, side face | 12 mm hole unverified |
 | GX12 3-pin panel socket and plug | 1 | sensor, side face | 12 mm hole unverified. The pin counts differ so the motor plug cannot go in the sensor socket |
 | Panel nut, PWM knob | 1 | potentiometer in the lid | supplied with the potentiometer, size unverified |
@@ -113,6 +113,6 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 | Panel nut, GX12 2-pin socket | 1 | motor socket in the side face | supplied with the socket, size unverified |
 | Panel nut, GX12 3-pin socket | 1 | sensor socket in the side face | supplied with the socket, size unverified |
 
-The PWM controller hangs on its knob potentiometer nut in the lid (7.2 mm hole, unverified, the pot must be on the board or on a lead). The timer relay module sits on four standoffs on the back wall, 44 x 24 mm hole spacing (`electronics.relay_holes`, unverified: measure on delivery). Hole sizes are in `electronics.front_holes` and `electronics.side_holes`.
+The PWM controller hangs on its knob potentiometer nut in the lid (7.2 mm hole, unverified, the pot must be on the board or on a lead). The timer relay module (71 x 39 mm board, 25 mm high with its LCD and terminals, `electronics.relay_board`) sits on four standoffs on the back wall, 64 x 32 mm hole spacing (`electronics.relay_holes`, an estimate, unverified: measure on delivery). The box is 96 x 54 x 120 mm inside so the module clears the side sockets and the DC jack. Hole sizes are in `electronics.front_holes` and `electronics.side_holes`.
 
 The controller has no current limit and the motor's stall torque is far above the gearbox limit: the clutch (0.84 to 2.10 Nm, estimate) is the only torque limit, below the gearbox limit of 3.92 Nm and above the plate drag of 0.27 Nm at 38 deg (estimate).

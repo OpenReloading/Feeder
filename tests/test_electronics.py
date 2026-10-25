@@ -107,3 +107,17 @@ def test_relay_screws_pass_the_board_holes():
         probe = Pos(x, o["y1"] - E.box_wall - E.standoff_h - E.relay_pcb_t / 2, z) * Cylinder(fasteners.nominal_d(E.lid_screw_size) / 2, E.relay_pcb_t, rotation=(90, 0, 0))
         common = probe & relay
         assert (common.volume if common.solids() else 0.0) < 1e-3
+
+
+def _common(a, b):
+    c = a & b
+    return c.volume if c.solids() else 0.0
+
+
+def test_bought_modules_and_panel_parts_do_not_overlap_in_the_box():
+    shapes = {"timer_relay": el.relay_board(), "pwm_controller": el.pwm_board()}
+    shapes |= {pp.label: loc * el.panel_envelope(pp) for _, pp, loc, _ in el.panel_fits()}
+    names = list(shapes)
+    for i, first in enumerate(names):
+        for second in names[i + 1:]:
+            assert _common(shapes[first], shapes[second]) < 1e-3, (first, second)
