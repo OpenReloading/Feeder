@@ -25,6 +25,7 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 | `.venv/bin/python build.py --plates` | also `build/plates/<set>/` for each plate set: plate, exit insert and drop tube |
 | `.venv/bin/python build.py --configurator` | also `build/configurator/`: the print files of every option combination (body split, plate set, extender, tilt link, tube shape, hub) as `<hash>.stl`, identical parts stored once, and `manifest.json` with the part files and BOM rows per choice |
 | `.venv/bin/python -m pytest -q` | tests only. `-n 4 --dist loadfile` runs the test files on 4 cores |
+| `.venv/bin/python -m pytest -q -n 4 --dist loadfile --cov`, then `.venv/bin/coverage report --rcfile=sim/.coveragerc` | tests with a coverage summary and the floors: `feeder` in `[tool.coverage.report]` of `pyproject.toml` (pytest fails below it), `sim` in `sim/.coveragerc` (the second command). CI (`pages.yml`) runs both on the whole suite. Raise a floor when coverage rises, keep it a little below the measured value. Not measured: `sim/__main__.py` (CLI of the hours-long sweeps). `feeder/export.py` (assembly viewer export) runs only in `build.py --assembly`, so its tests-only coverage is low |
 
 ## Build guide site
 
