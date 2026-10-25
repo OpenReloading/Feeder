@@ -7,10 +7,15 @@ on:
 permissions: {}
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  # a newer push or pull request commit cancels the older build, but a run on main (the deployment) is never cancelled
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
   build:
+    # The promotion pull request (develop -> main) repeats what the push to develop already built and tested. Matching
+    # the head repository too keeps a fork branch named develop from skipping the build.
+    if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -56,13 +61,15 @@ jobs:
           size=$(du -sm site | cut -f1)
           echo "site: $size MB"
           test "$size" -lt 800
-      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+      - if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       pages: write
       id-token: write

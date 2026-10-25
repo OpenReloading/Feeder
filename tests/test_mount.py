@@ -98,8 +98,8 @@ def test_pivot_hole_and_washer_clearances(parts):
     assert w["d2"] / 2 <= m.ear_r()  # washer inside the ear outline
     assert m.ear_r() - m.pivot_d() / 2 * math.sqrt(2) >= MW  # wall above the 45 deg roof of the hole
     assert m.ear_gap() == pytest.approx(MT.tongue_t + 4 * FIT)
-    hw = _hardware(CFG.case_plate.tilt, MT.pivot_size)
-    yoke, clamp = m.yoke_in_body(parts["mount_yoke"]), m.clamp_in_body(parts["mount_clamp"], CFG.case_plate.tilt)
+    hw = _hardware(layout.tilt(), MT.pivot_size)
+    yoke, clamp = m.yoke_in_body(parts["mount_yoke"]), m.clamp_in_body(parts["mount_clamp"], layout.tilt())
     for name, solid in hw.items():
         for pname, part in (("yoke", yoke), ("clamp", clamp)):
             assert _overlap(solid, part) < 1e-3, f"{name} in {pname}"
@@ -151,7 +151,7 @@ def test_weight_always_turns_the_body_steeper_so_the_link_stays_in_compression(t
         for fill, motor, brass, ext in itertools.product(CFG.print.fill, M.mass, (0.0, CFG.case_plate.drag_mass), (False, True)):
             assert _weight_moment(tilting, tilt, fill, motor, brass, ext) < 0, (tilt, fill, motor, brass, ext)
     assert all(m.link_length(t) > m.link_length(t + 1) for t in range(round(lo), round(hi)))  # steeper: shorter link
-    assert lo <= CFG.case_plate.tilt <= hi
+    assert lo <= layout.tilt() <= hi
 
 
 def test_link_sets_the_tilt_to_a_tenth_of_a_degree_per_tenth_of_a_millimetre():
@@ -282,7 +282,7 @@ def test_adjustable_link_covers_the_tilt_range():
 
 def test_fixed_links_are_in_the_range_and_their_pins_are_the_link_length_apart(parts):
     lo, hi = MT.tilt_range
-    assert CFG.case_plate.tilt in MT.fixed_tilts
+    assert layout.tilt() in MT.fixed_tilts
     for tilt in MT.fixed_tilts:
         assert lo <= tilt <= hi
         link = parts[f"mount_link_{tilt:.0f}"]
@@ -295,7 +295,7 @@ def test_link_pins_meet_the_fork_holes_at_every_tilt(parts):
     # from the solids: the link placed by its own frame must put its holes on the fork holes
     lo, hi = MT.tilt_range  # the adjustable link covers the range, not the margin
     yoke = m.yoke_in_body(parts["mount_yoke"])
-    for tilt in (lo, CFG.case_plate.tilt, hi):
+    for tilt in (lo, layout.tilt(), hi):
         pins = Compound(list(_hardware(tilt, MT.link_pin_size).values()))
         assert _overlap(pins, yoke) < 1e-3 and _overlap(pins, m.clamp_in_body(parts["mount_clamp"], tilt)) < 1e-3, tilt  # noqa: PT018
         assert _overlap(pins, m.link_in_body(m.adjustable_link(tilt), tilt)) < 1e-3, tilt
@@ -314,7 +314,7 @@ def test_clamp_fits_a_square_and_a_round_tube():
 
 
 def test_assembly_has_no_interference_at_the_default_tilt(parts, fixed):
-    tilt = CFG.case_plate.tilt
+    tilt = layout.tilt()
     mount = {
         "yoke": m.yoke_in_body(parts["mount_yoke"]),
         "clamp": m.clamp_in_body(parts["mount_clamp"], tilt),

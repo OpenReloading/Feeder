@@ -5,7 +5,7 @@ Run in the dev container from the project root:
     .venv/bin/python build.py --no-test    # build only
     .venv/bin/python build.py --assembly   # also build/assembly/: feeder.step, feeder.3mf, viewer.html
     .venv/bin/python build.py --variants   # also build/variants/<split>/: body and plate for each body split, with assembly
-    .venv/bin/python build.py --plates     # also build/plates/<set>/: plate, exit insert and drop tube per plate
+    .venv/bin/python build.py --plates     # also build/plates/<set>/: plate, exit insert, drop tube and its chain parts per plate
     .venv/bin/python build.py --configurator  # also build/configurator/: print files by content hash and manifest.json for the configurator (variants.py)
     .venv/bin/python build.py --guide      # also the build guide data and assembly for mkdocs build (mkdocs.yml)
 
@@ -60,10 +60,10 @@ def build_all(cfg: Config = CFG, out: Path = BUILD, modules: tuple[str, ...] | N
 
 def plate_set_parts(cfg: Config) -> list:
     """The parts that belong to one plate: the rest of the feeder takes every plate."""
-    from feeder.parts import body, case_plate, drop_tube  # noqa: PLC0415
+    from feeder.parts import body, case_plate, drop_chain, drop_tube  # noqa: PLC0415
 
     return [(f"case_plate_{cfg.case_plate.caliber}", case_plate.plate), ("body_exit_insert", body.exit_insert),
-            ("drop_tube", drop_tube.drop_tube)]
+            ("drop_tube", drop_tube.drop_tube), *drop_chain.PARTS.items()]
 
 
 def build_assembly(cfg: Config, out: Path, title: str) -> None:

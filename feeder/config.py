@@ -129,6 +129,8 @@ class CasePlate:
     the tilt and fall back. Base-down cases ride to the exit. Start values, tune on hardware."""
 
     caliber: str = "9mm_luger"  # a case in calibers.table (a plate for it alone) or a group in calibers.groups
+    item: str = "case"  # what the plate set delivers: "case", later "bullet". Only the keys of `tilts` are built
+    orient: str = "base_down"  # how it leaves the exit: "base_down" (case mouth up), later "mouth_down", "tip_first". Pocket and ridge geometry and the tilt set it, no flip module
     pocket_clearance: float = 3.0  # pocket = rim + this, measured to the band. 12 or 15 mm for 9mm: hardware test
     height_ratio: float = 0.37  # plate height over case length, near the estimated centre of mass (0.33 to 0.39). Group plates: the height closest to it for the shortest and longest case
     pocket_pitch: float = 1.6  # pocket spacing over pocket diameter
@@ -154,7 +156,7 @@ class CasePlate:
     fill_cases: int = 250  # design fill, about drag_mass of 9mm
     packing: float = 0.55  # loose cases over their envelope volume, low estimate (random cylinders about 0.55 to 0.65, unverified)
     drag_mu: float = 0.3  # brass on printed plastic, estimate
-    tilt: float = 45.0  # deg from horizontal, start value, tune on hardware
+    tilts: dict = field(default_factory=lambda: {("case", "base_down"): 45.0})  # (item, orient) the set delivers: deg from horizontal, start value, tune on hardware. The supported combinations
     direction: int = 1  # +1 counter-clockwise seen from above, -1 clockwise
 
 
@@ -463,7 +465,7 @@ class Clutch:
 class DropTube:
     """Bayonet socket over the exit spigot (two lugs on the spigot, an L slot with a notch at the stop in the socket wall),
     straight section with a port for an M18x1 inductive tube-full sensor
-    (LJ18A3-8-Z/AX, NPN NC, 8 mm rated), barb for a clear PVC hose. The bore only steps outward along the path.
+    (LJ18A3-8-Z/AX, NPN NC, 8 mm rated), male end for the parts of `DropChain`, which end in the hose barb. The bore only steps outward along the path.
     Sensor, nut and hose sizes are typical kit values, unverified, measure on delivery."""
 
     lug_h: float = 1.2  # radial height of a spigot lug, with a 45 deg underside that prints without support (print tolerance estimate, unverified: try it on a print)
@@ -489,7 +491,19 @@ class DropTube:
     barb_ridge_h: float = 0.4  # radial, 45 deg back face prints without support
     barb_ridge_pitch: float = 5.0
     barb_ridges: int = 2
-    barb_len: float = 18.0
+    barb_len: float = 18.0  # on the hose adapter, the last part of the chain
+
+
+@dataclass(frozen=True)
+class DropChain:
+    """Parts that chain on the drop tube's male end (the exit spigot's form), each with the drop tube's female socket at
+    one end and the male form at the other, so the bore stays at the drop tube bore. The hose adapter ends the chain.
+    The sensor window stays on the first tube. Own design sizes, tune on hardware."""
+
+    parts: tuple = ()  # optional parts between the drop tube and the hose adapter, in order: "spacer", "angled". () is the default assembly
+    spacer_len: float = 30.0  # straight tube between the socket and the male end
+    angle: float = 30.0  # deg the angled piece bends the path, sideways to the lugs (0 is straight). At most 35: the 45 deg lug undersides still print without support in this tilt (test_drop_chain)
+    leg_len: float = 25.0  # angled piece: straight tube each side of the bend, from the socket top and to the male end
 
 
 @dataclass(frozen=True)
@@ -527,6 +541,7 @@ class Config:
     electronics: Electronics = Electronics()
     clutch: Clutch = Clutch()
     drop_tube: DropTube = DropTube()
+    drop_chain: DropChain = DropChain()
     sim: Sim = Sim()
 
 

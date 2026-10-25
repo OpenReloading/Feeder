@@ -74,16 +74,6 @@
                 }
             }
         ],
-        "./feeder/export.py": [
-            {
-                "code": "reportReturnType",
-                "range": {
-                    "startColumn": 11,
-                    "endColumn": 5,
-                    "lineCount": 21
-                }
-            }
-        ],
         "./feeder/guide.py": [
             {
                 "code": "reportAttributeAccessIssue",

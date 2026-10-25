@@ -31,7 +31,7 @@ COLORS = {  # STEP and 3MF colours by viewer kind, RGB 0..1
 }
 
 
-def _steps(cfg: Config) -> list[dict]:
+def _steps(cfg: Config) -> list[tuple[str, str]]:
     """Assembly steps by `Placed.step`, text for the viewer."""
     mt, n = cfg.mount, cfg.clutch.springs_fitted
     split = cfg.body.split
@@ -54,6 +54,8 @@ def _steps(cfg: Config) -> list[dict]:
         ("Case plate", f"{layout.plate_r(cfg) * 2:.1f} mm, {layout.pocket_count(cfg)} notches, closed by the band. Drops over the ring hex onto the flange; lift it by the key ring."),
         ("Cap", f"Twist on by hand until it sits on the plate: about {sc.cap_clamp_force(cfg):.0f} N clamp at 1 Nm (estimate) holds the plate against the brass on the low side. Twist off to change plates."),
         ("Drop tube", f"Inner M18 x 1 lock nut into the slot from the side first. No screw: hold the socket {cfg.drop_tube.twist:.0f} deg counterclockwise (seen from below) of its final position, push it up over the exit spigot until the lugs reach the groove, then turn it clockwise until it stops and drops into the notch, sensor window square. To take it off, lift it out of the notch, turn it back and pull."),
+        ("Drop tube chain (optional)", f"Spacer ({cfg.drop_chain.spacer_len:.0f} mm) and angled piece ({cfg.drop_chain.angle:.0f} deg) go on the male end of the part before them the way the drop tube goes on the exit spigot: hold the socket {cfg.drop_tube.twist:.0f} deg counterclockwise (seen from below) of its final position, push it up over the lugs, turn it clockwise until it stops and drops into the notch. They keep the sensor side of the drop tube on +x."),
+        ("Hose adapter", "Same bayonet on the last male end. Push the clear hose over its barb."),
         ("Yoke", "Screws from below into the heat-set inserts in the body's bottom plane."),
         ("Clamp on the 25 mm tube", "Slit clamp: screws on washers in the counterbores, nuts in the pockets. Tongue between the yoke ears on the pivot bolt, a washer on each side, the nylon nut sets the pivot friction."),
         ("Tilt link", f"Pin A in the yoke fork, pin B in the clamp fork, a washer on each side and a nylon nut each. Adjustable link: fixed rod end on a captive M6 nut and a jam nut, adjust end between two nuts on a {mount.rod_length(cfg):.0f} mm M6 threaded rod, {mt.tilt_range[0]:.0f} to {mt.tilt_range[1]:.0f} deg. Or one printed fixed link per angle ({', '.join(f'{t:.0f}' for t in mt.fixed_tilts)} deg) on the same pins."),
