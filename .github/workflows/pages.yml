@@ -54,9 +54,10 @@ jobs:
           guide=$!
           tests=0
           pytest_args=(-q -n auto --dist loadfile)
-          # the coverage floors (pyproject.toml, sim/.coveragerc) need the whole suite, not the docs-only test file
+          # the coverage floors (pyproject.toml, sim/.coveragerc) need the whole suite, not the docs-only test file.
+          # The bare --cov goes last: before the test path it would take that path as its source.
           if [ "$TESTS" = tests ]; then pytest_args+=(--cov); fi
-          .venv/bin/python -m pytest "${pytest_args[@]}" "$TESTS" || tests=$?
+          .venv/bin/python -m pytest "$TESTS" "${pytest_args[@]}" || tests=$?
           if [ "$TESTS" = tests ]; then .venv/bin/coverage report --rcfile=sim/.coveragerc || tests=$?; fi
           wait "$guide" || { cat guide.log; exit 1; }
           exit "$tests"
