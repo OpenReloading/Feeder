@@ -56,6 +56,10 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
 .card h2 { font-family: var(--f-display); font-weight: 700; font-size: 22px; line-height: 1.2; margin: 0 }
 .card p { margin: 0; max-width: 90ch }
 .card small { font-family: var(--f-mono); font-size: 12px; color: var(--muted) }
+/* Embedded in the guide: the page scrolls, not the frame, and the site's heading is the only one */
+.embedded { overflow: hidden }
+.embedded h1 { display: none }
+.embedded .stage { height: clamp(360px, 70vw, 560px); touch-action: pan-y }
 [hidden] { display: none !important }
 </style>
 
@@ -116,6 +120,19 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
   const INFO = window.FEEDER_INFO, MODELS = window.FEEDER_MODELS;
   const S = INFO.springs, CS = INFO.cases;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // embedded in the guide (an iframe): follow the site's colour scheme and grow to the content, so only the page scrolls
+  const embedded = parent !== window;
+  if (embedded) {
+    document.documentElement.classList.add("embedded");
+    try {  // same origin only: the site's palette toggle sets data-md-color-scheme on its body
+      const host = parent.document.body, frame = window.frameElement;
+      const sync = () => { const scheme = host.dataset.mdColorScheme; if (scheme) document.documentElement.dataset.theme = scheme === "slate" ? "dark" : "light"; };
+      new MutationObserver(sync).observe(host, { attributes: true, attributeFilter: ["data-md-color-scheme"] });
+      sync();
+      new ResizeObserver(() => { frame.style.height = Math.ceil(document.documentElement.getBoundingClientRect().height) + "px"; }).observe(document.documentElement);
+    } catch { /* cross-origin or file: the browser's colour scheme and the frame's own size stay */ }
+  }
 
   const MATS = {
     motor: { c: 0x4b5258, m: 0.3, r: 0.5, label: "Motor (envelope)" },
@@ -196,6 +213,11 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
   camera.position.copy(camDir).multiplyScalar(900);
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
+  if (embedded) {  // one finger scrolls the page, two fingers orbit and zoom
+    controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
+    for (const type of ["touchstart", "touchmove"]) stage.addEventListener(type, e => { if (e.touches.length < 2) e.stopPropagation(); }, { capture: true });
+    if (matchMedia("(pointer: coarse)").matches) document.querySelector(".hint").textContent = "One finger scrolls · two fingers orbit and zoom";
+  }
   scene.add(new THREE.HemisphereLight(0xffffff, 0x445055, 0.75));
   const key = new THREE.DirectionalLight(0xffffff, 0.75); key.position.set(120, 400, 280); scene.add(key);
   const rim = new THREE.DirectionalLight(0xffffff, 0.3); rim.position.set(-300, 120, -250); scene.add(rim);
@@ -365,7 +387,7 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
   };
   const tiltedPts = sphere(TILT), levelPts = sphere(0);
   const target = new THREE.Box3().setFromPoints(tiltedPts).getCenter(new THREE.Vector3());
-  const radius = Math.max(...tiltedPts.concat(levelPts).map(p => p.distanceTo(target))) + 30;
+  const radius = tiltedPts.concat(levelPts).reduce((m, p) => Math.max(m, p.distanceTo(target)), 0) + 30;
   controls.target.copy(target);
   if (!reduce) t = 0;
 

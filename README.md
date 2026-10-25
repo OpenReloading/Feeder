@@ -166,11 +166,11 @@ Tilt choice. The best angle for 9mm on this feeder is UNTESTED. Start at 45 and 
 
 | Tilt | When | 9mm capacity, wall / with extender | Link pin to pin |
 |---|---|---|---|
+| 40 deg | most capacity, range end of this mount | 504 / 1536 | 97.1 mm |
 | 45 deg | default, start here | 406 / 1302 | 91.4 mm |
 | 50 deg | cases still go in upside down at 45 | 325 / 1100 | 85.6 mm |
 | 55 deg | still upside down at 50 | 254 / 934 | 79.7 mm |
 | 60 deg | last resort, extender needed for the design fill | 193 / 793 | 73.8 mm |
-| 40 deg | most capacity, range end of this mount | 504 / 1536 | 97.1 mm |
 
 Capacity: cases under a level brass surface as high as the lowest rim point allows (the wall top, or the extender top over its arc), loose packing 0.55 of the case envelope (`layout.capacity`, estimate; the volume the leaning extender takes, 3 to 7 %, is not subtracted). Fill at most 250 9mm cases (1 kg, `case_plate.fill_cases`, `case_plate.drag_mass`) at any tilt: the clutch, cap and mount load checks assume no more. The wall alone holds 250 up to 55 deg, the low side limits it. The extender raises that limit by 60 mm and keeps 250 cases in at 60 deg with room to spare, it is not for a larger fill.
 <!-- --8<-- [end:tilt] -->
