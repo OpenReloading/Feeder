@@ -60,7 +60,7 @@ All dimensions and options are in `feeder/config.py` (frozen dataclasses, instan
 | `cap` | twist cap: diameter, top, knob gap, grips, hand torque and friction estimates |
 | `spring` | clutch spring (Gutekunst VD-127E-01) |
 | `metal_hub` | Pololu 2693 aluminium hub (default) or `GENERIC_8MM_FLANGE`, an 8 mm flange coupling with nuts under the flange (unverified) |
-| `electronics` | motor driver current limit as a torque, electronics box: gap below the clamp, inner size, wall, clamp, lid screws, relay holes and standoffs, panel hole sizes, envelopes of the panel parts and modules (unverified) |
+| `electronics` | electronics box: gap below the clamp, inner size, wall, clamp, lid screws, relay holes and standoffs, panel hole sizes, envelopes of the panel parts and modules (unverified) |
 | `clutch` | slip clutch geometry, height gauge, screws, friction and torque limits |
 | `drop_tube` | bayonet (lug size, twist, notch lift), M18x1 sensor (length, thread), lock nut and window sizes, hose sizes and barb |
 | `mount` | tilt mount: body inserts, tube (round or square, 25 mm), tilt range 40 to 60 deg, M10 pivot, tilt link pins and rod, fixed link angles, body mass and load limits, unmodelled mass |

@@ -374,11 +374,10 @@ class PanelPart:
 
 @dataclass(frozen=True)
 class Electronics:
-    """Motor driver limit, and the box beside the stand tube below the tilt clamp: upright, controls in the front
+    """The box beside the stand tube below the tilt clamp: upright, controls in the front
     lid toward the user (the low side), its own slit clamp on the tube (the tilt clamp's screws). Panel hole and module sizes
     from seller listings, unverified: measure on delivery."""
 
-    current_limit_torque: float = 0.6  # Nm the driver current limit allows, calibrate with a scale test
     box_gap: float = 10.0  # below the tilt clamp
     box_inner: tuple = (80.0, 50.0, 120.0)  # x across, y away from the tube, z along it: PWM board on its knob in the upper lid, timer relay on the back wall below, estimate
     box_wall: float = 2.4  # thin enough for the panel threads (6 mm and longer, unverified)
@@ -404,7 +403,7 @@ class Electronics:
         ("motor", PanelPart("GX12 2-pin socket", 12.0, 8.5, 15.0, 2.0, (13.0, 13.0, 5.9), (16.0, 2.5))),
         ("sensor", PanelPart("GX12 3-pin socket", 12.0, 8.5, 15.0, 2.0, (13.0, 13.0, 5.9), (16.0, 2.5))),
     )
-    pwm_board: tuple = (50.0, 50.0, 13.6)  # PWM controller: across x, along z (about 25 round its knob), depth with parts on the board (estimate, unverified)
+    pwm_board: tuple = (50.0, 50.0, 13.6)  # PWM controller (listing: 50 x 32 PCB, height unverified; kept at 50 x 50 for the knob and terminals): across x, along z (about 25 round its knob), depth with parts on the board (estimate, unverified)
     relay_board: tuple = (50.0, 30.0)  # timer relay module PCB over its holes: across x, along z (estimate, unverified)
     relay_parts: tuple = (36.0, 16.0, 16.0)  # relay and terminal blocks between the mounting screw heads: across x, along z, height above the PCB (estimate, unverified)
 
@@ -432,7 +431,7 @@ class Clutch:
     knob_screw_size: str = "M5"
     knob_screw_length: float = 16.0  # ISO 4017
     friction_mu: tuple = (0.2, 0.5)  # PLA/PETG/ASA on the same, low and high estimate, unverified
-    backstop_margin: float = 1.25  # metal-hub clutch slips only above this times the current limit
+    backstop_margin: float = 1.25  # metal-hub clutch slips only above this times the plate drag (the controller has no current limit, the clutch is the only torque limit)
 
 
 @dataclass(frozen=True)

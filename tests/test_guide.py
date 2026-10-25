@@ -44,4 +44,21 @@ def test_wiring_board_ends_exist_and_the_motor_runs_through_the_relay():
 
 def test_no_wiring_step_tells_the_builder_to_reverse_the_motor():
     text = " ".join(f"{t} {n}" for _, t, n, _ in guide.WIRING_STEPS).lower()
-    assert not re.search(r"swap|reverse|wrong way|opposite way", text)
+    assert not re.search(r"swap|revers\w* (the )?(motor|leads|polarity of the motor)|wrong way|opposite way", text)
+
+
+def test_wiring_has_fuse_series_diode_and_flyback_diode_after_the_relay_contact():
+    wires = [c for step in guide.wiring_board()["steps"] for c in step["connections"]]
+    ends = {frozenset((c["a"], c["b"])) for c in wires}
+    assert {frozenset(("Q1:ON", "F1:1")), frozenset(("F1:2", "D1:A")), frozenset(("D1:K", "XP:1"))} <= ends  # supply side, in series
+    assert {frozenset(("D2:K", "X1:S1")), frozenset(("K1:NO", "X1:S1")), frozenset(("D2:A", "X1:S2"))} <= ends  # motor side of the contact
+
+
+def test_bom_protects_the_motor_stall_current_and_every_electronics_row_has_a_source_or_is_unverified():
+    rows = guide.bom_rows()
+    text = " ".join(" ".join(cells) for _, cells in rows)
+    assert "Stall current at most 2.60 A" in text
+    electronics = {guide._plain(cells[0]): " ".join(cells) for section, cells in rows if section == "Electronics"}
+    for word in ("5 A", "fuse", "Schottky", "Flexible wire", "Motor cable", "ferrule"):
+        assert any(word in name for name in electronics), word
+    assert all("http" in row or "unverified" in row for row in electronics.values())

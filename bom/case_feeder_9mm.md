@@ -1,6 +1,6 @@
 # BOM: 9mm case feeder (default configuration)
 
-Default: split body, Pololu 2693 metal hub, simple PWM speed controller, no microcontroller. Sizes marked unverified come from seller listings: measure on delivery and adjust `feeder/config.py`.
+Default: split body, Pololu 2693 metal hub, 7 A PWM speed controller, no microcontroller. Sizes marked unverified come from seller listings: measure on delivery and adjust `feeder/config.py`.
 
 ## Printed parts
 
@@ -34,7 +34,7 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 
 | Item | Qty | Used in | Note |
 |---|---|---|---|
-| Worm gear motor 5840-31ZY, 12 V, 8 mm D shaft, 1240 winding, 590:1 (6.5 rpm no load, 5 rpm at the suggested load) | 1 | body core | slowest variant. Runs at about 10 to 30 % PWM duty. Gearbox limit 3.92 Nm ([microdcmotors](https://microdcmotors.com/product/12v-24v-high-torque-low-speed-dc-motor-with-encoder-self-locking-model-nfp-5840-31zy-en)). May not start below 10 to 15 % duty (unverified) |
+| Worm gear motor 5840-31ZY, 12 V, 8 mm D shaft, 1240 winding, 590:1 (6.5 rpm no load, 5 rpm at the suggested load) | 1 | body core | slowest variant. Runs at about 10 to 30 % PWM duty. Gearbox limit 3.92 Nm ([microdcmotors](https://microdcmotors.com/product/12v-24v-high-torque-low-speed-dc-motor-with-encoder-self-locking-model-nfp-5840-31zy-en)). May not start below 10 to 15 % duty (unverified). Stall current at most 2.60 A, no-load at most 200 mA, suggested load at most 0.70 A at 12 V, the figure that sizes the supply, fuse and controller below |
 | Pololu 2693 aluminium hub, 8 mm bore, M3 holes | 1 | carrier | sold in pairs, includes its set screws. Option: `GENERIC_8MM_FLANGE` with 2 x ISO 4762 M3 x 12 and 2 x ISO 4032 M3 nuts |
 | Compression spring Gutekunst VD-127E-01 | 6 | disc | |
 | Split key ring 25 mm | 1 | case plate eye | one per plate, to lift it off |
@@ -83,8 +83,15 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 
 | Item | Qty | Note |
 |---|---|---|
-| 12 V DC power supply, 3 A | 1 | motor and sensor |
-| DC motor PWM speed controller, 12 V, with a minimum-duty trim | 1 | sets the plate speed. Set the trim so the motor still starts at the lowest knob setting |
+| 12 V DC power supply, 5 A, 5.5 x 2.1 mm plug, centre positive | 1 | motor, relay and sensor: 2.6 A at motor stall plus about 0.1 A for relay and sensor (estimate). Rating from the label, unverified |
+| [DC motor PWM speed controller, 12 to 30 V, rated 7 A, peak 10 A, 50 x 32 mm, B100K potentiometer](https://scccltd.com/products/12v-30v-10a-pwm-dc-motor-speed-controller) | 1 | sets the plate speed, above the 2.6 A motor stall current. No reverse polarity protection (listing), hence the series diode. No current limit, so the clutch is the only torque limit. Minimum-duty trim, mounting holes and height not in the listing, unverified. Set the trim so the motor still starts at the lowest knob setting |
+| [Littelfuse 02183.15MXP, 5 x 20 mm time-lag fuse, 3.15 A](https://cpc.farnell.com/littelfuse/02183-15mxp/fuse-5x20mm-time-delay-3-15a/dp/FF02791) | 1 | above the motor stall current and below the 5 A supply, so a short trips it and a stall does not. 250 V AC rated (listing), DC rating unverified |
+| Inline fuse holder for 5 x 20 mm fuses, 0.75 mm² leads | 1 | in the +12 V line after the switch, hangs on its leads in the box. Rating unverified: it must list at least 5 A |
+| [Vishay SB560-E3/54 Schottky diode, 5 A, 60 V, DO-201AD](https://azcus.digikey.com/en/products/detail/vishay-general-semiconductor-diodes-division/SB560-E3-54/1023528) | 2 | D1 in series in the +12 V line, blocks a reversed supply (0.65 V drop at 5 A, listing). D2 across the motor plug, cathode to motor +, clamps the kick when the relay contact opens |
+| Flexible wire 0.75 mm², red and black | 1 m each | supply, controller and motor lines in the box. Current rating unverified: the 3.15 A fuse protects it |
+| Motor cable, 2 cores 0.75 mm² | length to the motor | box to motor, soldered to the motor terminals and the GX12 plug. Current rating unverified |
+| Wire end ferrule 0.75 mm², DIN 46228-1 | 6 | screw terminals of the controller (4) and the relay contact (2). Sleeve length unverified: fit to the terminal |
+| Wire end ferrule 0.34 mm², DIN 46228-1 | 3 | relay supply and input screw terminals. Sleeve length unverified: fit to the terminal |
 | 12 V off-delay timer relay module (output holds for the set delay after the input drops, a returning input resets it), normally open contact in the motor line | 1 | input from the sensor output. The NC sensor conducts while no brass is in front of it, so the relay holds and the motor runs. Brass in front for longer than the delay (set about 2 s), a broken wire or no sensor power stops the motor. Each falling case blinks the sensor for about 0.1 s, which the delay ignores. Module type, input current and delay mode unverified: check against the sensor output |
 
 ## Electronics box
@@ -108,4 +115,4 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 
 The PWM controller hangs on its knob potentiometer nut in the lid (7.2 mm hole, unverified, the pot must be on the board or on a lead). The timer relay module sits on four standoffs on the back wall, 44 x 24 mm hole spacing (`electronics.relay_holes`, unverified: measure on delivery). Hole sizes are in `electronics.front_holes` and `electronics.side_holes`.
 
-Without a motor driver there is no current limit, and the motor's stall torque is far above the gearbox limit: the clutch (0.84 to 2.10 Nm, estimate) is the only torque limit, below the gearbox limit of 3.92 Nm and above the plate drag of 0.27 Nm at 38 deg (estimate).
+The controller has no current limit and the motor's stall torque is far above the gearbox limit: the clutch (0.84 to 2.10 Nm, estimate) is the only torque limit, below the gearbox limit of 3.92 Nm and above the plate drag of 0.27 Nm at 38 deg (estimate).
