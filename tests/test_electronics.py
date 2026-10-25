@@ -111,7 +111,7 @@ def test_relay_screws_pass_the_board_holes():
 
 def _common(a, b):
     c = a & b
-    return c.volume if c.solids() else 0.0
+    return c.volume if c is not None and c.solids() else 0.0
 
 
 def test_bought_modules_and_panel_parts_do_not_overlap_in_the_box():
