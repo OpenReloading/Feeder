@@ -38,6 +38,8 @@ The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenRe
 
 `.github/workflows/pages.yml` runs the tests, builds the guide and deploys `site/` to GitHub Pages on every push to `main` (pull requests build only).
 
+The configurator page (`guide/configurator.md`, `guide/javascripts/configurator.js`) picks the options, lists the parts and the BOM for the choice and zips the print files in the browser. It reads `build/configurator/` through `hooks/configurator_files.py`: run `build.py --no-test --configurator` before `mkdocs build` to see it locally. A push to `main` builds those files in CI; other builds and local builds without them show a notice instead.
+
 `build/<name>.stl` and `.step` are in the modelled orientation (assembly frame for the body). `build/print/<name>.stl` is each part as it goes on the bed (`feeder/printing.py`): flipped where it prints upside down, turned across the bed diagonal where it is wider than the bed.
 
 ## Configuration
@@ -62,7 +64,7 @@ All dimensions and options are in `feeder/config.py` (frozen dataclasses, instan
 | `metal_hub` | Pololu 2693 aluminium hub (default) or `GENERIC_8MM_FLANGE`, an 8 mm flange coupling with nuts under the flange (unverified) |
 | `electronics` | motor driver current limit as a torque, electronics box: gap below the clamp, inner size, wall, clamp, lid screws, relay holes and standoffs, panel hole sizes, envelopes of the panel parts and modules (unverified) |
 | `clutch` | slip clutch geometry, height gauge, screws, friction and torque limits |
-| `drop_tube` | thumb screw, M18x1 sensor (length, thread), lock nut and window sizes, hose sizes and barb |
+| `drop_tube` | bayonet (lug size, twist, notch lift), M18x1 sensor (length, thread), lock nut and window sizes, hose sizes and barb |
 | `mount` | tilt mount: body inserts, tube (round or square, 25 mm), tilt range 40 to 60 deg, M10 pivot, tilt link pins and rod, fixed link angles, body mass and load limits, unmodelled mass |
 
 ## Parts
@@ -82,8 +84,8 @@ Full hardware list for the default 9mm case feeder: `bom/case_feeder_9mm.md`.
 | `body_wall_0` to `body_wall_2` | 3 x ISO 4762 M3 x 12 each, into the core inserts. Lap joints at the seams, key ribs in the core skirt. The wall top is full height (125 mm above the plate bottom, `body.wall_h`) on the low side and falls at 40 deg toward the high side, not below one case length above the plate (`body.heap_angle`, `body.wall_slant`): brass lies level in the world, so at 40 deg tilt, the flattest, it stays below that line and the high side is open down to one case length above the plate |
 | `body_extender` | none. Optional, 60 mm more wall (`body.extender_h`, 0 for none) over a 150 deg arc centred on the low side (`body.extender_arc`), flat top at the wall slant, the high side stays open. The sleeve slides 15 mm down over the outside of the wall top. 4 x ISO 10642 M3 x 12 from inside the bowl, head flush in the wall, through wall and sleeve into ISO 4032 M3 nuts captive in ribs outside the sleeve. Prints on its flat top, turned on the bed to fit |
 | `body_track_gate` | none. Band sector in the band gap, on the exit insert. Its face is 0.5 mm behind the band face, the band ends have a 1 mm 45 deg lead-in, so cases pass the seams in either direction. The band ends lap 6 mm behind its ends, so it lifts out but cannot move inward. Prints top down |
-| `body_exit_insert` | none. Wear part: drop opening, funnel (30 deg lean toward the bowl centre) and spigot in a block that fills a vertical shaft through the core, so it drops in from above. Its 3 mm ledge rests in a 2 mm deck recess round the shaft, the gate and the plate keep it down. Prints top down |
-| `drop_tube` | Socket over the exit spigot (DIN 464 M3 x 10 knurled thumb screw into one CNC Kitchen M3 x 5.7 insert, hand tight on the spigot). Window, nut slot and plate for an M18x1 inductive sensor (LJ18A3-8-Z/AX default) with 2 M18x1 lock nuts (24 AF x 4, unverified, measure on delivery); the assembly draws the sensor (65 mm, unverified) between them. Barb for a clear PVC hose, 14 mm ID x 18 mm OD (unverified). The bore only steps outward along the path. Prints socket down, no supports (brim advised). No spring outlet |
+| `body_exit_insert` | none. Wear part: drop opening, funnel (30 deg lean toward the bowl centre) and spigot with the 2 bayonet lugs of the drop tube in a block that fills a vertical shaft through the core, so it drops in from above. Its 3 mm ledge rests in a 2 mm deck recess round the shaft, the gate and the plate keep it down. Prints top down |
+| `drop_tube` | Bayonet socket over the exit spigot, no screw: two lugs on the spigot (wide on the sensor side, narrow opposite) enter slots from the mouth, turn 60 deg along a groove and drop 1 mm into a notch at the stop (clockwise seen from below). Window, nut slot and plate for an M18x1 inductive sensor (LJ18A3-8-Z/AX default) with 2 M18x1 lock nuts (24 AF x 4, unverified, measure on delivery); the assembly draws the sensor (65 mm, unverified) between them. Barb for a clear PVC hose, 14 mm ID x 18 mm OD (unverified). The bore only steps outward along the path. Prints socket down, no supports (brim advised). No spring outlet |
 | `electronics_box`, `electronics_box_left`, `electronics_lid` | Upright box beside the stand tube, 10 mm below the tilt clamp, its front with the controls toward the user and clear of the drop path: right of the tube, or left as the mirror image, 80 x 50 x 120 mm inside (wide x deep x tall). Its own slit clamp holds the tube (2 x ISO 4762 M5 x 35 on ISO 7089 washers into ISO 4032 nuts) and stands off the side wall, joined to it by a web in front of the screws. Timer relay on 4 standoffs on the back wall. PWM knob, toggle switch and DC jack in a column in the lid, GX12 motor (2-pin) and sensor (3-pin) sockets low in the side face. The assembly shows the bought electronics as envelopes with their nuts, no wires: M18 sensor with 2 lock nuts, relay and PWM controller modules, switch, jack, knob and both GX12 sockets with a panel nut each; their sizes are seller values, unverified. The lid comes off forward: 4 x ISO 4762 M3 x 8 into CNC Kitchen M3 x 5.7 inserts in the corner posts. Panel hole sizes and relay hole spacing are seller values, unverified. The box prints on its back wall, the lid flat |
 
 Body splits (`body.split`), each fits a 256 mm bed:
@@ -104,7 +106,7 @@ Plate change, no tools: twist the cap off, lift the plate off the ring hex, drop
 
 ## Plate sets
 
-One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert and drop tube (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, loosen the thumb screw, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI). The exit opening is not adjustable: each plate set has its own exit insert, a slide would add a part and a lock for no gain.
+One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert and drop tube (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, twist the drop tube off the spigot, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI). The exit opening is not adjustable: each plate set has its own exit insert, a slide would add a part and a lock for no gain.
 
 | Set (`case_plate.caliber`) | Cases | Plate height | Pocket | Pockets | 45 deg capacity | Drop bore |
 |---|---|---|---|---|---|---|
@@ -115,6 +117,14 @@ One body and band take every plate: the exit shaft in the core holds any set's e
 | `revolver` | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 127 | 13.66 |
 
 A group plate gives its smallest case up to 2.3 mm more play than a one-case plate, so more cases may go in upside down (untested). A one-case plate (any key of `calibers.table`) is the tight option. Capacity counts the group's largest case. Rifle cases and bullets need another exit and are not built.
+
+## Drop tube attachment
+
+The drop tube twists onto the exit spigot, no screw and no tool (`drop_tube`, `exit.spigot_len`). Decision: a bayonet instead of a DIN 464 thumb screw on a boss.
+
+- Hose pull and vibration: the tube hangs on the notch floors, so its weight and an axial hose pull load the lugs against a 45 deg floor, the strong direction. Sideways hose pull is carried by the spigot over the full socket depth. To turn the tube off, lift it 1 mm (`lock_lift`) out of the notch first, which a shaking or pulled hose does not do on its own. Strength and hold are estimates until a print is tried.
+- Sensor window: the stop at the end of the 60 deg turn fixes the tube's azimuth, with the lug-to-notch fit (`print.fit`) as the only play, at most 0.3 mm at the window (checked in `tests/test_drop_tube.py`). The wide and the narrow lug make the tube fit one way only, sensor on the +x side of the body.
+- To fit: hold the socket 60 deg counterclockwise (seen from below) of its final position, push it up over the spigot until the lugs reach the groove, turn it clockwise until it stops and drops into the notch.
 
 ## Hose and sensor
 

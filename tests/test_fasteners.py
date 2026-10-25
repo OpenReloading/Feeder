@@ -25,6 +25,13 @@ def test_fastener_counts_match_the_bom():
     assert placed == bom
 
 
+def test_drop_tube_twists_on_without_a_screw_or_insert():
+    on_tube = [f.name for f in assembly.fasteners_in_body(CFG) if f.host == "drop_tube"]
+    assert on_tube == [f"Lock nut {CFG.drop_tube.sensor_thread}"]  # the sensor nut only
+    assert "DIN 464" not in BOM.read_text()
+    assert "thumb" not in BOM.read_text().lower()
+
+
 def _counts(cfg, host: str | None = None) -> dict:
     out: dict = {}
     for f in assembly.fasteners_in_body(cfg):
