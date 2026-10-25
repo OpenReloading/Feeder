@@ -189,7 +189,7 @@ Print the yoke with the flat mating face on the bed, the clamp upright, links an
 
 ## Simulation
 
-`sim/` simulates brass on the turning plate in MuJoCo (`pip install -e .[sim]`, already in `requirements.txt`) and estimates cases per hour, pocket fill, case orientation at the exit and plate torque for a tilt and plate speed. It runs slower than real time (about 3 to 4 s of computing per simulated second with 250 cases), so a sweep takes hours. In the container:
+`sim/` simulates brass on the turning plate in MuJoCo (`pip install -e .[sim]`, already in `pylock.toml`) and estimates cases per hour, pocket fill, case orientation at the exit and plate torque for a tilt and plate speed. It runs slower than real time (about 3 to 4 s of computing per simulated second with 250 cases), so a sweep takes hours. In the container:
 
 | Command | Result |
 |---|---|
