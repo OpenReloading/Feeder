@@ -38,14 +38,15 @@ jobs:
           python3 -m venv .venv
           .venv/bin/pip install -r requirements.txt -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
-      # guide data in the background while the test files run on the runner's cores
+      # guide data in the background while the test files run on the runner's cores. `-n auto` counts physical cores (psutil
+      # is installed), half of the runner's vCPUs: `-n logical` uses all of them
       - env:
           TESTS: ${{ steps.scope.outputs.tests || 'tests' }}
         run: |
           .venv/bin/python build.py --no-test --guide > guide.log 2>&1 &
           guide=$!
           tests=0
-          .venv/bin/python -m pytest -q -n auto --dist loadfile "$TESTS" || tests=$?
+          .venv/bin/python -m pytest -q -n logical --dist loadfile "$TESTS" || tests=$?
           wait "$guide" || { cat guide.log; exit 1; }
           exit "$tests"
       # the header's repository facts come from the GitHub API at build time
