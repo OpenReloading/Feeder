@@ -2,7 +2,7 @@
 drop path, screws reach their inserts, panel parts clear of each other and of the relay."""
 
 import pytest
-from build123d import Box, Cylinder, Plane, Pos, Rot, Vector
+from build123d import Align, Box, Cylinder, Plane, Pos, Rot, Vector
 
 from feeder import assembly, guide, wiring
 from feeder.config import CFG
@@ -33,7 +33,7 @@ def test_box_stands_beside_the_tube_with_its_front_toward_the_user_and_clear_of_
     ix, iy, iz = E.box_inner
     assert iy < ix < iz
     o, d = b.outlet()
-    path = Plane(origin=o, z_dir=d) * Cylinder(b.bore_d() / 2 + CFG.exit.wall, CFG.exit.spigot_len + 150.0)  # the drop tube and 150 mm of hose
+    path = Plane(origin=o, z_dir=d) * Cylinder(b.bore_d() / 2 + CFG.exit.wall, CFG.exit.spigot_len + 150.0, align=(Align.CENTER, Align.CENTER, Align.MIN))  # the drop tube and 150 mm of hose
     lo, hi = m.tilt_span()
     for tilt in (lo, (lo + hi) / 2, hi):
         into_clamp = m.clamp_frame(tilt).inverse() * el.box_frame(tilt, left=left)

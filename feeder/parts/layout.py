@@ -95,6 +95,14 @@ def plate_drag_torque(cfg: Config = CFG) -> float:
     return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(tilt(cfg))) * pocket_circle_r(cfg) / 1000
 
 
+def cap_drag_torque(cfg: Config = CFG) -> float:
+    """Nm the brass turns the cap with, an upper bound: the whole design fill rests on the cap wall at its rim radius,
+    as `plate_drag_torque` has it rest on the plate at the pocket circle. It loosens the cap when the plate turns
+    against the thread hand."""
+    cp = cfg.case_plate
+    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(tilt(cfg))) * cfg.cap.d / 2 / 1000
+
+
 def tipping_moment(tilt: float, cfg: Config = CFG) -> float:
     """Nm that tips the plate about the low edge of the ring flange: the brass normal load at the pocket circle.
     The plate weight, which resists, is left out."""
