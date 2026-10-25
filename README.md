@@ -25,6 +25,7 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 | `.venv/bin/python build.py --plates` | also `build/plates/<set>/` for each plate set: plate, exit insert and drop tube |
 | `.venv/bin/python build.py --configurator` | also `build/configurator/`: the print files of every option combination (body split, plate set, extender, tilt link, tube shape, hub) as `<hash>.stl`, identical parts stored once, and `manifest.json` with the part files and BOM rows per choice |
 | `.venv/bin/python -m pytest -q` | tests only. `-n 4 --dist loadfile` runs the test files on 4 cores |
+| `.venv/bin/python -m pytest -q -n 4 --dist loadfile --cov`, then `.venv/bin/coverage report --rcfile=sim/.coveragerc` | tests with a coverage summary and the floors: `feeder` in `[tool.coverage.report]` of `pyproject.toml` (pytest fails below it), `sim` in `sim/.coveragerc` (the second command). CI (`pages.yml`) runs both on the whole suite. Raise a floor when coverage rises, keep it a little below the measured value. Not measured: `sim/__main__.py` (CLI of the hours-long sweeps). `feeder/export.py` (assembly viewer export) runs only in `build.py --assembly`, so its tests-only coverage is low |
 
 ## Build guide site
 
@@ -36,7 +37,7 @@ The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenRe
 .venv/bin/mkdocs build --strict               # site/
 ```
 
-`.github/workflows/pages.yml` runs the tests, builds the guide and deploys `site/` to GitHub Pages on every push to `main` (pull requests build only).
+`.github/workflows/pages.yml` runs the tests, builds the guide and deploys it to GitHub Pages on every push to `main` or `develop` (pull requests build only). One deployment holds two sites: `main` at the root (the released site) and `develop` under `/develop/` (the development preview). Each ref is built by its own job and `assemble` merges them. The preview is built with `mkdocs-preview.yml` (`mkdocs build --strict -f mkdocs-preview.yml`): `hooks/preview.py` moves `site_url` to `<site_url>develop/`, adds `noindex` to every page and drops the sitemap, and `overrides/main.html` shows a banner that it is not the released site. The preview has no configurator print files (that page shows its notice). If the `develop` build fails, the root deploys without the preview and the run shows a warning; if the `main` build fails, nothing is deployed. A push to `develop` redeploys the root from `main`. The `github-pages` environment must allow deployments from `main` and `develop`.
 
 The configurator page (`guide/configurator.md`, `guide/javascripts/configurator.js`) picks the options, lists the parts and the BOM for the choice and zips the print files in the browser. It reads `build/configurator/` through `hooks/configurator_files.py`: run `build.py --no-test --configurator` before `mkdocs build` to see it locally. A push to `main` builds those files in CI; other builds and local builds without them show a notice instead.
 

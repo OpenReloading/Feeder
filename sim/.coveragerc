@@ -1,0 +1,7 @@
+# Floor of the sim package, a little below the measured 94 percent (91 with a warm plate cache in build/sim/cache; lines
+# and branches together); raise it when coverage rises. Checked after the test run: `coverage report --rcfile=sim/.coveragerc`. The measurement setup is in pyproject.toml.
+[report]
+include = sim/*
+fail_under = 90
+show_missing = true
+skip_covered = true
