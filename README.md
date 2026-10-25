@@ -109,6 +109,8 @@ The knob screw is tightened once at assembly, until the knob sits on the clutch.
 
 Plate change, no tools: twist the cap off, lift the plate off the ring hex, drop the next plate on, twist the cap on firmly by hand. It holds the plate down against the brass on the low side (`slip_clutch.cap_clamp_force`).
 
+The thread hand follows `case_plate.direction`, so brass drag tightens the cap. A plate turned the other way (a short unjam move, a motor wired the other way) drags it toward loosening, held by thread friction alone. At the hand-tight clamp, 250 cases (1 kg) and the flattest tilt (38 deg) the cap holds 0.16 Nm against at most 0.10 Nm of drag, margin 1.59 against the required 1.25 (estimates, `slip_clutch.cap_holding_torque`, `layout.cap_drag_torque`, `cap.mu_low`), on every plate set. The margin is static, so the length of a reverse does not matter, the fill does: it is gone at 1.27 kg of brass at that tilt. Twist the cap on firmly by hand before a reverse, and do not fill beyond 250 cases. No positive lock is fitted: it would add a part for a case that does not occur within the limits.
+
 ## Plate sets
 
 One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert and drop tube (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, twist the drop tube off the spigot, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI). The exit opening is not adjustable: each plate set has its own exit insert, a slide would add a part and a lock for no gain.

@@ -177,6 +177,15 @@ def test_cap_thread_self_locks_and_tightens_with_the_plate():
     assert sc.thread_hand(flipped) == "left"
 
 
+@pytest.mark.parametrize("plate_set", layout.plate_sets(), ids=lambda c: c.case_plate.caliber)
+def test_cap_stays_on_when_the_plate_turns_in_reverse(plate_set):
+    """Reverse (unjam move, motor wired the other way) turns the brass drag against the thread hand."""
+    flat = CFG.mount.tilt_range[0] - CFG.mount.tilt_margin
+    cp = plate_set.case_plate
+    flattest = replace(plate_set, case_plate=replace(cp, tilts={(cp.item, cp.orient): flat}))
+    assert sc.cap_holding_torque(flattest) >= C.backstop_margin * layout.cap_drag_torque(flattest)
+
+
 def test_spring_works_between_solid_and_free_length():
     length = sc.spring_working_length()
     assert CFG.spring.solid_length < length < CFG.spring.free_length

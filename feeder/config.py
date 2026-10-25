@@ -319,6 +319,7 @@ class Cap:
     grip_d: float = 6.0
     hand_torque: float = 1.0  # Nm, hand-tight twist, estimate, unverified
     mu: float = 0.5  # thread and face friction, high estimate: least clamp force per torque
+    mu_low: float = 0.2  # thread friction, low estimate (printed on printed, as clutch.friction_mu low): least torque holding the cap against the brass drag in reverse
 
 
 @dataclass(frozen=True)

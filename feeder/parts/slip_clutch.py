@@ -169,6 +169,16 @@ def cap_clamp_force(cfg: Config = CFG) -> float:
     return cp.hand_torque * 1000 / (r_m * math.tan(lead + flank) + cp.mu * r_face)
 
 
+def cap_holding_torque(cfg: Config = CFG) -> float:
+    """Nm to turn the cap off at the `cap_clamp_force` clamp: thread friction at the low estimate `cap.mu_low`, on the
+    thread alone (the face friction on the plate, which turns with the ring, is left out)."""
+    cp, dr = cfg.cap, cfg.drive_ring
+    r_m = dr.thread_d / 2 - dr.thread_depth / 2
+    lead = math.atan(thread_lead(cfg) / (2 * math.pi * r_m))
+    flank = math.atan(cp.mu_low / math.cos(math.radians(dr.thread_angle / 2)))
+    return cap_clamp_force(cfg) * r_m * math.tan(flank - lead) / 1000
+
+
 def _around(count: int, radius: float, start: float = 0.0):
     for i in range(count):
         a = math.radians(start + 360 * i / count)
