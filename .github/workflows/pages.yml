@@ -39,8 +39,7 @@ jobs:
           .venv/bin/pip install -r requirements.txt -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
       # guide data in the background while the test files run on the runner's cores. Releases (pushes to main, the
-      # Pages source) also build the configurator's print files, which mkdocs copies into the site. `-n auto` counts
-      # physical cores (psutil is installed), half of the runner's vCPUs: `-n logical` uses all of them
+      # Pages source) also build the configurator's print files, which mkdocs copies into the site
       - env:
           TESTS: ${{ steps.scope.outputs.tests || 'tests' }}
           RELEASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -50,7 +49,7 @@ jobs:
           .venv/bin/python build.py "${args[@]}" > guide.log 2>&1 &
           guide=$!
           tests=0
-          .venv/bin/python -m pytest -q -n logical --dist loadfile "$TESTS" || tests=$?
+          .venv/bin/python -m pytest -q -n auto --dist loadfile "$TESTS" || tests=$?
           wait "$guide" || { cat guide.log; exit 1; }
           exit "$tests"
       # the header's repository facts come from the GitHub API at build time
