@@ -100,7 +100,7 @@ Changes the clutch carrier and the body core, and adds hub screws and nuts for t
 <p><button type="button" id="configurator-download" class="md-button md-button--primary">Download zip</button>
 <span id="configurator-status" role="status"></span></p>
 <h2>Parts to buy</h2>
-<table>
+<table data-stack>
 <thead><tr><th>Group</th><th>Part</th><th>Qty</th><th>Used in</th></tr></thead>
 <tbody id="configurator-bom"></tbody>
 </table>

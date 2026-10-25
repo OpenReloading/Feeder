@@ -62,6 +62,9 @@
       }
       return row;
     }));
+    // labels for the phone layout of the parts to buy (table[data-stack] in extra.css)
+    const heads = [...$("configurator-bom").closest("table").tHead.rows[0].cells];
+    for (const row of $("configurator-bom").rows) heads.forEach((h, i) => (row.cells[i].dataset.label = h.textContent));
     $("configurator-status").textContent = "";
   }
 
