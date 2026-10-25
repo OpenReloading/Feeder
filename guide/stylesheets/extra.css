@@ -1,0 +1,216 @@
+/* One green token set, shared with the AutoLever docs. Light is the default scheme, dark is Material's slate. */
+:root,
+[data-md-color-scheme="default"] {
+  --page: #ffffff;
+  --surface: #f6f7f4;
+  --surface-alt: #eef2e8;
+  --ink: #24342e;
+  --muted: #5e6c5f;
+  --accent: #21634c;
+  --accent-hover: #174735;
+  --header-bg: #21634c;
+  --header-ink: #ffffff;
+  --line: #dce3dc;
+  --control-line: #74857a;
+  --warn: #c2410c;
+}
+
+[data-md-color-scheme="slate"] {
+  --page: #171c19;
+  --surface: #202722;
+  --surface-alt: #2b352e;
+  --ink: #e4ebe6;
+  --muted: #a9b6ac;
+  --accent: #72d6aa;
+  --accent-hover: #9be6c4;
+  --header-bg: #1b2622;
+  --header-ink: #e4ebe6;
+  --line: #3b4740;
+  --control-line: #6f8076;
+  --warn: #f59e0b;
+}
+
+/* Material variables from the tokens */
+[data-md-color-scheme] {
+  --md-default-bg-color: var(--page);
+  --md-default-fg-color: var(--ink);
+  --md-default-fg-color--light: var(--muted);
+  --md-default-fg-color--lighter: var(--control-line);
+  --md-default-fg-color--lightest: var(--line);
+  --md-primary-fg-color: var(--header-bg);
+  --md-primary-fg-color--light: var(--header-bg);
+  --md-primary-fg-color--dark: var(--header-bg);
+  --md-primary-bg-color: var(--header-ink);
+  --md-primary-bg-color--light: var(--header-ink);
+  --md-accent-fg-color: var(--accent-hover);
+  --md-accent-fg-color--transparent: transparent;
+  --md-accent-bg-color: var(--header-ink);
+  --md-typeset-color: var(--ink);
+  --md-typeset-a-color: var(--accent);
+  --md-typeset-table-color: var(--line);
+  --md-typeset-table-color--light: var(--surface);
+  --md-code-bg-color: var(--surface-alt);
+  --md-code-fg-color: var(--ink);
+  --md-footer-bg-color: var(--header-bg);
+  --md-footer-bg-color--dark: var(--header-bg);
+  --md-footer-fg-color: var(--header-ink);
+  --md-footer-fg-color--light: var(--header-ink);
+  --md-footer-fg-color--lighter: var(--header-ink);
+  --md-admonition-bg-color: var(--page);
+}
+
+.md-typeset a:focus-visible,
+.md-nav__link:focus-visible,
+.md-header a:focus-visible,
+.md-footer a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.md-header a:focus-visible,
+.md-footer a:focus-visible {
+  outline-color: var(--header-ink);
+}
+
+[data-md-color-scheme="slate"] .md-header {
+  border-bottom: 1px solid var(--line);
+}
+
+/* Warnings take the warn token, not Material's orange */
+.md-typeset .admonition.warning,
+.md-typeset details.warning {
+  border-color: var(--warn);
+}
+
+.md-typeset .warning > .admonition-title,
+.md-typeset .warning > summary {
+  background-color: color-mix(in srgb, var(--warn) 12%, var(--page));
+}
+
+.md-typeset .warning > .admonition-title::before,
+.md-typeset .warning > summary::before {
+  background-color: var(--warn);
+}
+
+/* BuildGuide components sit on the page colour */
+[data-md-color-scheme] .ag-guide {
+  --ag-page: var(--page);
+  --ag-ink: var(--ink);
+  --ag-muted: var(--muted);
+  --ag-accent: var(--accent);
+  --ag-line: var(--line);
+  --ag-control-line: var(--control-line);
+  --ag-surface-head: var(--surface-alt);
+}
+
+/* Inline code wraps at the <wbr> after a dot, never inside a name */
+.md-typeset code {
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+/* Tables with long cells (data-stack, set by hooks/table_layout.py) show one block per row on a phone */
+@media screen and (max-width: 600px) {
+  .md-typeset table[data-stack]:not([class]) {
+    display: block;
+    width: 100%;
+    overflow: visible;
+    border: 0;
+  }
+
+  .md-typeset table[data-stack] thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .md-typeset table[data-stack] tbody,
+  .md-typeset table[data-stack] tr,
+  .md-typeset table[data-stack] td {
+    display: block;
+  }
+
+  .md-typeset table[data-stack] tr {
+    margin-bottom: 0.8rem;
+    border: 0.05rem solid var(--line);
+    border-radius: 0.2rem;
+  }
+
+  .md-typeset table[data-stack]:not([class]) td {
+    min-width: 0;
+    padding: 0.5rem 0.7rem;
+    border-top: 0.05rem solid var(--line);
+  }
+
+  .md-typeset table[data-stack] td:first-child {
+    border-top: 0;
+    background: var(--surface);
+    font-weight: 600;
+  }
+
+  .md-typeset table[data-stack] td:not(:first-child)::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: 1em;
+    font-weight: 600;
+  }
+}
+
+/* BOM rows (the component's stylesheet loads after this one, hence the longer selector): less padding when the component is narrow, the spec column keeps its share */
+@container (max-width: 600px) {
+  [data-md-color-scheme] .ag-guide .ag-bom-table th,
+  [data-md-color-scheme] .ag-guide .ag-bom-table td {
+    padding: 8px 10px;
+  }
+
+  [data-md-color-scheme] .ag-guide .ag-part-cell {
+    min-width: 0;
+    gap: 8px;
+  }
+}
+
+/* Configurator: a fieldset is as wide as its longest option unless told otherwise, so the pickers shrink to the page */
+#configurator-form fieldset {
+  min-width: 0;
+}
+
+#configurator-form select {
+  max-width: 100%;
+}
+
+/* Part names are one long word with underscores */
+#configurator-parts td:first-child {
+  overflow-wrap: anywhere;
+}
+
+/* Prose lines of about 75 characters; tables, admonitions and components keep the full width */
+.md-content__inner > :is(p, ul, ol) {
+  max-width: 62ch;
+}
+
+/* Render on the home page (the light and dark image share this selector) */
+.md-typeset img[src*="assets/feeder-"] {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  border-radius: 0.3rem;
+}
+
+/* The assembly page prints its step list in place of the viewer */
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block;
+  }
+
+  .md-content iframe {
+    display: none;
+  }
+}

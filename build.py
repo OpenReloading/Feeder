@@ -112,6 +112,7 @@ def main() -> int:
         data.write_text(json.dumps(guide.guide_data([name for name, _ in iter_parts(CFG)]), indent=1), encoding="utf-8")
         print(f"built {data.relative_to(ROOT)}")
         (ROOT / "guide" / "generated" / "steps.md").write_text(guide.steps_markdown(CFG), encoding="utf-8")
+        (ROOT / "guide" / "generated" / "steps-detail.md").write_text(guide.steps_detail_markdown(CFG), encoding="utf-8")
     if args.no_test:
         return 0
     return subprocess.run([sys.executable, "-m", "pytest", "-q"], cwd=ROOT).returncode  # noqa: PLW1510

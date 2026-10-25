@@ -68,6 +68,11 @@ def steps_markdown(cfg: Config = CFG) -> str:
     return "".join(f"{i}. {title}\n" for i, (title, _) in enumerate(export._steps(cfg), 1))
 
 
+def steps_detail_markdown(cfg: Config = CFG) -> str:
+    """The assembly steps with their text as a numbered Markdown list, for the printed assembly page."""
+    return "".join(f"{i}. **{title}**: {text}\n" for i, (title, text) in enumerate(export._steps(cfg), 1))
+
+
 def wiring_board() -> dict:
     """Wiring board of the electronics box in the BuildGuide board format."""
     return {
