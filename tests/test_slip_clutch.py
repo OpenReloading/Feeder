@@ -183,12 +183,10 @@ def test_spring_works_between_solid_and_free_length():
     assert sc.clamp_force(1) <= CFG.spring.max_force
 
 
-def test_metal_hub_clutch_is_a_backstop_above_the_current_limit():
+def test_clutch_is_the_only_torque_limit_between_the_plate_drag_and_the_gearbox_limit():
     n = C.springs_fitted
-    assert sc.slip_torque(n, LOW) >= C.backstop_margin * CFG.electronics.current_limit_torque
     assert sc.slip_torque(n, HIGH) <= M.gearbox_torque_limit
     flattest = replace(CFG, case_plate=replace(CFG.case_plate, tilt=CFG.mount.tilt_range[0] - CFG.mount.tilt_margin))
-    assert CFG.electronics.current_limit_torque >= C.backstop_margin * layout.plate_drag_torque(flattest)
     assert sc.slip_torque(n, LOW) >= C.backstop_margin * layout.plate_drag_torque(flattest)
 
 
