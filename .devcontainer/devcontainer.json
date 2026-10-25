@@ -4,5 +4,5 @@
   "runArgs": ["--userns=keep-id"],
   "remoteUser": "vscode",
   "updateRemoteUserUID": false,
-  "postCreateCommand": "python -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/pip install --no-deps -e ."
+  "postCreateCommand": "python -m venv .venv && .venv/bin/pip install -r pylock.toml && .venv/bin/pip install --no-deps -e ."
 }

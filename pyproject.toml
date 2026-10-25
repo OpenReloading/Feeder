@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Parametric brass and bullet collator for reloading, built in build123d"
 license = "MIT"
 requires-python = ">=3.11,<3.15"
-# Exact pins; requirements.txt holds the full lock including transitive packages.
+# Exact pins; pylock.toml holds the full lock including transitive packages.
 dependencies = [
   "build123d==0.13.0",
   "bd_warehouse==0.4.0",
