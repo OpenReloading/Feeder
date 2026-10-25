@@ -107,12 +107,12 @@ jobs:
       - env:
           RESULT: ${{ needs.site.result }}
         run: test "$RESULT" = success
-  # The print files of the configurator page (about 44 CPU minutes) for the root site, built on a runner of their own
+  # The print files of the configurator page (about 44 CPU minutes, 32 minutes measured on a runner) for the root site, on their own runner
   # beside `site (main)`. The preview leaves them out: its configurator page shows its notice.
   configurator:
     if: github.event_name != 'pull_request' && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref)
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: read
     steps:
