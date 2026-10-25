@@ -3,41 +3,60 @@ site_url: https://openreloading.github.io/Feeder/
 site_description: Parametric brass collator for reloading. Build guide, BOM and assembly steps generated from feeder/config.py.
 repo_url: https://github.com/OpenReloading/Feeder
 repo_name: OpenReloading/Feeder
-copyright: MIT licence
+copyright: <a href="https://github.com/OpenReloading/Feeder/blob/main/LICENSE">MIT licence</a>
 docs_dir: guide
-exclude_docs: generated/steps.md   # snippet of index.md
+exclude_docs: |   # snippets of index.md and assembly.md
+  generated/steps.md
+  generated/steps-detail.md
 
 theme:
   name: material
   custom_dir: overrides   # partials/source.html: header facts rendered at build time
+  features:
+    - navigation.footer   # previous and next page links
+    - navigation.top   # back to top
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
   font: false   # system fonts: no requests to Google Fonts
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: blue grey
-      accent: deep orange
+      primary: custom
+      accent: custom
       toggle: {icon: material/weather-night, name: Dark mode}
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: blue grey
-      accent: deep orange
+      primary: custom
+      accent: custom
       toggle: {icon: material/weather-sunny, name: Light mode}
 
 # header facts (latest tag, stars, forks): fetched from the GitHub API at build time, not in the browser
 hooks:
   - hooks/repo_facts.py
+  - hooks/table_layout.py   # <wbr> in inline code, data-label and data-stack on long tables
   - hooks/configurator_files.py   # build/configurator/ (build.py --configurator) into site/configurator/data/
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/OpenReloading/Feeder
+      name: Feeder on GitHub
+
+extra_css:
+  - stylesheets/extra.css
 
 extra_javascript:
   - javascripts/configurator.js
 
 # build/guide/buildguide.json and guide/generated/ come from build.py --guide
 plugins:
+  - search   # listing plugins replaces the default search
   - buildguide:
       data: build/guide/buildguide.json
 
 markdown_extensions:
   - admonition
+  - md_in_html
   - pymdownx.snippets:
       check_paths: true
 

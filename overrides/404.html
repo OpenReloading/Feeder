@@ -1,0 +1,7 @@
+{% extends "main.html" %}
+
+{#- Material's 404 is a bare heading. The url filter resolves against the site root, so the links work from any missing path. -#}
+{% block content %}
+  <h1>Page not found</h1>
+  <p>This page does not exist. Start at the <a href="{{ '.'|url }}">Introduction</a> or open the <a href="{{ 'bom/'|url }}">BOM</a>.</p>
+{% endblock %}

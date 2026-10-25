@@ -32,6 +32,12 @@ def test_steps_markdown_numbers_every_assembly_step():
     assert lines and all(line.startswith(f"{i}. ") for i, line in enumerate(lines, 1))  # noqa: PT018
 
 
+def test_steps_detail_markdown_gives_every_step_its_text():
+    titles, details = guide.steps_markdown().splitlines(), guide.steps_detail_markdown().splitlines()
+    assert len(details) == len(titles)
+    assert all(d.startswith(t.replace(". ", ". **", 1) + "**: ") and len(d) > len(t) + 6 for t, d in zip(titles, details, strict=True))
+
+
 def test_wiring_board_ends_exist_and_the_motor_runs_through_the_relay():
     board = guide.wiring_board()
     terminals = {f"{k}:{t}" for k, p in board["parts"].items() for side in p["ports"].values() for t in side}
