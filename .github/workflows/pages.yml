@@ -110,6 +110,7 @@ jobs:
   # The print files of the configurator page (about 44 CPU minutes) for the root site, built on a runner of their own
   # beside `site (main)`. The preview leaves them out: its configurator page shows its notice.
   configurator:
+    if: github.event_name != 'pull_request' && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref)
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
