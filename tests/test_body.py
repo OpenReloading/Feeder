@@ -178,7 +178,9 @@ def assembled(request):
 
 def test_variant_body_parts_are_single_valid_solids_that_fit_the_bed(assembled):
     cfg, placed = assembled
-    for name, build in b.parts(cfg).items():  # noqa: B007, PERF102
+    for name in b.parts(cfg):
+        if name == "body_exit_insert_blank":  # optional, replaces the exit insert, not placed: test_blank_exit_insert_closes_the_exit
+            continue
         part = placed[name].shape
         assert part.is_valid and len(part.solids()) == 1, name  # noqa: PT018
         assert printing.fits(printing.on_bed(name, part, cfg), cfg), name
@@ -204,6 +206,7 @@ def _mates(cfg) -> dict[str, tuple[str, ...]]:
         f"case_plate_{CFG.case_plate.caliber}": ("slip_clutch_drive_ring",),
         "slip_clutch_cap": (f"case_plate_{CFG.case_plate.caliber}",),
         "drop_tube": ("body_exit_insert",),
+        "drop_hose_adapter": ("drop_tube",),
         "mount_yoke": main,
         "mount_clamp": ("mount_yoke",),
         assembly.link_name(assembly.body_tilt(cfg), cfg): ("mount_yoke", "mount_clamp"),
