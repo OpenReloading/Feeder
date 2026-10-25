@@ -40,10 +40,11 @@ DEPENDS = [
     ("body_half", ("split", "plate", "extender", "hub")),
     ("body_extender", ("split", "extender", "hub")),
     ("body_track_gate", ("split", "hub")),
+    ("body_exit_insert_blank", ("split", "hub")),
     ("body_exit_insert", ("split", "plate", "hub")),
     ("body", ("split", "plate", "extender", "hub")),
     ("case_plate", ("split", "plate")),
-    ("drop_tube", ("plate",)),
+    ("drop_", ("plate",)),
     ("electronics_box", ("tube",)),
     ("electronics", ()),
     ("mount_yoke", ()),
@@ -58,7 +59,7 @@ BOM_DEPENDS = ("split", "extender", "link", "hub")
 
 
 def combinations(options: dict = OPTIONS) -> list[dict]:
-    return [dict(zip(options, values)) for values in itertools.product(*options.values())]
+    return [dict(zip(options, values)) for values in itertools.product(*options.values())]  # noqa: B905
 
 
 def config(choice: dict) -> Config:

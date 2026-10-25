@@ -11,7 +11,7 @@ from pathlib import Path
 from build123d import Color, Compound, Mesher, export_step, export_stl
 
 from feeder import assembly
-from feeder.config import CFG, Config
+from feeder.config import CFG, Config  # noqa: F401
 from feeder.parts import case_plate, layout, mount
 from feeder.parts import slip_clutch as sc
 
@@ -31,7 +31,7 @@ COLORS = {  # STEP and 3MF colours by viewer kind, RGB 0..1
 }
 
 
-def _steps(cfg: Config) -> list[dict]:
+def _steps(cfg: Config) -> list[tuple[str, str]]:
     """Assembly steps by `Placed.step`, text for the viewer."""
     mt, n = cfg.mount, cfg.clutch.springs_fitted
     split = cfg.body.split
@@ -45,7 +45,7 @@ def _steps(cfg: Config) -> list[dict]:
         ("Motor", "Worm gear motor 5840-31ZY with its boss and 8 mm D shaft, drawn as an envelope."),
         body_step,
         ("Wall arcs", f"{cfg.body.wall_segments} arcs, screwed through their key ribs into the core's inserts. Key ribs slot into the skirt grooves, lap joints at the seams."),
-        ("Exit insert and gate", "Exit insert from above into its shaft, its ledge in the deck recess: drop opening, funnel and spigot. Gate into the band gap, its ends behind the band ends. To swap the insert: cap, plate and gate off, thumb screw loose, lift it out."),
+        ("Exit insert and gate", "Exit insert from above into its shaft, its ledge in the deck recess: drop opening, funnel and spigot. Gate into the band gap, its ends behind the band ends. To swap the insert: cap, plate and gate off, drop tube twisted off the spigot, lift it out."),
         ("Metal hub with the hub gauge", "Lay the gauge on the cup floor around the shaft, handle away from the set screws. Push the Pololu 2693 hub down onto it, tighten its 2 set screws on the D flat, slide the gauge out by its handle away from the shaft and lift it out."),
         ("Carrier on the hub flange", "Heat-set insert into the carrier top first. Screws into every other hub hole."),
         ("Drive ring", "Onto the carrier cone. It stays on the clutch when plates change."),
@@ -53,13 +53,15 @@ def _steps(cfg: Config) -> list[dict]:
         ("Knob and its screw", f"Tighten once at assembly until the knob sits on the carrier top: springs at {spring_len:.1f} mm, clamp {sc.clamp_force(n, cfg):.1f} N. Plate changes never touch it."),
         ("Case plate", f"{layout.plate_r(cfg) * 2:.1f} mm, {layout.pocket_count(cfg)} notches, closed by the band. Drops over the ring hex onto the flange; lift it by the key ring."),
         ("Cap", f"Twist on by hand until it sits on the plate: about {sc.cap_clamp_force(cfg):.0f} N clamp at 1 Nm (estimate) holds the plate against the brass on the low side. Twist off to change plates."),
-        ("Drop tube", "Heat-set insert into the boss first. Socket over the exit spigot, thumb screw into the insert, hand tight on the spigot. Inner M18 x 1 lock nut into the slot from the side first."),
+        ("Drop tube", f"Inner M18 x 1 lock nut into the slot from the side first. No screw: hold the socket {cfg.drop_tube.twist:.0f} deg counterclockwise (seen from below) of its final position, push it up over the exit spigot until the lugs reach the groove, then turn it clockwise until it stops and drops into the notch, sensor window square. To take it off, lift it out of the notch, turn it back and pull."),
+        ("Drop tube chain (optional)", f"Spacer ({cfg.drop_chain.spacer_len:.0f} mm) and angled piece ({cfg.drop_chain.angle:.0f} deg) go on the male end of the part before them the way the drop tube goes on the exit spigot: hold the socket {cfg.drop_tube.twist:.0f} deg counterclockwise (seen from below) of its final position, push it up over the lugs, turn it clockwise until it stops and drops into the notch. They keep the sensor side of the drop tube on +x."),
+        ("Hose adapter", "Same bayonet on the last male end. Push the clear hose over its barb."),
         ("Yoke", "Screws from below into the heat-set inserts in the body's bottom plane."),
         ("Clamp on the 25 mm tube", "Slit clamp: screws on washers in the counterbores, nuts in the pockets. Tongue between the yoke ears on the pivot bolt, a washer on each side, the nylon nut sets the pivot friction."),
         ("Tilt link", f"Pin A in the yoke fork, pin B in the clamp fork, a washer on each side and a nylon nut each. Adjustable link: fixed rod end on a captive M6 nut and a jam nut, adjust end between two nuts on a {mount.rod_length(cfg):.0f} mm M6 threaded rod, {mt.tilt_range[0]:.0f} to {mt.tilt_range[1]:.0f} deg. Or one printed fixed link per angle ({', '.join(f'{t:.0f}' for t in mt.fixed_tilts)} deg) on the same pins."),
         ("Wall extender (optional)", f"One open arc of {cfg.body.extender_arc:.0f} deg over the low side, {cfg.body.extender_h:.0f} mm more wall, top at the wall slant. The sleeve slides {cfg.body.extender_lap:.0f} mm down over the outside of the wall top. A nut into each rib pocket first, then countersunk screws from inside the bowl through wall and sleeve into the rib nuts. The high side stays open."),
-        ("Electronics box", f"Heat-set inserts into the corner posts and the relay standoffs first. The box clamps the stand tube {cfg.electronics.box_gap:.0f} mm below the tilt clamp, beside it with its front toward the user: right or left of the tube, the left box is the mirror image. Screws on washers in the counterbores from the outside, nuts in the pockets from the gap at the wall. Timer relay module onto its standoffs, screws into the inserts. GX12 sockets into the side face, each with its panel nut inside."),
-        ("Lid with the controls", "PWM knob, toggle switch and DC jack into the lid from the front, each with its panel nut on the inside. The PWM controller hangs on the back of the knob potentiometer. Lid on the box, screws from the front. The cables are long enough to open it."),
+        ("Electronics box", f"Heat-set inserts into the corner posts and the relay standoffs first. The box clamps the stand tube {cfg.electronics.box_gap:.0f} mm below the tilt clamp, beside it with its front toward the user: right or left of the tube, the left box is the mirror image. Screws on washers in the counterbores from the outside, nuts in the pockets from the gap at the wall. Timer relay module onto its standoffs, screws into the inserts. GX12 sockets into the side face, each with its panel nut inside. Fuse holder into its cradle on the back wall and the two splice connectors into theirs, a cable tie through the tunnel under each. Tie the wires of each socket to the pad behind it and leave a loop of about {cfg.electronics.service_loop:.0f} mm free behind the socket."),
+        ("Lid with the controls", "PWM knob, toggle switch and DC jack into the lid from the front, each with its panel nut on the inside. The text engraved in the lid is the pin map of the plugs and the polarity of the jack. The PWM controller hangs on the back of the knob potentiometer. Lid on the box, screws from the front. The cables are long enough to open it."),
         ("Level sensor", "Sensor from the outside through the plate hole and the inner lock nut until its face touches the window wall, outer lock nut on the plate. Plug it into the GX12 3-pin socket."),
     ]
 
@@ -135,26 +137,26 @@ def export_assembly(cfg: Config, out: Path, title: str, inline_libs: bool = True
     with tempfile.TemporaryDirectory() as tmp:
         for p in placed:
             stl(p.name, p.shape)
-            parts.append(dict(name=p.name, kind=p.kind, step=index[p.step], dir=list(p.explode), tool=p.tool))
+            parts.append(dict(name=p.name, kind=p.kind, step=index[p.step], dir=list(p.explode), tool=p.tool))  # noqa: C408
         for i, f in enumerate(fs):  # one mesh per group, instanced along its locations
             stl(f"fastener_{i}", f.shape)
-            fasteners.append(dict(model=f"fastener_{i}", kind=f.kind, host=names.index(f.host), seq=f.seq,
+            fasteners.append(dict(model=f"fastener_{i}", kind=f.kind, host=names.index(f.host), seq=f.seq,  # noqa: C408
                                   lift=round(f.shape.bounding_box().size.Z + 10, 1), m=[_matrix(loc) for loc in f.at]))
     ftext = _fastener_text(fs, step_of)
     pc = layout.pocket_circle_r(cfg)
     ang = [a for a in case_plate.pocket_angles(cfg) if abs((a - 270 + 180) % 360 - 180) <= 80][::2]
     z, zc, n = layout.levels(cfg), sc.levels(cfg), cfg.clutch.springs_fitted
-    info = dict(
+    info = dict(  # noqa: C408
         eyebrow=f"Feeder · 9mm case feeder · body {cfg.body.split.replace('_', ' ')}",
         intro=f"{title}. Tilted view: as mounted, tube vertical.",
         labels={"body": {"arcs": "Body core", "halves": "Body halves", "one_piece": "Body"}[cfg.body.split]},
-        steps=[dict(t=steps[s][0], d=steps[s][1], f=ftext.get(index[s], [])) for s in used],
+        steps=[dict(t=steps[s][0], d=steps[s][1], f=ftext.get(index[s], [])) for s in used],  # noqa: C408
         spring_step=step_of["slip_clutch_disc"], case_step=step_of[f"case_plate_{cfg.case_plate.caliber}"],
         parts=parts, fasteners=fasteners, tilt=tilt, tilt_range=list(cfg.mount.tilt_range), pivot=list(mount.pivot_point(cfg)),
         tube_axis=list(assembly.pivot_axis(tilt, cfg)),
-        cases=dict(rim_d=layout.caliber(cfg).rim_d, length=layout.caliber(cfg).case_length, z0=z.deck_top, r=pc,
+        cases=dict(rim_d=layout.caliber(cfg).rim_d, length=layout.caliber(cfg).case_length, z0=z.deck_top, r=pc,  # noqa: C408
                    xy=[[pc * math.cos(math.radians(a)), pc * math.sin(math.radians(a))] for a in ang]),
-        springs=dict(count=n, pcd=cfg.clutch.spring_pcd, od=cfg.spring.od, free=cfg.spring.free_length, rate=cfg.spring.rate,
+        springs=dict(count=n, pcd=cfg.clutch.spring_pcd, od=cfg.spring.od, free=cfg.spring.free_length, rate=cfg.spring.rate,  # noqa: C408
                      working=sc.spring_working_length(cfg), bottom=zc.ring_floor + cfg.clutch.disc_t - cfg.clutch.spring_pocket_depth_disc - zc.floor_top),
         slip=[round(sc.slip_torque(n, mu, cfg), 2) for mu in cfg.clutch.friction_mu], clamp=round(sc.clamp_force(n, cfg), 1),
         plate_d=round(layout.plate_r(cfg) * 2, 1), pockets=layout.pocket_count(cfg), drag=round(layout.plate_drag_torque(cfg), 2),

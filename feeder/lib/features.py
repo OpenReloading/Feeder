@@ -1,6 +1,6 @@
 """Shared geometry features."""
 
-import math
+import math  # noqa: I001
 
 from build123d import Circle, Part, Plane, Polygon, Pos, Rectangle, RegularPolygon, Sketch, extrude, loft
 

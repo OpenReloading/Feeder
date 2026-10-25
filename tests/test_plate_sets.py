@@ -2,6 +2,7 @@
 configured plate. The other test modules check the configured plate in detail."""
 
 import math
+from dataclasses import replace
 
 import pytest
 import trimesh
@@ -40,7 +41,7 @@ def plate_set(request):
 def test_parts_are_single_valid_solids(plate_set):
     _, parts = plate_set
     for name, part in parts.items():
-        assert part.is_valid and len(part.solids()) == 1, name
+        assert part.is_valid and len(part.solids()) == 1, name  # noqa: PT018
 
 
 def test_group_plate_height_and_pockets_suit_every_case(plate_set):
@@ -58,11 +59,26 @@ def test_group_plate_height_and_pockets_suit_every_case(plate_set):
     assert z.plate_bottom - z.deck_top + s.case_plate.flatness / 2 < layout.caliber(s).rim_t_min  # no rim under the plate
 
 
+def test_set_declares_a_supported_item_and_orientation(plate_set):
+    s, _ = plate_set
+    assert (s.case_plate.item, s.case_plate.orient) in s.case_plate.tilts
+    assert layout.tilt(s) == s.case_plate.tilts[s.case_plate.item, s.case_plate.orient]
+
+
+@pytest.mark.parametrize("s", SETS, ids=IDS)
+def test_unsupported_orientation_names_the_supported_ones(s):
+    bad = replace(s, case_plate=replace(s.case_plate, orient="mouth_down"))
+    msg = "case/base_down"
+    for build_part in (cp.plate, b.exit_insert, layout.tilt):
+        with pytest.raises(ValueError, match=msg):
+            build_part(bad)
+
+
 def test_exit_takes_the_set_and_fits_the_body_shaft(plate_set, core):
     s, parts = plate_set
     length, r0, r1 = b.opening(s)
     r, d = layout.pocket_circle_r(s), layout.pocket_d(s)
-    assert r0 < r - d / 2 and r1 > r + d / 2
+    assert r0 < r - d / 2 and r1 > r + d / 2  # noqa: PT018
     assert length > layout.caliber(s).case_length + d
     assert layout.bowl_r(s) - FIT - r1 >= MW  # the opening's outer edge is an arc under the band
     assert b.bore_d(s) >= layout.caliber(s).rim_d + 0.4
@@ -71,7 +87,7 @@ def test_exit_takes_the_set_and_fits_the_body_shaft(plate_set, core):
     z = layout.levels(s)
     shaft_plan = ShapelyPolygon([(v.X, v.Y) for v in b._exit_outline(s, 0.0).vertices()]).buffer(EPS)
     verts, _ = ins.tessellate(0.05)
-    assert all(shaft_plan.contains(Point(v.X, v.Y)) for v in verts if v.Z < z.deck_top - s.exit.seat_t - EPS)  # it drops in from above
+    assert all(shaft_plan.contains(Point(v.X, v.Y)) for v in verts if v.Z < z.deck_top - s.exit.seat_t - EPS)  # it drops in from above  # noqa: SIM300
 
 
 def test_drop_tube_passes_every_case(plate_set, core):

@@ -33,6 +33,20 @@ def plate_sets(cfg: Config = CFG) -> list[Config]:
     return [replace(cfg, case_plate=replace(cfg.case_plate, caliber=n)) for n in names]
 
 
+def check_orientation(cfg: Config = CFG) -> None:
+    """Plate, exit insert and tilt are built for the (item, orient) in `case_plate.tilts` only."""
+    cp = cfg.case_plate
+    if (cp.item, cp.orient) not in cp.tilts:
+        ok = ", ".join(f"{i}/{o}" for i, o in cp.tilts)
+        raise ValueError(f"plate set {cp.caliber!r}: item/orient {cp.item}/{cp.orient} is not supported, supported: {ok}")
+
+
+def tilt(cfg: Config = CFG) -> float:
+    """Tilt preset of the plate set's item and orientation, deg from horizontal."""
+    check_orientation(cfg)
+    return cfg.case_plate.tilts[cfg.case_plate.item, cfg.case_plate.orient]
+
+
 def bed_d(cfg: Config = CFG) -> float:
     """Largest round part that fits the bed."""
     p = cfg.printer
@@ -78,7 +92,7 @@ def pocket_count(cfg: Config = CFG) -> int:
 def plate_drag_torque(cfg: Config = CFG) -> float:
     """Nm to turn the plate under the brass: the pile rests on the low side at about the pocket circle."""
     cp = cfg.case_plate
-    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(cp.tilt)) * pocket_circle_r(cfg) / 1000
+    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(tilt(cfg))) * pocket_circle_r(cfg) / 1000
 
 
 def tipping_moment(tilt: float, cfg: Config = CFG) -> float:
@@ -154,7 +168,7 @@ def motor_screws(cfg: Config = CFG) -> list[tuple[float, float]]:
     out = []
     for along in (-m.mount_near, m.mount_far):  # along the gearbox toward the can
         for across in (-m.mount_across / 2, m.mount_across / 2):
-            out.append((along * math.cos(a) - across * math.sin(a), along * math.sin(a) + across * math.cos(a)))
+            out.append((along * math.cos(a) - across * math.sin(a), along * math.sin(a) + across * math.cos(a)))  # noqa: PERF401
     return out
 
 

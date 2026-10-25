@@ -7,10 +7,15 @@ on:
 permissions: {}
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  # a newer push or pull request commit cancels the older build, but a run on main (the deployment) is never cancelled
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
   build:
+    # The promotion pull request (develop -> main) repeats what the push to develop already built and tested. Matching
+    # the head repository too keeps a fork branch named develop from skipping the build.
+    if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -27,17 +32,21 @@ jobs:
           else
             echo "tests=tests/test_guide.py" >> "$GITHUB_OUTPUT"
           fi
-      # as .devcontainer: libgl for OCP, the locked environment, the package itself
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglu1-mesa
+      # as .devcontainer: libgl for OCP, the locked environment, the package itself; DejaVu is the font of the lid text
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglu1-mesa fonts-dejavu-core
       - run: |
           python3 -m venv .venv
           .venv/bin/pip install -r requirements.txt -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
-      # guide data in the background while the test files run on the runner's cores
+      # guide data in the background while the test files run on the runner's cores. Releases (pushes to main, the
+      # Pages source) also build the configurator's print files, which mkdocs copies into the site
       - env:
           TESTS: ${{ steps.scope.outputs.tests || 'tests' }}
+          RELEASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         run: |
-          .venv/bin/python build.py --no-test --guide > guide.log 2>&1 &
+          args=(--no-test --guide)
+          if [ "$RELEASE" = true ]; then args+=(--configurator); fi
+          .venv/bin/python build.py "${args[@]}" > guide.log 2>&1 &
           guide=$!
           tests=0
           .venv/bin/python -m pytest -q -n auto --dist loadfile "$TESTS" || tests=$?
@@ -47,13 +56,20 @@ jobs:
       - run: .venv/bin/mkdocs build --strict
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+      # the Pages artifact limit is 1 GB
+      - run: |
+          size=$(du -sm site | cut -f1)
+          echo "site: $size MB"
+          test "$size" -lt 800
+      - if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       pages: write
       id-token: write

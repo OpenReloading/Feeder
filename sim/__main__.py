@@ -37,7 +37,7 @@ def sweep(a) -> None:
     path = Path(a.out)
     path.parent.mkdir(parents=True, exist_ok=True)
     done = _done(path)
-    todo = [dict(plate=pl, case=a.case or None, tilt=t, rpm=r, n_cases=a.cases, revs=a.revs, com_ratio=c, mu=m, seed=s)
+    todo = [dict(plate=pl, case=a.case or None, tilt=t, rpm=r, n_cases=a.cases, revs=a.revs, com_ratio=c, mu=m, seed=s)  # noqa: C408
             for pl, t, r, c, m, s in itertools.product(a.plate.split(","), _floats(a.tilt), _floats(a.rpm), _floats(a.com), _floats(a.mu),
                                                        range(1, a.seeds + 1))
             if (pl, a.case, t, r, a.cases, c, m, s) not in done]
@@ -60,12 +60,12 @@ def sweep(a) -> None:
 
 
 def plot(a) -> None:
-    import matplotlib
+    import matplotlib  # noqa: PLC0415
 
     matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # noqa: PLC0415
 
-    with open(a.csv) as f:
+    with open(a.csv) as f:  # noqa: PTH123
         rows = [r for r in csv.DictReader(f) if r["valid"] == "True"]  # a lost or spilled case is a model fault
     fig, ax = plt.subplots(1, 3, figsize=(15, 4.5))
     for tilt in sorted({float(r["tilt"]) for r in rows}):
@@ -75,7 +75,7 @@ def plot(a) -> None:
         ax[1].plot(x, [float(r["fill"]) for r in rs], "o-")
         ax[1].fill_between(x, [float(r["fill_lo"]) for r in rs], [float(r["fill_hi"]) for r in rs], alpha=0.2)
         ax[2].plot(x, [float(r["torque_p95"]) for r in rs], "o-")
-    for a_, label in zip(ax, ("base-down exits per hour", "pocket fill (95 % CI)", "plate torque p95, Nm")):
+    for a_, label in zip(ax, ("base-down exits per hour", "pocket fill (95 % CI)", "plate torque p95, Nm")):  # noqa: B905
         a_.set_xlabel("plate rpm")
         a_.set_title(label)
         a_.grid(alpha=0.3)
@@ -87,19 +87,19 @@ def plot(a) -> None:
 
 
 def calibrate(a) -> None:
-    with open(a.measured) as f:
+    with open(a.measured) as f:  # noqa: PTH123
         measured = [{k: float(v) for k, v in r.items()} for r in csv.DictReader(f)]
     pairs = list(itertools.product(_floats(a.mu), _floats(a.com)))
-    jobs = [dict(tilt=m["tilt"], rpm=m["rpm"], n_cases=a.cases, revs=a.revs, mu=mu, com_ratio=c) for mu, c in pairs for m in measured]
+    jobs = [dict(tilt=m["tilt"], rpm=m["rpm"], n_cases=a.cases, revs=a.revs, mu=mu, com_ratio=c) for mu, c in pairs for m in measured]  # noqa: C408
     with ProcessPoolExecutor(max_workers=min(a.workers, 6)) as ex:
         sims = [f.result() for f in [ex.submit(run, **kw) for kw in jobs]]
     out = []
     for k, (mu, c) in enumerate(pairs):
         err = 0.0
-        for m, s in zip(measured, sims[k * len(measured):(k + 1) * len(measured)]):
+        for m, s in zip(measured, sims[k * len(measured):(k + 1) * len(measured)]):  # noqa: B905
             share = s["base_down"] / s["exits"] if s["exits"] else 0.0
             err += ((s["cases_per_h"] - m["cases_per_h"]) / m["cases_per_h"]) ** 2 + (share - m["base_down_share"]) ** 2
-        out.append(dict(mu=mu, com_ratio=c, error=round(err, 4)))
+        out.append(dict(mu=mu, com_ratio=c, error=round(err, 4)))  # noqa: C408
     out.sort(key=lambda r: r["error"])
     path = OUT / "calibration.csv"
     path.parent.mkdir(parents=True, exist_ok=True)

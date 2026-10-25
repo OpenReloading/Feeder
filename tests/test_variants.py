@@ -40,7 +40,7 @@ def test_every_referenced_file_exists_and_is_named_by_its_content(built):
 def test_identical_parts_share_one_file(built):
     out, manifest = built
     files = manifest["parts"]["body_track_gate"]["files"]
-    assert len(files) == 6 and len(set(files.values())) == 4  # split x hub: the arcs and halves gates are the same part
+    assert len(files) == 6 and len(set(files.values())) == 4  # split x hub: the arcs and halves gates are the same part  # noqa: PT018
     assert files["arcs/pololu_2693"] == files["halves/pololu_2693"] != files["arcs/generic_8mm_flange"]
     assert len(set(manifest["parts"]["slip_clutch_cap"]["files"].values())) == 1  # no option changes the cap
     contents = [f.read_bytes() for f in out.glob("*.stl")]
@@ -52,8 +52,8 @@ def test_a_fixed_link_choice_has_its_link_and_no_rod_end_or_rod(built):
     adjustable, bom = variants.resolve(manifest, {**FIRST, "link": "adjustable"})
     fixed, bom_fixed = variants.resolve(manifest, {**FIRST, "link": "50"})
     assert {n for n in adjustable if n.startswith("mount_")} >= {"mount_rod_end_adjust", "mount_rod_end_fixed"}
-    assert {n for n in fixed if n.startswith("mount_link")} == {"mount_link_50"} and not [n for n in fixed if "rod_end" in n]
-    assert any(r["part"].startswith("DIN 976-1") for r in bom) and not any(r["part"].startswith("DIN 976-1") for r in bom_fixed)
+    assert {n for n in fixed if n.startswith("mount_link")} == {"mount_link_50"} and not [n for n in fixed if "rod_end" in n]  # noqa: PT018
+    assert any(r["part"].startswith("DIN 976-1") for r in bom) and not any(r["part"].startswith("DIN 976-1") for r in bom_fixed)  # noqa: PT018
 
 
 def test_bom_follows_the_extender_and_the_hub(built):
@@ -63,9 +63,9 @@ def test_bom_follows_the_extender_and_the_hub(built):
         return {r["part"]: r["qty"] for r in variants.resolve(manifest, {**FIRST, **option})[1]}
 
     default, bare, generic = qty(), qty(extender="without"), qty(hub="generic_8mm_flange")
-    assert default["ISO 10642 M3 x 12"] == 4 and "ISO 10642 M3 x 12" not in bare  # the extender's screws
-    assert default["ISO 4032 M3 nut"] == 4 and "ISO 4032 M3 nut" not in bare
-    assert any(p.startswith("Pololu 2693") for p in default) and not any(p.startswith("Pololu 2693") for p in generic)
+    assert default["ISO 10642 M3 x 12"] == 4 and "ISO 10642 M3 x 12" not in bare  # the extender's screws  # noqa: PT018
+    assert default["ISO 4032 M3 nut"] == 4 and "ISO 4032 M3 nut" not in bare  # noqa: PT018
+    assert any(p.startswith("Pololu 2693") for p in default) and not any(p.startswith("Pololu 2693") for p in generic)  # noqa: PT018
     assert any(p.startswith("Generic 8 mm") for p in generic)
     assert generic["ISO 4032 M3 nut"] == default["ISO 4032 M3 nut"] + 2  # nuts under the flange
     assert generic["ISO 4762 M3 x 12"] == default["ISO 4762 M3 x 12"] + 2
@@ -87,7 +87,7 @@ def _shape(part):
     return tuple(round(v, 3) for v in (part.volume, *box.min, *box.max))
 
 
-@pytest.mark.parametrize("base", ("arcs", "one_piece"))
+@pytest.mark.parametrize("base", ("arcs", "one_piece"))  # noqa: PT007
 @pytest.mark.parametrize("option", ALTERNATIVE)
 def test_a_part_does_not_change_with_an_option_it_is_not_keyed_by(base, option):
     a = {**FIRST, "split": base}

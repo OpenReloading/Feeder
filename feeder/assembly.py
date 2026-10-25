@@ -14,7 +14,15 @@ from build123d import Box, Cone, Cylinder, Part, Plane, Pos, Rot
 from feeder.config import CFG, Config
 from feeder.lib import fasteners
 from feeder.lib.features import d_bore, hex_prism
-from feeder.parts import body, case_plate, drop_tube, electronics, layout, mount
+from feeder.parts import (
+    body,
+    case_plate,
+    drop_chain,
+    drop_tube,
+    electronics,
+    layout,
+    mount,
+)
 from feeder.parts import slip_clutch as sc
 
 B = sc.BOTTOM
@@ -72,9 +80,9 @@ def stand_tube(tilt: float, cfg: Config = CFG, stub: float = 100.0) -> Part:
 
 
 def body_tilt(cfg: Config = CFG) -> float:
-    """Tilt of the assembled feeder: the angle of the fixed link, else `case_plate.tilt`."""
+    """Tilt of the assembled feeder: the angle of the fixed link, else the plate set's tilt."""
     angle = mount.link_angle(cfg)
-    return cfg.case_plate.tilt if angle is None else angle
+    return layout.tilt(cfg) if angle is None else angle
 
 
 def link_name(tilt: float, cfg: Config = CFG) -> str:
@@ -96,7 +104,7 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
     """Every part of the feeder in the body frame, in assembly order."""
     tilt = body_tilt(cfg) if tilt is None else tilt
     link, adjustable = link_name(tilt, cfg), mount.link_angle(cfg) is None
-    m, c = cfg.motor, cfg.clutch
+    m, c = cfg.motor, cfg.clutch  # noqa: F841
     zc, z = sc.levels(cfg), layout.levels(cfg)
     off = Pos(0, 0, -zc.floor_top)  # clutch frame to body frame
     down = (0.0, 0.0, -1.0)
@@ -111,7 +119,9 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
     dt = cfg.drop_tube
     kinds = {"body_core": ("body", 1), "body": ("body", 1), "body_track_gate": ("gate", 3), "body_exit_insert": ("exit", 3)}
     for name, build in body.parts(cfg).items():
-        kind, step = kinds.get(name, ("wall", 2) if name.startswith("body_wall") else ("body", 1) if name.startswith("body_half") else ("extender", 15))
+        if name == "body_exit_insert_blank":  # optional, replaces the exit insert
+            continue
+        kind, step = kinds.get(name, ("wall", 2) if name.startswith("body_wall") else ("body", 1) if name.startswith("body_half") else ("extender", 17))
         out.append(Placed(name, build(cfg), kind, step))
     out += [
         Placed("pololu_hub", off * _hub(cfg), "alu", 4, bought=True),
@@ -125,23 +135,25 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
     out.append(Placed("slip_clutch_cap", off * cap_on_ring(cfg), "cap", 10))
     _, d = body.outlet(cfg)
     out.append(Placed("drop_tube", drop_tube.placement(cfg) * drop_tube.drop_tube(cfg), "drop", 11, explode=(d.X, d.Y, d.Z)))
+    for name, frame in drop_chain.frames(cfg):
+        out.append(Placed(name, frame * drop_chain.PARTS[name](cfg), "drop", 13 if name == "drop_hose_adapter" else 12, explode=(d.X, d.Y, d.Z)))
     out += [
-        Placed("mount_yoke", mount.yoke_in_body(mount.yoke(cfg), cfg), "yoke", 12, explode=down),
-        Placed("mount_clamp", mount.clamp_in_body(mount.clamp(cfg), tilt, cfg), "clamp", 13, explode=down),
-        Placed("stand_tube", stand_tube(tilt, cfg), "tube", 13, explode=down, bought=True),
+        Placed("mount_yoke", mount.yoke_in_body(mount.yoke(cfg), cfg), "yoke", 14, explode=down),
+        Placed("mount_clamp", mount.clamp_in_body(mount.clamp(cfg), tilt, cfg), "clamp", 15, explode=down),
+        Placed("stand_tube", stand_tube(tilt, cfg), "tube", 15, explode=down, bought=True),
         Placed(link, mount.link_in_body(mount.adjustable_link(tilt, cfg) if adjustable else mount.fixed_link(tilt, cfg), tilt, cfg),
-               "link", 14, explode=(1.0, 0.0, 0.0)),
-        Placed("electronics_box", box * electronics.box(cfg), "elec", 16, explode=down),
-        Placed("timer_relay", box * electronics.relay_board(cfg), "board", 16, explode=_dir(box, (0, -1, 0)), bought=True),
+               "link", 16, explode=(1.0, 0.0, 0.0)),
+        Placed("electronics_box", box * electronics.box(cfg), "elec", 18, explode=down),
+        Placed("timer_relay", box * electronics.relay_board(cfg), "board", 18, explode=_dir(box, (0, -1, 0)), bought=True),
     ]
     for name, pp, mouth, _ in electronics.panel_fits(cfg):
         front = name in dict(cfg.electronics.front_holes)
-        out.append(Placed(_slug(pp.label), box * mouth * electronics.panel_envelope(pp), "panel", 17 if front else 16,
+        out.append(Placed(_slug(pp.label), box * mouth * electronics.panel_envelope(pp), "panel", 19 if front else 18,
                           explode=_dir(box, (0, -1, 0) if front else (1, 0, 0)), bought=True))
     out += [
-        Placed("electronics_lid", box * electronics.lid(cfg), "lid", 17, explode=_dir(box, (0, -1, 0))),
-        Placed("pwm_controller", box * electronics.pwm_board(cfg), "board", 17, explode=_dir(box, (0, -1, 0)), bought=True),
-        Placed("level_sensor", sensor * Cylinder(dt.sensor_thread_d / 2, dt.sensor_length, align=B), "sensor", 18, explode=_dir(sensor, (0, 0, 1)), bought=True),
+        Placed("electronics_lid", box * electronics.lid(cfg), "lid", 19, explode=_dir(box, (0, -1, 0))),
+        Placed("pwm_controller", box * electronics.pwm_board(cfg), "board", 19, explode=_dir(box, (0, -1, 0)), bought=True),
+        Placed("level_sensor", sensor * Cylinder(dt.sensor_thread_d / 2, dt.sensor_length, align=B), "sensor", 20, explode=_dir(sensor, (0, 0, 1)), bought=True),
     ]
     if split == "halves":  # the two halves part sideways in the exploded view
         a = math.radians(cfg.body.halves_seam)
@@ -214,7 +226,7 @@ def _half(x: float, y: float, cfg: Config) -> int:
     return 0 if -x * math.sin(a) + y * math.cos(a) > 0 else 1
 
 
-def _pin_stack(size: str, length: float, face: float, nut_af: float, nut_h: float, head: str) -> list[tuple]:
+def _pin_stack(size: str, length: float, face: float, nut_af: float, nut_h: float, head: str) -> list[tuple]:  # noqa: PLR0913
     """Bolt along x through ears whose outer faces are at +-`face`, head at -x, washer on both sides and a DIN 985
     nut: (name, kind, shape, location about the pin centre, seq)."""
     wh = fasteners.washer_data(size)["h"]
@@ -228,7 +240,7 @@ def _pin_stack(size: str, length: float, face: float, nut_af: float, nut_h: floa
     ]
 
 
-def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fastener]:
+def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fastener]:  # noqa: C901, PLR0912, PLR0915
     """Every bought screw, bolt, nut, washer and heat-set insert, body frame, grouped by name, host and seq."""
     tilt = body_tilt(cfg) if tilt is None else tilt
     b, m, c, mt, mh, f = cfg.body, cfg.motor, cfg.clutch, cfg.mount, cfg.metal_hub, cfg.print.fit
@@ -280,12 +292,6 @@ def fasteners_in_body(cfg: Config = CFG, tilt: float | None = None) -> list[Fast
     k = fasteners.hex_screw(c.knob_screw_size, c.knob_screw_length).screw_data["k"]
     items.append((f"ISO 4017 {c.knob_screw_size} x {c.knob_screw_length:g}", "screw", _hex_screw(c.knob_screw_size, c.knob_screw_length), off * Pos(0, 0, zc.top + c.knob_t - k), "slip_clutch_knob", 1))
     d = cfg.drop_tube
-    mouth = drop_tube.placement(cfg).location * drop_tube.screw_mouth(cfg)
-    insert(d.screw_size, mouth, "drop_tube")
-    k = drop_tube.dims(cfg)
-    lift = d.screw_length - (k.r_socket + k.screw_boss_t - k.r_spigot)  # tip on the spigot, head off the boss
-    thumb = _shank(d.screw_size, d.screw_length) + Cylinder(d.collar_d / 2, d.head_h - d.knurl_h, align=B) + Pos(0, 0, d.head_h - d.knurl_h) * Cylinder(d.knurl_d / 2, d.knurl_h, align=B)
-    items.append((f"DIN 464 {d.screw_size} x {d.screw_length:g} thumb screw", "screw", thumb, mouth * Pos(0, 0, lift), "drop_tube", 1))
     # clamp and box collar screws along x: washer and head in the -x counterbore, nut in the +x pocket
     L, w = mount.clamp_layout(cfg), mount.clamp_width(cfg)
     wh, nut = fasteners.washer_data(mt.clamp_size)["h"], fasteners.nut_data(mt.clamp_size)
