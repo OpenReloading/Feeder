@@ -67,11 +67,13 @@ def test_socket_bore_is_a_sliding_fit_on_the_spigot_with_a_stop(part):
     assert K.r_bore > b.bore_d() / 2  # the shoulder face of the spigot end opens outward into the tube
 
 
-def test_barb_is_thick_enough_and_fits_its_length(part):
-    assert K.r_barb - K.r_bore >= CFG.print.min_wall
-    assert D.barb_ridges * D.barb_ridge_pitch <= D.barb_len
-    assert K.r_barb == pytest.approx((D.hose_id + D.barb_grip) / 2)
+def test_male_end_is_the_exit_spigots_form(part):
+    assert K.r_spigot - K.r_bore >= CFG.print.min_wall  # the wall left round the tube bore
+    assert K.male_z >= K.boss_top  # the lugs clear the sensor boss
     assert part.bounding_box().max.Z == pytest.approx(K.tip)  # noqa: SIM300
+    assert K.tip - K.male_z == E.spigot_len
+    slab = Pos(0, 0, K.male_z + D.lug_z + D.lug_h + D.lug_tip + 1) * Box(80, 80, 0.2)  # past the lugs
+    assert (part & slab).bounding_box().size.X / 2 == pytest.approx(K.r_spigot, abs=0.01)  # noqa: SIM300
 
 
 def test_sensor_window_is_as_thin_as_configured(part):

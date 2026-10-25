@@ -20,6 +20,7 @@ PARTS = {
     "body_wall_0": lambda: body.wall(0),
     "body_track_gate": body.track_gate,
     "body_exit_insert": body.exit_insert,
+    "body_exit_insert_blank": body.exit_insert_blank,
     "electronics_box": electronics.box,
     "electronics_box_left": electronics.box_left,
     "electronics_lid": electronics.lid,

@@ -2,6 +2,7 @@
 configured plate. The other test modules check the configured plate in detail."""
 
 import math
+from dataclasses import replace
 
 import pytest
 import trimesh
@@ -56,6 +57,21 @@ def test_group_plate_height_and_pockets_suit_every_case(plate_set):
     assert 2 * (r - s.case_plate.channel_len) * math.sin(math.pi / n) - (d - 1) >= MW
     z = layout.levels(s)
     assert z.plate_bottom - z.deck_top + s.case_plate.flatness / 2 < layout.caliber(s).rim_t_min  # no rim under the plate
+
+
+def test_set_declares_a_supported_item_and_orientation(plate_set):
+    s, _ = plate_set
+    assert (s.case_plate.item, s.case_plate.orient) in s.case_plate.tilts
+    assert layout.tilt(s) == s.case_plate.tilts[s.case_plate.item, s.case_plate.orient]
+
+
+@pytest.mark.parametrize("s", SETS, ids=IDS)
+def test_unsupported_orientation_names_the_supported_ones(s):
+    bad = replace(s, case_plate=replace(s.case_plate, orient="mouth_down"))
+    msg = "case/base_down"
+    for build_part in (cp.plate, b.exit_insert, layout.tilt):
+        with pytest.raises(ValueError, match=msg):
+            build_part(bad)
 
 
 def test_exit_takes_the_set_and_fits_the_body_shaft(plate_set, core):
