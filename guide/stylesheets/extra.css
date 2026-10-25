@@ -173,6 +173,20 @@ button:focus-visible {
   }
 }
 
+/* Configurator: a fieldset is as wide as its longest option unless told otherwise, so the pickers shrink to the page */
+#configurator-form fieldset {
+  min-width: 0;
+}
+
+#configurator-form select {
+  max-width: 100%;
+}
+
+/* Part names are one long word with underscores */
+#configurator-parts td:first-child {
+  overflow-wrap: anywhere;
+}
+
 /* Prose lines of about 75 characters; tables, admonitions and components keep the full width */
 .md-content__inner > :is(p, ul, ol) {
   max-width: 62ch;
