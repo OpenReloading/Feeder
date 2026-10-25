@@ -51,7 +51,7 @@ All dimensions and options are in `feeder/config.py` (frozen dataclasses, instan
 | `printer` | bed size and edge margin. The plate and band diameter follow from the bed |
 | `calibers` | rim diameter, minimum rim thickness and case length per caliber (C.I.P. TDCC) |
 | `motor` | 5840-31ZY output shaft, boss, mounting screws, gearbox and can envelope, direction of the can, mass range |
-| `case_plate` | caliber or caliber group, notches or holes, pocket clearance and pitch, plate height over case length, chamfers, pickup channels, ribs or ridges (`ribs`), pull eye, design fill, tilt, rotation direction, drag estimate |
+| `case_plate` | caliber or caliber group, notches or holes, pocket clearance and pitch, plate height over case length, chamfers, pickup channels, ribs or ridges (`ribs`), pull eye, design fill, tilt, rotation direction (the cap thread hand follows it and the wiring has one motor polarity: set it here and print the matching plate and cap, do not swap the motor leads), drag estimate |
 | `body` | split (`arcs`, `halves`, `one_piece`), floor, wall height, deck, cup, ribs, skirt, wall joint screws and keys, seam post screws, wall extender, motor can tunnel |
 | `track` | gap from plate to deck, band ring, gate setback, chamfer and lap |
 | `exit` | drop opening length over case length, funnel lean and length, bore clearance, spigot, ledge in the deck recess |

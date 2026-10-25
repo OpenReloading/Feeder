@@ -97,8 +97,8 @@ WIRING_STEPS = [
     ("D", "Sensor socket", "The sensor output pulls the relay input to 0 V while no brass is in front of it. "
      "Check the relay module takes a low input (unverified).",
      [("8", "XP:4", "X2:S1", "BN"), ("9", "XN:4", "X2:S2", "BU"), ("10", "X2:S3", "K1:IN", "BK")]),
-    ("E", "Motor line", "The motor runs only while the relay holds. If the plate turns the wrong way, swap the two "
-     "motor leads at the plug.",
+    ("E", "Motor line", "The motor runs only while the relay holds. The cap thread follows the plate direction, so "
+     "the motor turns one way only: set `case_plate.direction` in the configuration and print the matching plate and cap.",
      [("11", "U1:M+", "K1:COM", "RD"), ("12", "K1:NO", "X1:S1", "RD"), ("13", "U1:M-", "X1:S2", "BK")]),
     ("F", "Plugs", "Solder the sensor cable and the motor leads to the plugs: brown, blue, black to pins 1, 2, 3; "
      "motor + to pin 1.",

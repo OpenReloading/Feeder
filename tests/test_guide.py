@@ -1,5 +1,6 @@
 """Build guide data: the BOM checklist carries every BOM row and the configured parts."""
 
+import re
 from pathlib import Path
 
 import build
@@ -39,3 +40,8 @@ def test_wiring_board_ends_exist_and_the_motor_runs_through_the_relay():
     assert all(c["a"] in terminals and c["b"] in terminals and c["color"] in board["colors"] for c in wires)
     ends = {frozenset((c["a"], c["b"])) for c in wires}
     assert {frozenset(("U1:M+", "K1:COM")), frozenset(("K1:NO", "X1:S1")), frozenset(("X2:S3", "K1:IN"))} <= ends
+
+
+def test_no_wiring_step_tells_the_builder_to_reverse_the_motor():
+    text = " ".join(f"{t} {n}" for _, t, n, _ in guide.WIRING_STEPS).lower()
+    assert not re.search(r"swap|reverse|wrong way|opposite way", text)
