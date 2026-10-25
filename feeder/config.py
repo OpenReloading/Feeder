@@ -425,7 +425,7 @@ class Electronics:
     front_refs: tuple = ("U1", "Q1", "J1")  # wiring part (feeder.wiring) behind each hole of `front_holes`
     side_refs: tuple = ("X1", "X2")  # and of `side_holes`
     lid_titles: tuple = (("U1", "SPEED"), ("Q1", "POWER"), ("J1", "12V IN"), ("X1", "MOTOR"), ("X2", "SENSOR"))  # lid text titles by wiring part, the pins and polarity come from `feeder.wiring`
-    label_font: str = "DejaVu Sans"  # bold, found in the dev container and on the Ubuntu CI runner
+    label_font: str = "DejaVu Sans"  # bold, in the dev container image; the Pages workflow installs fonts-dejavu-core
     label_gap: float = 11.0  # lid text starts this far from the middle line, clear of the 16 mm knob
     cradle_z: tuple = (80.0, 104.0)  # z of the fuse holder cradle and of the splice connectors on the back wall: clear of the relay below and the PWM board in front
     pad_len: float = 12.0  # tie pad length along z, about the width of a wire bundle
