@@ -14,19 +14,22 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: blue grey
-      accent: deep orange
+      primary: custom
+      accent: custom
       toggle: {icon: material/weather-night, name: Dark mode}
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: blue grey
-      accent: deep orange
+      primary: custom
+      accent: custom
       toggle: {icon: material/weather-sunny, name: Light mode}
 
 # header facts (latest tag, stars, forks): fetched from the GitHub API at build time, not in the browser
 hooks:
   - hooks/repo_facts.py
   - hooks/configurator_files.py   # build/configurator/ (build.py --configurator) into site/configurator/data/
+
+extra_css:
+  - stylesheets/extra.css
 
 extra_javascript:
   - javascripts/configurator.js
