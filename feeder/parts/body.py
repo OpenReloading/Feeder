@@ -147,15 +147,29 @@ def _spigot_frame(cfg: Config) -> Plane:
     return Plane(origin=o, x_dir=(1, 0, 0), z_dir=d)
 
 
+def _insert_block(cfg: Config) -> Part:
+    """The insert's shaft filler and ledge, flat top at the deck top, without funnel and spigot."""
+    e, f = cfg.exit, cfg.print.fit
+    z = layout.levels(cfg)
+    body = Pos(0, 0, z.bottom) * extrude(_exit_outline(cfg, -f), z.deck_top - z.bottom)  # fills the shaft up to one flat top (prints top down)
+    body += Pos(0, 0, z.deck_top - e.seat_t) * extrude(_exit_outline(cfg, e.seat_w - f), e.seat_t)  # ledge in the deck recess
+    return Part(body & Cylinder(layout.bowl_r(cfg) - f, 1000))
+
+
+@per_config
+def exit_insert_blank(cfg: Config = CFG) -> Part:
+    """Closes the exit: the insert's shaft filler and ledge with no opening, funnel or spigot, for the day the exit
+    moves to another position. Prints top down like the exit insert."""
+    return _insert_block(cfg)
+
+
 @per_config
 def exit_insert(cfg: Config = CFG) -> Part:
     layout.check_orientation(cfg)
-    e, f = cfg.exit, cfg.print.fit
+    e = cfg.exit
     z = layout.levels(cfg)
     length, r0, r1 = opening(cfg)  # noqa: RUF059
-    body = Pos(0, 0, z.bottom) * extrude(_exit_outline(cfg, -f), z.deck_top - z.bottom)  # fills the shaft up to one flat top (prints top down)
-    body += Pos(0, 0, z.deck_top - e.seat_t) * extrude(_exit_outline(cfg, e.seat_w - f), e.seat_t)  # ledge in the deck recess
-    body = body & Cylinder(layout.bowl_r(cfg) - f, 1000)
+    body = _insert_block(cfg)
     body += _funnel(cfg, e.wall) - Pos(0, 0, z.bottom) * Box(1000, 1000, 1000, align=BOTTOM)  # funnel end and spigot below the body
     body += _spigot_frame(cfg) * spigot_lugs(cfg)
     body -= _funnel(cfg, 0.0)
@@ -607,7 +621,7 @@ def _extender_nut_holes(cfg: Config) -> Part:
 
 def parts(cfg: Config = CFG) -> dict:
     b = cfg.body
-    out = {"body_track_gate": track_gate, "body_exit_insert": exit_insert}
+    out = {"body_track_gate": track_gate, "body_exit_insert": exit_insert, "body_exit_insert_blank": exit_insert_blank}
     if b.split == "arcs":
         out["body_core"] = core
         for i in range(b.wall_segments):

@@ -87,6 +87,20 @@ def test_exit_insert_fills_its_shaft_and_sits_on_the_deck(parts):
     assert all(shaft_plan.contains(Point(v.X, v.Y)) for v in verts if v.Z < z.deck_top - E.seat_t - 1e-3)  # it drops in from above  # noqa: SIM300
 
 
+def test_blank_exit_insert_closes_the_exit(parts):
+    z = layout.levels()
+    core, ins, blank = parts["body_core"], parts["body_exit_insert"], parts["body_exit_insert_blank"]
+    assert blank.is_valid
+    assert len(blank.solids()) == 1
+    assert (core & blank).volume < 1e-3  # drops into the same shaft
+    assert blank.bounding_box().min.Z == pytest.approx(z.bottom)  # no funnel or spigot below the body  # noqa: SIM300
+    assert blank.bounding_box().max.Z == pytest.approx(z.deck_top)  # flat top level with the deck  # noqa: SIM300
+    _, r0, r1 = b.opening()
+    drop = Pos(0, (r0 + r1) / 2, z.deck_top - 1) * Box(2, 2, 1)  # in the drop opening
+    assert (blank & drop).volume == pytest.approx(drop.volume)
+    assert (ins & drop).volume < 1e-3  # the exit insert has the opening
+
+
 def test_exit_outlet_is_below_the_body_and_clear_of_the_motor():
     o, d = b.outlet()
     end = o + d * E.spigot_len

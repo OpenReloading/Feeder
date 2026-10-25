@@ -14,7 +14,15 @@ from build123d import Box, Cone, Cylinder, Part, Plane, Pos, Rot
 from feeder.config import CFG, Config
 from feeder.lib import fasteners
 from feeder.lib.features import d_bore, hex_prism
-from feeder.parts import body, case_plate, drop_tube, electronics, layout, mount
+from feeder.parts import (
+    body,
+    case_plate,
+    drop_chain,
+    drop_tube,
+    electronics,
+    layout,
+    mount,
+)
 from feeder.parts import slip_clutch as sc
 
 B = sc.BOTTOM
@@ -111,7 +119,9 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
     dt = cfg.drop_tube
     kinds = {"body_core": ("body", 1), "body": ("body", 1), "body_track_gate": ("gate", 3), "body_exit_insert": ("exit", 3)}
     for name, build in body.parts(cfg).items():
-        kind, step = kinds.get(name, ("wall", 2) if name.startswith("body_wall") else ("body", 1) if name.startswith("body_half") else ("extender", 15))
+        if name == "body_exit_insert_blank":  # optional, replaces the exit insert
+            continue
+        kind, step = kinds.get(name, ("wall", 2) if name.startswith("body_wall") else ("body", 1) if name.startswith("body_half") else ("extender", 17))
         out.append(Placed(name, build(cfg), kind, step))
     out += [
         Placed("pololu_hub", off * _hub(cfg), "alu", 4, bought=True),
@@ -125,23 +135,25 @@ def placed(cfg: Config = CFG, tilt: float | None = None) -> list[Placed]:
     out.append(Placed("slip_clutch_cap", off * cap_on_ring(cfg), "cap", 10))
     _, d = body.outlet(cfg)
     out.append(Placed("drop_tube", drop_tube.placement(cfg) * drop_tube.drop_tube(cfg), "drop", 11, explode=(d.X, d.Y, d.Z)))
+    for name, frame in drop_chain.frames(cfg):
+        out.append(Placed(name, frame * drop_chain.PARTS[name](cfg), "drop", 13 if name == "drop_hose_adapter" else 12, explode=(d.X, d.Y, d.Z)))
     out += [
-        Placed("mount_yoke", mount.yoke_in_body(mount.yoke(cfg), cfg), "yoke", 12, explode=down),
-        Placed("mount_clamp", mount.clamp_in_body(mount.clamp(cfg), tilt, cfg), "clamp", 13, explode=down),
-        Placed("stand_tube", stand_tube(tilt, cfg), "tube", 13, explode=down, bought=True),
+        Placed("mount_yoke", mount.yoke_in_body(mount.yoke(cfg), cfg), "yoke", 14, explode=down),
+        Placed("mount_clamp", mount.clamp_in_body(mount.clamp(cfg), tilt, cfg), "clamp", 15, explode=down),
+        Placed("stand_tube", stand_tube(tilt, cfg), "tube", 15, explode=down, bought=True),
         Placed(link, mount.link_in_body(mount.adjustable_link(tilt, cfg) if adjustable else mount.fixed_link(tilt, cfg), tilt, cfg),
-               "link", 14, explode=(1.0, 0.0, 0.0)),
-        Placed("electronics_box", box * electronics.box(cfg), "elec", 16, explode=down),
-        Placed("timer_relay", box * electronics.relay_board(cfg), "board", 16, explode=_dir(box, (0, -1, 0)), bought=True),
+               "link", 16, explode=(1.0, 0.0, 0.0)),
+        Placed("electronics_box", box * electronics.box(cfg), "elec", 18, explode=down),
+        Placed("timer_relay", box * electronics.relay_board(cfg), "board", 18, explode=_dir(box, (0, -1, 0)), bought=True),
     ]
     for name, pp, mouth, _ in electronics.panel_fits(cfg):
         front = name in dict(cfg.electronics.front_holes)
-        out.append(Placed(_slug(pp.label), box * mouth * electronics.panel_envelope(pp), "panel", 17 if front else 16,
+        out.append(Placed(_slug(pp.label), box * mouth * electronics.panel_envelope(pp), "panel", 19 if front else 18,
                           explode=_dir(box, (0, -1, 0) if front else (1, 0, 0)), bought=True))
     out += [
-        Placed("electronics_lid", box * electronics.lid(cfg), "lid", 17, explode=_dir(box, (0, -1, 0))),
-        Placed("pwm_controller", box * electronics.pwm_board(cfg), "board", 17, explode=_dir(box, (0, -1, 0)), bought=True),
-        Placed("level_sensor", sensor * Cylinder(dt.sensor_thread_d / 2, dt.sensor_length, align=B), "sensor", 18, explode=_dir(sensor, (0, 0, 1)), bought=True),
+        Placed("electronics_lid", box * electronics.lid(cfg), "lid", 19, explode=_dir(box, (0, -1, 0))),
+        Placed("pwm_controller", box * electronics.pwm_board(cfg), "board", 19, explode=_dir(box, (0, -1, 0)), bought=True),
+        Placed("level_sensor", sensor * Cylinder(dt.sensor_thread_d / 2, dt.sensor_length, align=B), "sensor", 20, explode=_dir(sensor, (0, 0, 1)), bought=True),
     ]
     if split == "halves":  # the two halves part sideways in the exploded view
         a = math.radians(cfg.body.halves_seam)

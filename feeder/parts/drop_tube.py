@@ -1,4 +1,5 @@
-"""Drop tube: continues the exit insert's spigot to a clear PVC hose, with a port for a tube-full sensor.
+"""Drop tube: continues the exit insert's spigot, with a port for a tube-full sensor, and ends in the spigot's own form
+so parts chain on it (`drop_chain`).
 
 - Bayonet socket over the spigot (fit `print.fit`): each of the spigot's two lugs enters an axial slot from the mouth,
   turns `twist` along a groove and drops `lock_lift` into a notch at the stop. The stop fixes the sensor window; the
@@ -6,11 +7,12 @@
   A stop shoulder at the spigot end closes the socket.
 - Straight section with the sensor boss. The sensor sits in a plate between two M18x1 lock nuts: the
   inner nut in a slot loaded from the side, the outer nut on the plate. A `window_t` wall closes the bore.
-- Barb for the hose, the bore of the tube continues through it.
+- Male end: the exit spigot's form (same lugs and outline, `male`), the next part's socket takes it. The bore of the
+  tube continues through it, the wall there is `exit.wall` less a fit. The hose barb is on `drop_chain`'s hose adapter.
 
 Frame: print orientation, socket mouth on the bed at z = 0, +z along the case path, sensor on +x, the wide lug's
 slot on +x. `placement` puts it on the body's spigot (hanging in the notch). The inner diameter never shrinks along
-the path: spigot bore, tube bore (wider by two fits), hose.
+the path: spigot bore, tube bore (wider by two fits), then the chain keeps the tube bore.
 """
 
 from dataclasses import dataclass  # noqa: I001
@@ -44,7 +46,8 @@ class Dims:
     half_h: float  # boss half height and half width
     sensor_z: float
     boss_top: float
-    tip: float  # outlet end
+    tip: float  # outlet end, the male end of the tube
+    male_z: float  # start of the male end, its lugs hang the next part's socket
     r_groove: float  # outer wall of the slots, groove and notch
     floor_z: float  # groove floor at the lug root radius, the lug hangs `lock_lift` below it in the notch
     roof_z: float  # top of the groove at its outer wall
@@ -65,6 +68,7 @@ def dims(cfg: Config = CFG) -> Dims:
     half_h = d.nut_af / 2 + cfg.fasteners.head_fit + d.boss_wall
     sensor_z = socket_top + half_h + (plate_x - r_bore)  # the 45 deg underside of the boss starts at the socket top
     boss_top = sensor_z + half_h
+    tip = math.ceil(max(boss_top + e.spigot_len, sensor_z + layout.caliber(cfg).case_length + d.sensor_margin) * 10) / 10  # long cases: longer tube under the male end, up to the next 0.1 mm so rounding never eats the sensor margin
     return Dims(
         r_spigot=r_spigot,
         r_socket=r_socket,
@@ -80,7 +84,8 @@ def dims(cfg: Config = CFG) -> Dims:
         half_h=half_h,
         sensor_z=sensor_z,
         boss_top=boss_top,
-        tip=math.ceil(max(boss_top + d.barb_len, sensor_z + layout.caliber(cfg).case_length + d.sensor_margin) * 10) / 10,  # long cases: longer tube under the barb, up to the next 0.1 mm so rounding never eats the sensor margin
+        tip=tip,
+        male_z=tip - e.spigot_len,
         r_groove=r_groove,
         floor_z=floor_z,
         roof_z=floor_z + d.lug_h + d.lug_tip + 2 * f,
@@ -88,9 +93,9 @@ def dims(cfg: Config = CFG) -> Dims:
 
 
 def bore_profile(cfg: Config = CFG) -> list[tuple[float, float]]:
-    """(z where it starts, inner diameter) along the case path: spigot bore, tube bore, hose."""
+    """(z where it starts, inner diameter) along the case path: spigot bore, tube bore. Every chained part keeps the tube bore."""
     k = dims(cfg)
-    return [(0.0, body.bore_d(cfg)), (k.depth, 2 * k.r_bore), (k.tip, cfg.drop_tube.hose_id)]
+    return [(0.0, body.bore_d(cfg)), (k.depth, 2 * k.r_bore)]
 
 
 def sensor_frame(cfg: Config = CFG) -> Location:
@@ -115,12 +120,13 @@ def _boss(k: Dims, cfg: Config) -> Part:
     return boss & extrude(Plane.YZ * Polygon(*sides, align=None), k.plate_x)
 
 
-def _barb(k: Dims, cfg: Config) -> Part:
+def barb(k: Dims, cfg: Config, tip: float) -> Part:
+    """Hose barb ending at `tip`, ridges back to front toward the hose end."""
     d = cfg.drop_tube
     h, pitch = d.barb_ridge_h, d.barb_ridge_pitch
-    solid = Pos(0, 0, k.tip - d.barb_len) * Cylinder(k.r_barb, d.barb_len, align=BOTTOM)
+    solid = Pos(0, 0, tip - d.barb_len) * Cylinder(k.r_barb, d.barb_len, align=BOTTOM)
     for i in range(d.barb_ridges):
-        top = k.tip - i * pitch
+        top = tip - i * pitch
         solid += Pos(0, 0, top - (pitch - h)) * Cone(k.r_barb + h, k.r_barb, pitch - h, align=BOTTOM)
         solid += Pos(0, 0, top - pitch) * Cone(k.r_barb, k.r_barb + h, h, align=BOTTOM)
     return solid
@@ -160,17 +166,29 @@ def _bayonet(k: Dims, cfg: Config) -> Part:
     return Part(cut)
 
 
+def socket_cut(k: Dims, cfg: Config) -> Part:
+    """What a part's female end gives up: the cavity over the spigot, the 45 deg stop shoulder (prints without
+    supports) and the bayonet. Mouth at z = 0. The outer wall is `Cylinder(k.r_socket_out, k.socket_top)`."""
+    cut = Cylinder(k.r_socket, k.depth, align=BOTTOM)
+    cut += Pos(0, 0, k.depth) * Cone(k.r_socket, k.r_bore, k.r_socket - k.r_bore, align=BOTTOM)
+    return Part(cut + _bayonet(k, cfg))
+
+
+def male(k: Dims, cfg: Config, z: float = 0.0) -> Part:
+    """The male end, the exit spigot's form with the bore still to cut, starting at `z` along +z."""
+    return Part(Pos(0, 0, z) * (Cylinder(k.r_spigot, cfg.exit.spigot_len, align=BOTTOM) + body.spigot_lugs(cfg)))
+
+
 @per_config
 def drop_tube(cfg: Config = CFG) -> Part:
-    d, f = cfg.drop_tube, cfg.print.fit  # noqa: F841
+    d = cfg.drop_tube
     k = dims(cfg)
     part = Cylinder(k.r_socket_out, k.socket_top, align=BOTTOM)
-    part += Cylinder(k.r_tube, k.tip - d.barb_len, align=BOTTOM)
+    part += Cylinder(k.r_tube, k.male_z, align=BOTTOM)
     part += _boss(k, cfg)
-    part += _barb(k, cfg)
+    part += male(k, cfg, k.male_z)
 
-    part -= Cylinder(k.r_socket, k.depth, align=BOTTOM)
-    part -= Pos(0, 0, k.depth) * Cone(k.r_socket, k.r_bore, k.r_socket - k.r_bore, align=BOTTOM)  # 45 deg stop shoulder, prints without supports
+    part -= socket_cut(k, cfg)
     part -= Pos(0, 0, k.depth - 1) * Cylinder(k.r_bore, k.tip - k.depth + 2, align=BOTTOM)
     nut_slot = Box(k.slot_h, 2 * k.half_h + 2, d.nut_af + 2 * cfg.fasteners.head_fit, align=(Align.MIN, Align.CENTER, Align.CENTER))
     part -= Pos(k.window_x, 0, k.sensor_z) * nut_slot
@@ -178,7 +196,6 @@ def drop_tube(cfg: Config = CFG) -> Part:
     r = d.sensor_hole_d / 2
     hole = teardrop(d.sensor_hole_d, d.plate_t + 2) & Pos(0, 0, -r) * Box(d.plate_t + 2, 2 * r, r + roof, align=(Align.MIN, Align.CENTER, Align.MIN))
     part -= Pos(k.window_x + k.slot_h - 1, 0, k.sensor_z) * hole
-    part -= _bayonet(k, cfg)
     return part
 
 

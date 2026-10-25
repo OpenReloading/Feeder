@@ -21,6 +21,9 @@ Default: split body, Pololu 2693 metal hub, simple PWM speed controller, no micr
 | `body_track_gate` | 1 |
 | `body_exit_insert` | 1 |
 | `drop_tube` | 1 |
+| `drop_hose_adapter` | 1 |
+| `drop_spacer`, `drop_angled` | 1 each, optional, chain between the drop tube and the hose adapter (`drop_chain.parts`) |
+| `body_exit_insert_blank` | 1, optional, closes the exit instead of the exit insert |
 | `mount_yoke` | 1 |
 | `mount_clamp` | 1 |
 | `mount_rod_end_adjust`, `mount_rod_end_fixed` | 1 each, adjustable link |
@@ -28,7 +31,7 @@ Default: split body, Pololu 2693 metal hub, simple PWM speed controller, no micr
 | `electronics_box` or `electronics_box_left` | 1, right or left of the tube as the user sees it |
 | `electronics_lid` | 1 |
 
-Other calibers: plate, exit insert and drop tube come per plate set from `build/plates/<set>/` (README, Plate sets). The rest stays.
+Other calibers: plate, exit insert, drop tube and its chain parts come per plate set from `build/plates/<set>/` (README, Plate sets). The rest stays.
 
 ## Drive and clutch
 
@@ -77,7 +80,7 @@ Other calibers: plate, exit insert and drop tube come per plate set from `build/
 |---|---|---|---|
 | Inductive sensor LJ18A3-8-Z/AX, M18x1, NPN NC, 6 to 36 V (unverified) | 1 | drop tube, tube-full | body (65 mm long) and lock nuts unverified (24 AF x 4) |
 | Lock nut M18 x 1 | 2 | sensor in the drop tube | one each side of the printed plate, supplied with the sensor. 24 AF x 4 unverified |
-| Clear PVC hose 14 mm ID x 18 mm OD | length to the press | drop tube barb | unverified |
+| Clear PVC hose 14 mm ID x 18 mm OD | length to the press | hose adapter barb | unverified |
 
 ## Electronics
 

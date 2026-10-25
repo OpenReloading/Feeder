@@ -9,7 +9,7 @@ from build123d import Part, Pos, Rot
 from feeder.config import CFG, Config
 from feeder.parts import body
 
-UPSIDE_DOWN = {"slip_clutch_cap", "body_track_gate", "body_exit_insert"}
+UPSIDE_DOWN = {"slip_clutch_cap", "body_track_gate", "body_exit_insert", "body_exit_insert_blank"}
 TOP_DOWN_SLANTED = {"body_extender"}  # flat top falls at the wall slant
 TURNED = {"electronics_box": Rot(X=-90), "electronics_box_left": Rot(X=-90), "electronics_lid": Rot(X=90)}  # box on its back wall, lid on its outer face
 

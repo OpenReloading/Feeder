@@ -467,7 +467,19 @@ class DropTube:
     barb_ridge_h: float = 0.4  # radial, 45 deg back face prints without support
     barb_ridge_pitch: float = 5.0
     barb_ridges: int = 2
-    barb_len: float = 18.0
+    barb_len: float = 18.0  # on the hose adapter, the last part of the chain
+
+
+@dataclass(frozen=True)
+class DropChain:
+    """Parts that chain on the drop tube's male end (the exit spigot's form), each with the drop tube's female socket at
+    one end and the male form at the other, so the bore stays at the drop tube bore. The hose adapter ends the chain.
+    The sensor window stays on the first tube. Own design sizes, tune on hardware."""
+
+    parts: tuple = ()  # optional parts between the drop tube and the hose adapter, in order: "spacer", "angled". () is the default assembly
+    spacer_len: float = 30.0  # straight tube between the socket and the male end
+    angle: float = 30.0  # deg the angled piece bends the path, sideways to the lugs (0 is straight). At most 35: the 45 deg lug undersides still print without support in this tilt (test_drop_chain)
+    leg_len: float = 25.0  # angled piece: straight tube each side of the bend, from the socket top and to the male end
 
 
 @dataclass(frozen=True)
@@ -505,6 +517,7 @@ class Config:
     electronics: Electronics = Electronics()
     clutch: Clutch = Clutch()
     drop_tube: DropTube = DropTube()
+    drop_chain: DropChain = DropChain()
     sim: Sim = Sim()
 
 
