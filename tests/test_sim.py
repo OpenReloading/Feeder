@@ -93,7 +93,7 @@ def test_extender_arc_stands_on_the_low_side_only_in_the_sim_wall():
 
 def test_starts_dumped_and_tilt_change_run_and_keep_a_small_pile_in():
     for start in START[1:]:
-        r = run(60.0, 6.0, n_cases=20, seconds=2.0, start=start)
+        r = run(60.0, 6.0, n_cases=20, seconds=2.0, extender=True, start=start)
         assert r["start"] == start and r["lost"] == 0 and r["spilled"] == 0, start  # noqa: PT018
     with pytest.raises(ValueError, match="start"):
         run(45.0, 6.0, n_cases=1, seconds=0.1, start="poured")

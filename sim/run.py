@@ -10,10 +10,10 @@ The wall extender is fitted when the fill is above the wall's capacity at the ti
 README tells users. A case goes back below the wall top; when the pile leaves no room there it counts as
 `overfill` and is dropped on top anyway.
 
-`start` is how the run begins: "settled" (the pile lies on the plate), "dumped" (it falls the height of the wall onto the
-plate along gravity, as poured in from above), "tilt_change" (it settles at the far end of the mount's tilt range, then
-the tilt goes to `tilt` in `CHANGE_S`) or "dumped_tilt_change" (dumped at the far end, then the tilt change). A spill
-counts from the first step, the pile settling and the tilt change included.
+`start` is how the run begins: "settled" (the pile lies on the plate), "dumped" (it hits the plate at the speed of a fall
+from the wall top, as poured in from above), "tilt_change" (it settles at the far end of the mount's tilt range, then the
+tilt goes to `tilt` in `CHANGE_S`) or "dumped_tilt_change" (dumped at the far end, then the tilt change). A spill counts
+from the first step, the pile settling and the tilt change included.
 """
 
 import math
@@ -71,18 +71,22 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
     hinge = model.jnt_dofadr[model.joint("hinge").id]
     hinge_q = model.jnt_qposadr[model.joint("hinge").id]
 
-    def place(i: int, x: float, y: float, zz: float):
+    # dumped: the pile hits the plate at the speed of a fall from the wall top along gravity (a start at rest from that
+    # height would land beyond the low wall at a steep tilt)
+    dump_v = math.sqrt(2 * G * (z.wall_top - pt) / math.cos(math.radians(tilt_from)) * MM) if "dumped" in start else 0.0
+
+    def place(i: int, x: float, y: float, zz: float, v: float = 0.0):
         q = rng.normal(size=4)
         data.qpos[qa[i]:qa[i] + 7] = [x * MM, y * MM, zz * MM, *(q / np.linalg.norm(q))]
         data.qvel[va[i]:va[i] + 6] = 0
+        data.qvel[va[i]:va[i] + 3] = [0, -v * math.sin(math.radians(tilt_from)), -v * math.cos(math.radians(tilt_from))]  # along gravity
 
     cell = 22.0  # a case fits a 22 mm cell in any orientation (diagonal 21.6), so the start lattice has no overlap
     grid = np.arange(-R, R + 1, cell)
     spots = [(x, y) for x in grid for y in grid if cfg.cap.d / 2 + cell / 2 < math.hypot(x, y) < layout.plate_r(cfg) - cell / 2]
     for i in range(n_cases):
         x, y = spots[i % len(spots)]
-        fall = (z.wall_top - pt if "dumped" in start else 40) + cell * (i // len(spots))
-        place(i, x, y + (fall * math.tan(math.radians(tilt_from)) if "dumped" in start else 0), pt + fall)  # dumped: from up the gravity line, so it lands on the spot
+        place(i, x, y, pt + 40 + cell * (i // len(spots)), dump_v)
 
     def respawn(i: int) -> bool:
         """On top of the pile on the low side, above the highest case near the spot so nothing overlaps, and below
@@ -112,7 +116,6 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
     m = dict(exits=0, base_down=0, mouth_down=0, sideways=0, lost=0, spilled=0, overfill=0)  # noqa: C408
     torque, speed, deepest, deepest_pair, lost_at, spilled_at, deep_checks = [], [], 0.0, "", [], [], 0
     turn0 = None
-    entered = np.zeros(n_cases, dtype=bool)
     above = data.qpos[qa[:, None] + np.arange(3)] / MM
     n_step = round(CHUNK / s.timestep)
     travel = rpm * 6 * CHUNK  # deg the plate turns between checks
@@ -134,8 +137,7 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
                     deepest, deepest_pair = -c.dist / MM, f"{model.geom(c.geom1).name or model.body(model.geom_bodyid[c.geom1]).name}/{model.geom(c.geom2).name or model.body(model.geom_bodyid[c.geom2]).name}"
         p = data.qpos[qa[:, None] + np.arange(3)] / MM
         r = np.hypot(p[:, 0], p[:, 1])
-        entered |= r < R  # a dumped case starts outside the bowl, on the gravity line down to its spot
-        out = ((p[:, 2] < z.deck_top) | (r > R + cfg.body.wall_t + 2)) & entered
+        out = (p[:, 2] < z.deck_top) | (r > R + cfg.body.wall_t + 2)
         for i in np.flatnonzero(out):
             ang = math.degrees(math.atan2(above[i, 1], above[i, 0]))
             ra = math.hypot(above[i, 0], above[i, 1])

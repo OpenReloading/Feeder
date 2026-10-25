@@ -213,17 +213,15 @@ The results above and in the three bullets are from the wall that fell at 15 deg
 | 45 deg | 1,530, 50 % | 2,880, 47 % |
 | 60 deg (extender) | 360, 12 % | 1,020, 17 % |
 
-Other starts, 1.5 rpm, cases spilled of 250 (cases per hour):
+Other starts, 1.5 rpm, cases spilled of 250 (cases per hour). Spills count from the first step, none in any run:
 
 | Start | 40 deg | 45 deg | 60 deg (extender) |
 |---|---|---|---|
-| `dumped`: all 250 released together from the wall height, falling along gravity onto the plate | 6 (2,040) | 10 (1,590) | 15 (300) |
+| `dumped`: all 250 hit the plate together at the speed of a fall from the wall top | 0 (1,800) | 0 (1,710) | 0 (810) |
 | `tilt_change`: settled at the far end of 40 to 60 deg, then the tilt changes in 1 s (extender fitted) | 0 (1,620) | not run | 0 (630) |
-| `dumped_tilt_change`: dumped at the far end, then the tilt change | 15 (1,740), all in the dump at 60 deg | not run | 0 (870) |
+| `dumped_tilt_change`: dumped at the far end, then the tilt change | 0 (1,500) | not run | 0 (570) |
 
-`dumped` with the extender fitted at 40 and 45 deg: 0 (1,860) and 4 (1,920) spilled.
-
-In the dumped start the impact throws cases up the low side and a few clear the rim (the wall top without the extender, the extender top at 60 deg). A user pours the brass in over some seconds, not as one block: slow pouring was not simulated. Pour the brass in over a few handfuls, the extender catches most of a thrown pile.
+`dumped` with the extender fitted at 40 and 45 deg: 0 spilled (1,530 and 1,560). The dump starts the pile on the plate with the fall speed along gravity, it does not pour a stream over the rim, so a pour from beyond the high wall is not simulated.
 
 ## License
 
