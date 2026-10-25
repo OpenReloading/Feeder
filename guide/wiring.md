@@ -22,4 +22,6 @@ The listings do not agree on the output type, and this wiring needs NPN normally
 
 Then put a 10 kΩ resistor between brown and black and read black to blue with no metal in front: it must stay below 0.2 V, the low-level limit of the timer relay module (seller sheet). A higher reading means the module may not trigger: use another sensor.
 
+The lid has the plug pin map and the polarity of the supply jack engraved in its outer face, from the same data as the board below: check a plug against it before you close the box.
+
 <div data-buildguide="board" data-board="wiring"></div>
