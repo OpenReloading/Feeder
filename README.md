@@ -38,6 +38,8 @@ The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenRe
 
 `.github/workflows/pages.yml` runs the tests, builds the guide and deploys `site/` to GitHub Pages on every push to `main` (pull requests build only).
 
+The configurator page (`guide/configurator.md`, `guide/javascripts/configurator.js`) picks the options, lists the parts and the BOM for the choice and zips the print files in the browser. It reads `build/configurator/` through `hooks/configurator_files.py`: run `build.py --no-test --configurator` before `mkdocs build` to see it locally. A push to `main` builds those files in CI; other builds and local builds without them show a notice instead.
+
 `build/<name>.stl` and `.step` are in the modelled orientation (assembly frame for the body). `build/print/<name>.stl` is each part as it goes on the bed (`feeder/printing.py`): flipped where it prints upside down, turned across the bed diagonal where it is wider than the bed.
 
 ## Configuration
@@ -51,7 +53,7 @@ All dimensions and options are in `feeder/config.py` (frozen dataclasses, instan
 | `printer` | bed size and edge margin. The plate and band diameter follow from the bed |
 | `calibers` | rim diameter, minimum rim thickness and case length per caliber (C.I.P. TDCC) |
 | `motor` | 5840-31ZY output shaft, boss, mounting screws, gearbox and can envelope, direction of the can, mass range |
-| `case_plate` | caliber or caliber group, notches or holes, pocket clearance and pitch, plate height over case length, chamfers, pickup channels, ribs or ridges (`ribs`), pull eye, design fill, item and orientation (`item`, `orient`) with the tilt of each (`tilts`), rotation direction, drag estimate |
+| `case_plate` | caliber or caliber group, notches or holes, pocket clearance and pitch, plate height over case length, chamfers, pickup channels, ribs or ridges (`ribs`), pull eye, design fill, item and orientation (`item`, `orient`) with the tilt of each (`tilts`), rotation direction (the cap thread hand follows it and the wiring has one motor polarity: set it here and print the matching plate and cap, do not swap the motor leads), drag estimate |
 | `body` | split (`arcs`, `halves`, `one_piece`), floor, wall height, deck, cup, ribs, skirt, wall joint screws and keys, seam post screws, wall extender, motor can tunnel |
 | `track` | gap from plate to deck, band ring, gate setback, chamfer and lap |
 | `exit` | drop opening length over case length, funnel lean and length, bore clearance, spigot, ledge in the deck recess |
@@ -60,7 +62,7 @@ All dimensions and options are in `feeder/config.py` (frozen dataclasses, instan
 | `cap` | twist cap: diameter, top, knob gap, grips, hand torque and friction estimates |
 | `spring` | clutch spring (Gutekunst VD-127E-01) |
 | `metal_hub` | Pololu 2693 aluminium hub (default) or `GENERIC_8MM_FLANGE`, an 8 mm flange coupling with nuts under the flange (unverified) |
-| `electronics` | motor driver current limit as a torque, electronics box: gap below the clamp, inner size, wall, clamp, lid screws, relay holes and standoffs, panel hole sizes, envelopes of the panel parts and modules (unverified) |
+| `electronics` | electronics box: gap below the clamp, inner size, wall, clamp, lid screws, relay holes and standoffs, panel hole sizes, envelopes of the panel parts and modules (unverified) |
 | `clutch` | slip clutch geometry, height gauge, screws, friction and torque limits |
 | `drop_tube` | bayonet (lug size, twist, notch lift), M18x1 sensor (length, thread), lock nut and window sizes, hose sizes and barb |
 | `drop_chain` | optional chain parts (`parts`), spacer length, bend angle and leg length of the angled piece |
@@ -89,7 +91,7 @@ Full hardware list for the default 9mm case feeder: `bom/case_feeder_9mm.md`.
 | `drop_hose_adapter` | none. Ends the chain: the same socket and bayonet as the drop tube, barb for a clear PVC hose, 14 mm ID x 18 mm OD (unverified), the tube bore through it. Prints socket down, no supports |
 | `drop_spacer` | none. Optional: socket, 30 mm of straight tube (`drop_chain.spacer_len`) and the male form, the bore of the drop tube |
 | `drop_angled` | none. Optional: socket, a 30 deg bend sideways to the lugs, away from the body (`drop_chain.angle`), 25 mm legs (`drop_chain.leg_len`) and the male form. Prints socket down, the lugs still print without supports at the bend |
-| `electronics_box`, `electronics_box_left`, `electronics_lid` | Upright box beside the stand tube, 10 mm below the tilt clamp, its front with the controls toward the user and clear of the drop path: right of the tube, or left as the mirror image, 80 x 50 x 120 mm inside (wide x deep x tall). Its own slit clamp holds the tube (2 x ISO 4762 M5 x 35 on ISO 7089 washers into ISO 4032 nuts) and stands off the side wall, joined to it by a web in front of the screws. Timer relay on 4 standoffs on the back wall. PWM knob, toggle switch and DC jack in a column in the lid, GX12 motor (2-pin) and sensor (3-pin) sockets low in the side face. The assembly shows the bought electronics as envelopes with their nuts, no wires: M18 sensor with 2 lock nuts, relay and PWM controller modules, switch, jack, knob and both GX12 sockets with a panel nut each; their sizes are seller values, unverified. The lid comes off forward: 4 x ISO 4762 M3 x 8 into CNC Kitchen M3 x 5.7 inserts in the corner posts. Panel hole sizes and relay hole spacing are seller values, unverified. The box prints on its back wall, the lid flat |
+| `electronics_box`, `electronics_box_left`, `electronics_lid` | Upright box beside the stand tube, 10 mm below the tilt clamp, its front with the controls toward the user and clear of the drop path: right of the tube, or left as the mirror image, 96 x 54 x 120 mm inside (wide x deep x tall). Its own slit clamp holds the tube (2 x ISO 4762 M5 x 35 on ISO 7089 washers into ISO 4032 nuts) and stands off the side wall, joined to it by a web in front of the screws. DROK timer relay module on 4 standoffs on the back wall. PWM knob, toggle switch and DC jack in a column in the lid, GX12 motor (2-pin) and sensor (3-pin) sockets low in the side face. The assembly shows the bought electronics as envelopes with their nuts, no wires: M18 sensor with 2 lock nuts, relay and PWM controller modules, switch, jack, knob and both GX12 sockets with a panel nut each; their sizes are seller values, unverified. The lid comes off forward: 4 x ISO 4762 M3 x 8 into CNC Kitchen M3 x 5.7 inserts in the corner posts. Panel hole sizes and relay hole spacing are seller values, unverified. The box prints on its back wall, the lid flat |
 
 Body splits (`body.split`), each fits a 256 mm bed:
 
