@@ -82,8 +82,8 @@ Full hardware list for the default 9mm case feeder: `bom/case_feeder_9mm.md`.
 | `slip_clutch_knob` | ISO 4017 M5 x 16 |
 | `case_plate_9mm_luger` | 25 mm split key ring. 240.2 mm, 34 notches open to the rim, 7.09 mm high on a 256 mm bed. The band closes each notch, so the pocket is rim + 3 mm measured to the band. A shallow pickup channel (1.5 mm deep at the pocket, 25 mm long) leads into each pocket, 6 half-round radial ribs stir the pile (`case_plate.ribs` `per_pocket`: a ridge between every two pockets instead), the ring in the eye beside the cap lifts the plate. Drops over the ring hex onto its flange, 6 mm thick at the hub, cap recess above. `case_plate.notches` False: closed round holes for an A/B test |
 | `body_core` | 4 x ISO 10642 M4 x 10 (motor, from inside the cup), 9 x CNC Kitchen M3 x 5.7 inserts (wall joints), 4 x CNC Kitchen M5 x 9.5 inserts (mount). Deck and band in one piece: the band is a C ring on the deck round the plate, 3.5 mm thick, up to the longest case plus 3.5 mm above the deck. It closes the plate notches, so cases slide on it and on the deck, never on the wall seams. Its gap over the exit takes the gate. Prints bottom down |
-| `body_wall_0` to `body_wall_2` | 3 x ISO 4762 M3 x 12 each, into the core inserts. Lap joints at the seams, key ribs in the core skirt. The wall top is full height (125 mm above the plate bottom, `body.wall_h`) on the low side and falls at 40 deg toward the high side, not below one case length above the plate (`body.heap_angle`, `body.wall_slant`): brass lies level in the world, so at 40 deg tilt, the flattest, it stays below that line and the high side is open down to one case length above the plate |
-| `body_extender` | none. Optional, 60 mm more wall (`body.extender_h`, 0 for none) over a 150 deg arc centred on the low side (`body.extender_arc`), flat top at the wall slant, the high side stays open. The sleeve slides 15 mm down over the outside of the wall top. 4 x ISO 10642 M3 x 12 from inside the bowl, head flush in the wall, through wall and sleeve into ISO 4032 M3 nuts captive in ribs outside the sleeve. Prints on its flat top, turned on the bed to fit |
+| `body_wall_0` to `body_wall_2` | 3 x ISO 4762 M3 x 12 each, into the core inserts. Lap joints at the seams, key ribs in the core skirt. The wall top is full height (125 mm above the plate bottom, `body.wall_h`) on the low side and falls at 15 deg toward the high side (`body.wall_slant`: the flattest tilt, 40 deg, less `body.heap_angle`, 25 deg), not below 45 mm above the plate top (`body.wall_low`, about two 9mm cases and more than the longest case of any plate set). Brass lies level in the world, so at 40 deg tilt the level line falls at 40 deg and the wall top stays 25 deg above it for a heap or a case the plate throws up. Wall above the plate top for the 9mm plate: 118 mm on the low side, 84 mm in the centre, 51 mm at the high end and in the exit sector. The floor is 49 mm above the 9mm plate top, because one wall serves every plate set and the revolver plate sits highest |
+| `body_extender` | none. Optional, 60 mm more wall (`body.extender_h`, 0 for none) over a 200 deg arc centred on the low side (`body.extender_arc`, the widest the 250 mm bed takes on its slanted top, the exit sector stays open). Above the full wall top it leans 25 deg toward the bowl axis (`body.extender_lean`, 20 to 30 deg), so its top edge sits 28 mm inside the wall and a case thrown up falls back in. Flat top at the wall slant. The sleeve slides 15 mm down over the outside of the wall top. 4 x ISO 10642 M3 x 12 from inside the bowl, head flush in the wall, through wall and sleeve into ISO 4032 M3 nuts captive in ribs outside the sleeve. Prints on its flat top, turned on the bed to fit, without support |
 | `body_track_gate` | none. Band sector in the band gap, on the exit insert. Its face is 0.5 mm behind the band face, the band ends have a 1 mm 45 deg lead-in, so cases pass the seams in either direction. The band ends lap 6 mm behind its ends, so it lifts out but cannot move inward. Prints top down |
 | `body_exit_insert` | none. Wear part: drop opening, funnel (30 deg lean toward the bowl centre) and spigot with the 2 bayonet lugs of the drop tube in a block that fills a vertical shaft through the core, so it drops in from above. Its 3 mm ledge rests in a 2 mm deck recess round the shaft, the gate and the plate keep it down. Prints top down |
 | `body_exit_insert_blank` | none. Optional: closes the exit, the insert's block and ledge with no opening, funnel or spigot (a second exit position, if one is ever added, not in the default assembly). Prints top down |
@@ -164,13 +164,13 @@ Tilt choice. The best angle for 9mm on this feeder is UNTESTED. Start at 45 and 
 
 | Tilt | When | 9mm capacity, wall / with extender | Link pin to pin |
 |---|---|---|---|
-| 45 deg | default, start here | 406 / 534 | 91.4 mm |
-| 50 deg | cases still go in upside down at 45 | 325 / 574 | 85.6 mm |
-| 55 deg | still upside down at 50 | 254 / 626 | 79.7 mm |
-| 60 deg | last resort, extender needed for the design fill | 193 / 516 | 73.8 mm |
-| 40 deg | most capacity, range end of this mount | 504 / 504 | 97.1 mm |
+| 45 deg | default, start here | 406 / 1302 | 91.4 mm |
+| 50 deg | cases still go in upside down at 45 | 325 / 1100 | 85.6 mm |
+| 55 deg | still upside down at 50 | 254 / 934 | 79.7 mm |
+| 60 deg | last resort, extender needed for the design fill | 193 / 793 | 73.8 mm |
+| 40 deg | most capacity, range end of this mount | 504 / 1536 | 97.1 mm |
 
-Capacity: cases under a level brass surface as high as the lowest rim point allows (the wall top, or the extender top over its arc), loose packing 0.55 of the case envelope (`layout.capacity`, estimate). Fill at most 250 9mm cases (1 kg, `case_plate.fill_cases`, `case_plate.drag_mass`) at any tilt: the clutch, cap and mount load checks assume no more. The extender keeps 250 cases in at 60 deg, it is not for a larger fill. Above 55 deg it is the low side that limits the capacity, below it the open high side: the extender adds little at 40 deg.
+Capacity: cases under a level brass surface as high as the lowest rim point allows (the wall top, or the extender top over its arc), loose packing 0.55 of the case envelope (`layout.capacity`, estimate; the volume the leaning extender takes, 3 to 7 %, is not subtracted). Fill at most 250 9mm cases (1 kg, `case_plate.fill_cases`, `case_plate.drag_mass`) at any tilt: the clutch, cap and mount load checks assume no more. The wall alone holds 250 up to 55 deg, the low side limits it. The extender raises that limit by 60 mm and keeps 250 cases in at 60 deg with room to spare, it is not for a larger fill.
 <!-- --8<-- [end:tilt] -->
 
 | Part | Hardware |
@@ -193,11 +193,12 @@ Print the yoke with the flat mating face on the bed, the clamp upright, links an
 |---|---|
 | `.venv/bin/python -m sim run --tilt 45 --rpm 1.5` | one point after one warm-up turn, metrics as JSON |
 | `.venv/bin/python -m sim sweep --tilt 38,45,52,62 --rpm 0.75,1.5,3,6.5` | grid into `build/sim/sweep.csv`; a stopped sweep resumes, at most 6 workers |
+| `.venv/bin/python -m sim sweep --tilt 40,60 --rpm 1.5 --start dumped,tilt_change` | other starts of the pile (below), `--start` takes `settled`, `dumped`, `tilt_change`, `dumped_tilt_change` |
 | `.venv/bin/python -m sim sweep --plate 9mm_luger,small_pistol --case 9mm_luger --out build/sim/pockets.csv` | one case size on several plate sets (`--plate` takes `case_plate.caliber` values, `--case` a `calibers.table` key) |
 | `.venv/bin/python -m sim plot` | `build/sim/sweep.png`: cases per hour, fill with its 95 % interval, torque |
 | `.venv/bin/python -m sim calibrate measured.csv` | fits friction and case centre of mass to hardware runs (columns `tilt`, `rpm`, `cases_per_h`, `base_down_share`) into `build/sim/calibration.csv` |
 
-`valid` is false when a case went through the deck outside the opening (`lost`, with where in `lost_at`): a model fault, so `plot` leaves the point out. `spilled` counts cases over the wall (`spilled_at`), `overfill` the cases that found no room below the wall top on their way back. The extender is fitted (`extender`) when `--cases` is more than the wall holds at the tilt (`layout.capacity`). `deepest_mm`, `deepest_pair` and `deep_share` (share of checks with a contact overlap above 1.5 mm) show how far the soft contacts give.
+`valid` is false when a case went through the deck outside the opening (`lost`, with where in `lost_at`): a model fault, so `plot` leaves the point out. `spilled` counts cases over the wall from the first step (`spilled_at`, the first 50), `overfill` the cases that found no room below the wall top on their way back. The extender is fitted (`extender`) when `--cases` is more than the wall holds at the steeper of the tilt and the tilt the run starts at (`layout.capacity`). `deepest_mm`, `deepest_pair` and `deep_share` (share of checks with a contact overlap above 1.5 mm) show how far the soft contacts give.
 `wrong_upper` is the upper bound on cases leaving mouth down or sideways.
 
 Approximations, so take the numbers as trends until calibrated:
@@ -220,13 +221,23 @@ Results (250 9mm cases, 9mm plate, wall 125, about 3 counted turns per point, on
 - Case centre of mass at 0.33 and 0.39 of the length from the base (38 and 45 deg, 1.5 and 3 rpm) moves the rate between 1,200 and 3,780 per hour, still all base down. The farther the centre of mass from the base, the lower the fill.
 - 9mm cases on the small_pistol plate (larger pockets) at 45 deg: 1,650 per hour at 1.5 rpm and 2,400 at 3 rpm, all base down.
 
-The results above and in the three bullets are from the wall that fell at 15 deg. With the wall top falling at 40 deg toward the open high side (`body.heap_angle` 0) and the extender as an open arc, 250 cases, one seed, no case spilled and all left base down:
+The results above and in the three bullets are from the wall that fell at 15 deg. With the current wall (top falling at 15 deg, 45 mm floor, `body.heap_angle` 25) and the 200 deg extender leaning 25 deg, 250 cases, one seed, every point valid and every exit base down. Start `settled`, spills counted from the first step, none in any run:
 
 | Tilt | 1.5 rpm | 3 rpm |
 |---|---|---|
-| 40 deg | 1,590, 52 % | 2,820, 46 % |
-| 45 deg | 1,920, 63 % | 2,460, 40 % |
-| 60 deg (extender) | 690, 23 % | 1,140, 19 % |
+| 40 deg | 1,920, 63 % | 2,880, 47 % |
+| 45 deg | 1,530, 50 % | 2,880, 47 % |
+| 60 deg (extender) | 360, 12 % | 1,020, 17 % |
+
+Other starts, 1.5 rpm, cases spilled of 250 (cases per hour). Spills count from the first step, none in any run:
+
+| Start | 40 deg | 45 deg | 60 deg (extender) |
+|---|---|---|---|
+| `dumped`: all 250 hit the plate together at the speed of a fall from the wall top | 0 (1,800) | 0 (1,710) | 0 (810) |
+| `tilt_change`: settled at the far end of 40 to 60 deg, then the tilt changes in 1 s (extender fitted) | 0 (1,620) | not run | 0 (630) |
+| `dumped_tilt_change`: dumped at the far end, then the tilt change | 0 (1,500) | not run | 0 (570) |
+
+`dumped` with the extender fitted at 40 and 45 deg: 0 spilled (1,530 and 1,560). The dump starts the pile on the plate with the fall speed along gravity, it does not pour a stream over the rim, so a pour from beyond the high wall is not simulated.
 
 ## License
 
