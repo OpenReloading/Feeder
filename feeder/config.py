@@ -443,7 +443,7 @@ class Clutch:
 class DropTube:
     """Bayonet socket over the exit spigot (two lugs on the spigot, an L slot with a notch at the stop in the socket wall),
     straight section with a port for an M18x1 inductive tube-full sensor
-    (LJ18A3-8-Z/AX, NPN NC, 8 mm rated), barb for a clear PVC hose. The bore only steps outward along the path.
+    (LJ18A3-8-Z/AX, NPN NC, 8 mm rated), male end for the parts of `DropChain`, which end in the hose barb. The bore only steps outward along the path.
     Sensor, nut and hose sizes are typical kit values, unverified, measure on delivery."""
 
     lug_h: float = 1.2  # radial height of a spigot lug, with a 45 deg underside that prints without support (print tolerance estimate, unverified: try it on a print)
