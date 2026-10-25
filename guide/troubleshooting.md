@@ -17,6 +17,7 @@ Find the symptom, try the first fix, then the next. Config values are in `feeder
 | Plate stops, motor keeps turning | clutch slips: too much brass or a jam | Clear the jam. If it slips with a normal fill, tighten the knob to the stop and check that all `clutch.springs_fitted` springs are in |
 | Motor stalls or strains on a jam | clutch holds too much | Fit fewer springs (`clutch.springs_fitted`). The gearbox has no other protection |
 | Cases jam at the exit | exit insert or gate not seated, or a case on its side | Seat the exit insert on its ledge and the gate between the band ends. Check the plate set matches the caliber |
+| Two cases arrive at the exit together, or one stands upright on a pocket | a case stands on a pocket or is stacked above one | Set `track.wiper_h` (start value 1.5) and print the core again: a fixed arm over the plate before the exit knocks the case back. Fit it only if a print shows the fault |
 | Cases jam in the hose | hose rises or loops | Lay the hose downhill all the way, with no loops |
 | Motor never stops with a full tube | sensor too far from the brass | Screw the sensor in until its face touches the window, then tighten the lock nut. Fallback: thinner window (`drop_tube.window_t` 0.6) |
 | Motor stops and starts with every case | timer delay too short | Set a longer OP on the timer relay module, so only a full tube stops the motor |

@@ -1,7 +1,7 @@
 """MuJoCo model of the feeder in the body frame (z up the plate axis, exit at +y), gravity tilted by `tilt`.
 
 - Static: deck with the drop opening, band with its gap, gate in the gap, wall up to the slanted wall top, all
-  boxes round the bowl (`sim.segments`).
+  boxes round the bowl (`sim.segments`), and the wiper arm when `track.wiper_h` is set.
 - Plate: the printed plate's convex decomposition (CoACD, cached in build/sim/cache), so pockets, pickup channels,
   chamfers and ribs are the CAD's within about 1 mm, plus the cap. A hinge on z, driven by a velocity actuator.
 - Cases: a capsule for case to case contacts, flat discs at both ends that only touch the feeder, so a case
@@ -93,6 +93,17 @@ def _leaning_box(name: str, ang: float, half: float, r: float, z0: float, top: f
             f'pos="{rm * math.cos(a) * MM} {rm * math.sin(a) * MM} {zm * MM}" xyaxes="{" ".join(f"{v:.9f}" for v in (*x, *y))}" rgba="{rgba}"/>')
 
 
+def _wiper_box(cfg: Config) -> str:
+    """The wiper arm of `body._wiper` as one box: same angle, reach, width, underside and top."""
+    t = cfg.track
+    ang = b.EXIT_ANGLE - cfg.case_plate.direction * (b._gap_angles(cfg)[1] + math.degrees((t.band_t / 2) / (layout.band_inner_r(cfg) + t.band_t / 2)))
+    z0, z1, r_out = b.wiper_z(cfg), b.band_top(cfg), layout.band_inner_r(cfg) + t.band_t / 2
+    length, a = t.wiper_reach + t.band_t / 2, math.radians(ang)
+    rm = r_out - length / 2
+    return (f'<geom name="wiper" type="box" size="{length / 2 * MM} {t.band_t / 2 * MM} {(z1 - z0) / 2 * MM}" '
+            f'pos="{rm * math.cos(a) * MM} {rm * math.sin(a) * MM} {(z0 + z1) / 2 * MM}" euler="0 0 {ang}" rgba="0.85 0.5 0.2 1"/>')
+
+
 def _off(ang: float) -> float:
     return abs((ang - EXIT + 180) % 360 - 180)
 
@@ -137,6 +148,9 @@ def mjcf(tilt: float, n_cases: int, cfg: Config = CFG, com_ratio: float | None =
             static.append(_leaning_box(f"lean{i}", ang, step / 2, R, z.wall_top, top, cfg.body.extender_lean, 2 * cfg.body.wall_t, "0.7 0.7 0.7 0.15"))
         else:
             static.append(_box(f"wall{i}", R, R + cfg.body.wall_t, band_top, top, ang, step / 2, "0.7 0.7 0.7 0.15"))
+
+    if cfg.track.wiper_h:
+        static.append(_wiper_box(cfg))
 
     hulls = plate_hulls(cfg)
     assets = [f'<mesh name="h{i}" vertex="{" ".join(f"{c * MM:.6g}" for c in v.ravel())}" face="{" ".join(map(str, f.ravel()))}"/>'
