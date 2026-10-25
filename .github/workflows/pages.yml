@@ -10,11 +10,10 @@ concurrency:
   # a newer push or pull request commit cancels the older build, but a run on main (the deployment) is never cancelled
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 # The site is main at the root and develop (the preview) under /develop/, one Pages deployment. A push or dispatch on
-# main or develop builds both refs, one job each, and `assemble` merges them. A pull request or any other ref builds
-# itself as the only `head` site.
+# main or develop builds both refs, one `site` job each, and `assemble` merges them. A pull request or any other ref
+# builds itself as the only `head` site.
 jobs:
-  build:
-    name: build   # the check name the rulesets require; on a push the two sites are two jobs of this name
+  site:
     # The promotion pull request (develop -> main) repeats what the push to develop already built and tested. Matching
     # the head repository too keeps a fork branch named develop from skipping the build.
     if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
@@ -100,10 +99,22 @@ jobs:
           path: site
           retention-days: 1
           if-no-files-found: error
+  # The check the rulesets require, under its own name (a matrix job is named after its matrix values). Skipped with
+  # `site` on the promotion pull request; a failed `site` job fails it (develop does not: continue-on-error).
+  build:
+    needs: site
+    if: ${{ !cancelled() && needs.site.result != 'skipped' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - env:
+          RESULT: ${{ needs.site.result }}
+        run: test "$RESULT" = success
   # main at the root, the preview under develop/. Without the preview artifact the root deploys alone.
   assemble:
     if: github.event_name != 'pull_request' && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref)
-    needs: build
+    needs: site
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions: {}
