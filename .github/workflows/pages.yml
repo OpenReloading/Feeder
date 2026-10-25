@@ -9,8 +9,12 @@ concurrency:
   group: pages-${{ github.ref }}
   # a newer push or pull request commit cancels the older build, but a run on main (the deployment) is never cancelled
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+# The site is main at the root and develop (the preview) under /develop/, one Pages deployment. A push or dispatch on
+# main or develop builds both refs, one job each, and `assemble` merges them. A pull request or any other ref builds
+# itself as the only `head` site.
 jobs:
   build:
+    name: build   # the check name the rulesets require; on a push the two sites are two jobs of this name
     # The promotion pull request (develop -> main) repeats what the push to develop already built and tested. Matching
     # the head repository too keeps a fork branch named develop from skipping the build.
     if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
@@ -18,16 +22,24 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ fromJSON(github.event_name != 'pull_request' && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref) && '["main", "develop"]' || '["head"]') }}
+    # a failed preview leaves the root site to deploy (`assemble` warns); a failed main build fails the run
+    continue-on-error: ${{ matrix.site == 'develop' }}
     steps:
+      # the pushed commit for its own ref (and for a head build), the branch tip for the other one
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ (matrix.site == 'head' || github.ref == format('refs/heads/{0}', matrix.site)) && github.sha || format('refs/heads/{0}', matrix.site) }}
           persist-credentials: false
           fetch-depth: 2
       # a pull request that changes only docs runs the README test, not the geometry tests (HEAD^1 is the base)
       - id: scope
         if: github.event_name == 'pull_request'
         run: |
-          if git diff --name-only HEAD^1 HEAD | grep -qvE '^(docs/.*|guide/[^/]*\.md|[^/]*\.md|mkdocs\.yml|LICENSE)$'; then
+          if git diff --name-only HEAD^1 HEAD | grep -qvE '^(docs/.*|guide/[^/]*\.md|[^/]*\.md|mkdocs(-preview)?\.yml|LICENSE)$'; then
             echo "tests=tests" >> "$GITHUB_OUTPUT"
           else
             echo "tests=tests/test_guide.py" >> "$GITHUB_OUTPUT"
@@ -42,41 +54,87 @@ jobs:
           .venv/bin/pip install -r pylock.toml
           .venv/bin/pip install -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
-      # guide data in the background while the test files run on the runner's cores. Releases (pushes to main, the
-      # Pages source) also build the configurator's print files, which mkdocs copies into the site
+      # guide data in the background while the test files run on the runner's cores. The root site (the main build)
+      # also builds the configurator's print files, which mkdocs copies into the site. The preview leaves them out: the
+      # configurator page shows its notice there, and the files would take the develop job past its time limit
       - env:
           TESTS: ${{ steps.scope.outputs.tests || 'tests' }}
-          RELEASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          # the other ref of a push was tested by its own push
+          TESTED: ${{ matrix.site == 'head' || github.ref == format('refs/heads/{0}', matrix.site) }}
+          RELEASE: ${{ matrix.site == 'main' }}
         run: |
           args=(--no-test --guide)
           if [ "$RELEASE" = true ]; then args+=(--configurator); fi
           .venv/bin/python build.py "${args[@]}" > guide.log 2>&1 &
           guide=$!
           tests=0
-          pytest_args=(-q -n auto --dist loadfile)
-          # the coverage floors (pyproject.toml, sim/.coveragerc) need the whole suite, not the docs-only test file.
-          # The bare --cov goes last: before the test path it would take that path as its source.
-          if [ "$TESTS" = tests ]; then pytest_args+=(--cov); fi
-          .venv/bin/python -m pytest "$TESTS" "${pytest_args[@]}" || tests=$?
-          if [ "$TESTS" = tests ]; then .venv/bin/coverage report --rcfile=sim/.coveragerc || tests=$?; fi
+          if [ "$TESTED" = true ]; then
+            pytest_args=(-q -n auto --dist loadfile)
+            # the coverage floors (pyproject.toml, sim/.coveragerc) need the whole suite, not the docs-only test file.
+            # The bare --cov goes last: before the test path it would take that path as its source.
+            if [ "$TESTS" = tests ]; then pytest_args+=(--cov); fi
+            .venv/bin/python -m pytest "$TESTS" "${pytest_args[@]}" || tests=$?
+            if [ "$TESTS" = tests ]; then .venv/bin/coverage report --rcfile=sim/.coveragerc || tests=$?; fi
+          fi
           wait "$guide" || { cat guide.log; exit 1; }
           exit "$tests"
-      # the header's repository facts come from the GitHub API at build time
-      - run: .venv/bin/mkdocs build --strict
-        env:
+      # the header's repository facts come from the GitHub API at build time. The preview is the same site with
+      # mkdocs-preview.yml (base path, noindex, banner); a pull request also builds it, to catch a broken preview config
+      - env:
           GITHUB_TOKEN: ${{ github.token }}
+          CONFIG: ${{ matrix.site == 'develop' && 'mkdocs-preview.yml' || 'mkdocs.yml' }}
+        run: |
+          .venv/bin/mkdocs build --strict -f "$CONFIG"
+          if [ "$CONFIG" = mkdocs.yml ] && [ -f mkdocs-preview.yml ] && [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            .venv/bin/mkdocs build --strict -f mkdocs-preview.yml -d "$RUNNER_TEMP/preview"
+          fi
       # the Pages artifact limit is 1 GB
       - run: |
           size=$(du -sm site | cut -f1)
           echo "site: $size MB"
           test "$size" -lt 800
-      - if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+      - if: matrix.site != 'head'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
+          name: site-${{ matrix.site }}
           path: site
-  deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+          retention-days: 1
+          if-no-files-found: error
+  # main at the root, the preview under develop/. Without the preview artifact the root deploys alone.
+  assemble:
+    if: github.event_name != 'pull_request' && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref)
     needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions: {}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site-main
+          path: public
+      - id: preview
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site-develop
+          path: public/develop
+      - if: steps.preview.outcome != 'success'
+        run: echo "::warning title=No development preview::The develop build failed, the site deploys without /develop/."
+      # the Pages artifact limit is 1 GB
+      - run: |
+          size=$(du -sm public | cut -f1)
+          echo "site: $size MB"
+          test "$size" -lt 800
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: public
+  deploy:
+    if: github.event_name != 'pull_request' && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref)
+    needs: assemble
+    # deployments of different runs queue instead of overlapping
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
