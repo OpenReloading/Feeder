@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest==9.1.1", "pytest-xdist==3.8.0", "ocp_vscode==4.2.0"]
+dev = ["pytest==9.1.1", "pytest-xdist==3.8.0", "pytest-cov==7.1.0", "ocp_vscode==4.2.0"]
 sim = ["mujoco==3.16.0", "coacd==1.0.14"]
 
 [tool.setuptools.packages.find]
@@ -33,6 +33,20 @@ include = ["feeder*", "sim*"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+# Measured by `pytest --cov` over the whole suite. Floors a little below the measured values (feeder 96, sim 94 percent,
+# lines and branches together; sim 91 with a warm plate cache); raise them when coverage rises. The sim floor is in sim/.coveragerc.
+[tool.coverage.run]
+source = ["feeder", "sim"]
+branch = true
+# CLI front end of the sweeps, which run for hours; the logic is in sim/run.py and tested there
+omit = ["sim/__main__.py"]
+
+[tool.coverage.report]
+include = ["feeder/*"]
+fail_under = 94
+show_missing = true
+skip_covered = true
 
 [tool.ruff.lint]
 select = [

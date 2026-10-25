@@ -53,7 +53,12 @@ jobs:
           .venv/bin/python build.py "${args[@]}" > guide.log 2>&1 &
           guide=$!
           tests=0
-          .venv/bin/python -m pytest -q -n auto --dist loadfile "$TESTS" || tests=$?
+          pytest_args=(-q -n auto --dist loadfile)
+          # the coverage floors (pyproject.toml, sim/.coveragerc) need the whole suite, not the docs-only test file.
+          # The bare --cov goes last: before the test path it would take that path as its source.
+          if [ "$TESTS" = tests ]; then pytest_args+=(--cov); fi
+          .venv/bin/python -m pytest "$TESTS" "${pytest_args[@]}" || tests=$?
+          if [ "$TESTS" = tests ]; then .venv/bin/coverage report --rcfile=sim/.coveragerc || tests=$?; fi
           wait "$guide" || { cat guide.log; exit 1; }
           exit "$tests"
       # the header's repository facts come from the GitHub API at build time

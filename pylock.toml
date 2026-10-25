@@ -156,6 +156,17 @@ url = "https://files.pythonhosted.org/packages/cf/8c/9677dad226e5aaac5b823d5b09d
 sha256 = "e439ab450c93455feb0218532ded3e946ec7a9b5f459069f122cfa44b89229f6"
 
 [[packages]]
+name = "coverage"
+version = "7.17.0"
+
+[[packages.wheels]]
+name = "coverage-7.17.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl"
+url = "https://files.pythonhosted.org/packages/e9/58/d8bdd65a661913bc12eaaa3e59742b2cb8b94f2e7f78e62184f0a58ca493/coverage-7.17.0-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl"
+
+[packages.wheels.hashes]
+sha256 = "acdb5f3c96046efff9dc6c572a6acb2b8d0da09372d7b9a9ed7249cf7d17434f"
+
+[[packages]]
 name = "cycler"
 version = "0.12.1"
 
@@ -715,6 +726,17 @@ url = "https://files.pythonhosted.org/packages/24/25/1de2678b631f5a49215c6c96fff
 
 [packages.wheels.hashes]
 sha256 = "37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c"
+
+[[packages]]
+name = "pytest-cov"
+version = "7.1.0"
+
+[[packages.wheels]]
+name = "pytest_cov-7.1.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/9d/7a/d968e294073affff457b041c2be9868a40c1c71f4a35fcc1e45e5493067b/pytest_cov-7.1.0-py3-none-any.whl"
+
+[packages.wheels.hashes]
+sha256 = "a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678"
 
 [[packages]]
 name = "pytest-xdist"

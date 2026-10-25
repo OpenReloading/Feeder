@@ -23,6 +23,7 @@ Python packages (top-level pins in `pyproject.toml`, full lock in `pylock.toml`)
 | pandas | 3.0.6 |
 | matplotlib | 3.11.2 |
 | pytest | 9.1.1 |
+| pytest-cov | 7.1.0 |
 | ocp_vscode (optional viewer) | 4.2.0 |
 
 Git is used on the host.

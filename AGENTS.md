@@ -8,6 +8,7 @@ Parametric brass and bullet collator for reloading, built in build123d with metr
 - Build all parts and run the tests: `.venv/bin/python build.py`
 - Build only: `.venv/bin/python build.py --no-test`
 - Tests only: `.venv/bin/python -m pytest -q`
+- Coverage floors: `.venv/bin/python -m pytest -q -n 4 --dist loadfile --cov`, then `.venv/bin/coverage report --rcfile=sim/.coveragerc`. The `feeder` floor is `fail_under` in `pyproject.toml`, the `sim` floor is in `sim/.coveragerc`; CI (`pages.yml`) runs both on the whole suite. Keep a floor a little below the measured value and raise it when coverage rises. A partial run fails the floor. `sim/__main__.py` is omitted (CLI of the long sweeps).
 - Lock: `pylock.toml` (PEP 751, wheels of Python 3.14, hashes) is what the dev container, CI build, tests and docs install (`pip install -r pylock.toml`). Dependabot updates `requirements.txt`, the pinned input; after that change regenerate the lock in the container with `.venv/bin/pip lock --only-binary :all: -r requirements.txt -o pylock.toml` (`tests/test_lock.py` fails when they differ). Packages held back in the `ignore` list of `.github/dependabot.yml` stay at their `requirements.txt` pins.
 - Build guide site: `.venv/bin/pip install -r requirements-guide.txt`, `.venv/bin/python build.py --no-test --guide`, `.venv/bin/mkdocs build --strict`
 - Simulation: `.venv/bin/python -m sim run|sweep|plot|calibrate` (README "Simulation"). A sweep runs for hours: at most 4 to 6 workers, never next to the test suite (host memory)
