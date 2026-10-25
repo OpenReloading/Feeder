@@ -51,7 +51,7 @@ All dimensions and options are in `feeder/config.py` (frozen dataclasses, instan
 | `printer` | bed size and edge margin. The plate and band diameter follow from the bed |
 | `calibers` | rim diameter, minimum rim thickness and case length per caliber (C.I.P. TDCC) |
 | `motor` | 5840-31ZY output shaft, boss, mounting screws, gearbox and can envelope, direction of the can, mass range |
-| `case_plate` | caliber or caliber group, notches or holes, pocket clearance and pitch, plate height over case length, chamfers, pickup channels, ribs or ridges (`ribs`), pull eye, design fill, tilt, rotation direction, drag estimate |
+| `case_plate` | caliber or caliber group, notches or holes, pocket clearance and pitch, plate height over case length, chamfers, pickup channels, ribs or ridges (`ribs`), pull eye, design fill, item and orientation (`item`, `orient`) with the tilt of each (`tilts`), rotation direction, drag estimate |
 | `body` | split (`arcs`, `halves`, `one_piece`), floor, wall height, deck, cup, ribs, skirt, wall joint screws and keys, seam post screws, wall extender, motor can tunnel |
 | `track` | gap from plate to deck, band ring, gate setback, chamfer and lap |
 | `exit` | drop opening length over case length, funnel lean and length, bore clearance, spigot, ledge in the deck recess |
@@ -106,15 +106,17 @@ Plate change, no tools: twist the cap off, lift the plate off the ring hex, drop
 
 One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert and drop tube (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, twist the drop tube off the spigot, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI). The exit opening is not adjustable: each plate set has its own exit insert, a slide would add a part and a lock for no gain.
 
-| Set (`case_plate.caliber`) | Cases | Plate height | Pocket | Pockets | 45 deg capacity | Drop bore |
-|---|---|---|---|---|---|---|
-| `9mm_luger` (default, one case) | 9mm Luger | 7.09 | 12.96 | 34 | 406 | 10.56 |
-| `pocket_pistol` | .25 ACP, .32 ACP, .380 ACP | 6.06 | 12.53 | 36 | 499 | 10.13 |
-| `small_pistol` | 9mm Makarov, 9mm Luger, .45 GAP, 9x21 | 7.22 | 14.94 | 29 | 255 | 12.54 |
-| `large_pistol` | .40 S&W, .357 SIG, .45 ACP, .38 Super, 7.62x25, 10mm Auto | 8.60 | 15.19 | 29 | 200 | 12.79 |
-| `revolver` | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 127 | 13.66 |
+| Set (`case_plate.caliber`) | Item | Orient | Cases | Plate height | Pocket | Pockets | 45 deg capacity | Drop bore |
+|---|---|---|---|---|---|---|---|---|
+| `9mm_luger` (default, one case) | case | base down | 9mm Luger | 7.09 | 12.96 | 34 | 406 | 10.56 |
+| `pocket_pistol` | case | base down | .25 ACP, .32 ACP, .380 ACP | 6.06 | 12.53 | 36 | 499 | 10.13 |
+| `small_pistol` | case | base down | 9mm Makarov, 9mm Luger, .45 GAP, 9x21 | 7.22 | 14.94 | 29 | 255 | 12.54 |
+| `large_pistol` | case | base down | .40 S&W, .357 SIG, .45 ACP, .38 Super, 7.62x25, 10mm Auto | 8.60 | 15.19 | 29 | 200 | 12.79 |
+| `revolver` | case | base down | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 127 | 13.66 |
 
 A group plate gives its smallest case up to 2.3 mm more play than a one-case plate, so more cases may go in upside down (untested). A one-case plate (any key of `calibers.table`) is the tight option. Capacity counts the group's largest case. Rifle cases and bullets need another exit and are not built.
+
+What a set delivers is `case_plate.item` (`case`, later `bullet`) and `case_plate.orient` (`base_down`: mouth up at the exit). The plate, the exit insert and the tilt preset are selected from them, and only the pairs in `case_plate.tilts` are built (`case`/`base_down` at 45 deg): any other pair raises an error that names them. Orientation stays a property of the pocket and ridge geometry and the tilt, there is no flip module.
 
 ## Drop tube attachment
 

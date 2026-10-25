@@ -72,9 +72,9 @@ def stand_tube(tilt: float, cfg: Config = CFG, stub: float = 100.0) -> Part:
 
 
 def body_tilt(cfg: Config = CFG) -> float:
-    """Tilt of the assembled feeder: the angle of the fixed link, else `case_plate.tilt`."""
+    """Tilt of the assembled feeder: the angle of the fixed link, else the plate set's tilt."""
     angle = mount.link_angle(cfg)
-    return cfg.case_plate.tilt if angle is None else angle
+    return layout.tilt(cfg) if angle is None else angle
 
 
 def link_name(tilt: float, cfg: Config = CFG) -> str:

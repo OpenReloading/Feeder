@@ -1,6 +1,6 @@
 """Bought fasteners: the assembly places every one the BOM lists, each in its holes."""
 
-import re  # noqa: I001
+import re
 from dataclasses import replace
 from pathlib import Path
 
@@ -10,6 +10,8 @@ from test_body import CONFIGS
 
 from feeder import assembly, export, guide
 from feeder.config import CFG, GENERIC_8MM_FLANGE
+from feeder.parts import layout
+
 GAP = 0.5  # mm, as in test_body: hole clearances and fits
 BOM = Path(__file__).parent.parent / "bom" / "case_feeder_9mm.md"
 ENVELOPES = ("level_sensor", "timer_relay", "pwm_controller", "pwm_knob", "toggle_switch", "dc_jack", "gx12_2_pin_socket", "gx12_3_pin_socket")  # bought electronics: nuts and screws must not cut them either
@@ -54,7 +56,7 @@ def test_fixed_link_replaces_the_rod_nuts_and_sets_the_tilt(tilt):
 
 
 def test_default_link_is_the_adjustable_one_at_the_plate_tilt():
-    assert CFG.mount.link == "adjustable" and assembly.body_tilt(CFG) == CFG.case_plate.tilt  # noqa: PT018
+    assert CFG.mount.link == "adjustable" and assembly.body_tilt(CFG) == layout.tilt()  # noqa: PT018
     assert "mount_tilt_link" in {p.name for p in assembly.placed(CFG)}
 
 

@@ -187,7 +187,8 @@ def test_metal_hub_clutch_is_a_backstop_above_the_current_limit():
     n = C.springs_fitted
     assert sc.slip_torque(n, LOW) >= C.backstop_margin * CFG.electronics.current_limit_torque
     assert sc.slip_torque(n, HIGH) <= M.gearbox_torque_limit
-    flattest = replace(CFG, case_plate=replace(CFG.case_plate, tilt=CFG.mount.tilt_range[0] - CFG.mount.tilt_margin))
+    flat = CFG.mount.tilt_range[0] - CFG.mount.tilt_margin
+    flattest = replace(CFG, case_plate=replace(CFG.case_plate, tilts={(CFG.case_plate.item, CFG.case_plate.orient): flat}))
     assert CFG.electronics.current_limit_torque >= C.backstop_margin * layout.plate_drag_torque(flattest)
     assert sc.slip_torque(n, LOW) >= C.backstop_margin * layout.plate_drag_torque(flattest)
 

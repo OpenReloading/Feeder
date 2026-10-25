@@ -95,6 +95,7 @@ def _pull_eye(cfg: Config, h: float) -> Part:
 
 @per_config
 def plate(cfg: Config = CFG) -> Part:
+    layout.check_orientation(cfg)
     cp = cfg.case_plate
     h = layout.plate_h(cfg)
     r = layout.pocket_circle_r(cfg)

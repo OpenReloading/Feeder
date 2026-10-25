@@ -149,6 +149,7 @@ def _spigot_frame(cfg: Config) -> Plane:
 
 @per_config
 def exit_insert(cfg: Config = CFG) -> Part:
+    layout.check_orientation(cfg)
     e, f = cfg.exit, cfg.print.fit
     z = layout.levels(cfg)
     length, r0, r1 = opening(cfg)  # noqa: RUF059

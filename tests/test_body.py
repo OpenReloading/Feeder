@@ -331,10 +331,10 @@ def test_wall_top_is_open_on_the_high_side_and_holds_level_brass():
 def test_bowl_holds_the_design_fill():
     cp_, (lo, hi) = CFG.case_plate, CFG.mount.tilt_range
     z = layout.levels()  # noqa: F841
-    assert layout.capacity(cp_.tilt) >= cp_.fill_cases  # default tilt, no extender
-    assert layout.capacity(cp_.tilt, rim=lambda a: b.rim_top(a, extender=False)) == layout.capacity(cp_.tilt)  # the wall top profile gives the level plane
+    assert layout.capacity(layout.tilt()) >= cp_.fill_cases  # default tilt, no extender
+    assert layout.capacity(layout.tilt(), rim=lambda a: b.rim_top(a, extender=False)) == layout.capacity(layout.tilt())  # the wall top profile gives the level plane
     assert layout.capacity(hi, rim=b.rim_top) >= cp_.fill_cases  # steepest tilt with the extender
-    assert all(layout.capacity(t, rim=b.rim_top) >= layout.capacity(t) for t in (lo, cp_.tilt, hi))  # the extender never holds less
+    assert all(layout.capacity(t, rim=b.rim_top) >= layout.capacity(t) for t in (lo, layout.tilt(), hi))  # the extender never holds less
     assert layout.capacity(45, 70) < cp_.fill_cases < layout.capacity(40, 95)  # the estimate's scale: 70 mm was too low
 
 

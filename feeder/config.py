@@ -129,6 +129,8 @@ class CasePlate:
     the tilt and fall back. Base-down cases ride to the exit. Start values, tune on hardware."""
 
     caliber: str = "9mm_luger"  # a case in calibers.table (a plate for it alone) or a group in calibers.groups
+    item: str = "case"  # what the plate set delivers: "case", later "bullet". Only the keys of `tilts` are built
+    orient: str = "base_down"  # how it leaves the exit: "base_down" (case mouth up), later "mouth_down", "tip_first". Pocket and ridge geometry and the tilt set it, no flip module
     pocket_clearance: float = 3.0  # pocket = rim + this, measured to the band. 12 or 15 mm for 9mm: hardware test
     height_ratio: float = 0.37  # plate height over case length, near the estimated centre of mass (0.33 to 0.39). Group plates: the height closest to it for the shortest and longest case
     pocket_pitch: float = 1.6  # pocket spacing over pocket diameter
@@ -154,7 +156,7 @@ class CasePlate:
     fill_cases: int = 250  # design fill, about drag_mass of 9mm
     packing: float = 0.55  # loose cases over their envelope volume, low estimate (random cylinders about 0.55 to 0.65, unverified)
     drag_mu: float = 0.3  # brass on printed plastic, estimate
-    tilt: float = 45.0  # deg from horizontal, start value, tune on hardware
+    tilts: dict = field(default_factory=lambda: {("case", "base_down"): 45.0})  # (item, orient) the set delivers: deg from horizontal, start value, tune on hardware. The supported combinations
     direction: int = 1  # +1 counter-clockwise seen from above, -1 clockwise
 
 

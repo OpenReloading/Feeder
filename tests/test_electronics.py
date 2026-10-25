@@ -9,6 +9,7 @@ from feeder.config import CFG
 from feeder.lib import fasteners
 from feeder.parts import body as b
 from feeder.parts import electronics as el
+from feeder.parts import layout
 from feeder.parts import mount as m
 
 E, MW = CFG.electronics, CFG.print.min_wall
@@ -92,7 +93,7 @@ def test_every_panel_hole_has_a_part_whose_barrel_fits_and_carries_its_nut():
 
 
 def test_panel_nuts_sit_on_the_inner_face_of_their_panel():
-    box = el.box_frame(CFG.case_plate.tilt)
+    box = el.box_frame(layout.tilt())
     nuts = {f.name: f for f in assembly.fasteners_in_body() if f.name.startswith("Panel nut")}
     for name, pp, mouth, t in el.panel_fits():
         f = nuts[f"Panel nut, {pp.label}"]
