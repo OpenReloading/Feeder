@@ -26,6 +26,7 @@ theme:
 # header facts (latest tag, stars, forks): fetched from the GitHub API at build time, not in the browser
 hooks:
   - hooks/repo_facts.py
+  - hooks/table_layout.py   # <wbr> in inline code, data-label and data-stack on long tables
   - hooks/configurator_files.py   # build/configurator/ (build.py --configurator) into site/configurator/data/
 
 extra_css:
