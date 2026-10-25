@@ -13,6 +13,8 @@ orientation they go on the print bed.
 import hashlib
 import itertools
 import json
+import os
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import replace
 from pathlib import Path
 
@@ -117,13 +119,13 @@ def bom_rows(cfg: Config) -> list[dict]:
     return rows
 
 
-def _export(name: str, builder, cfg: Config, out: Path) -> str:
+def _export(name: str, choice: dict, out: Path) -> str:
     """Write the print-bed STL of one part to out/<hash>.stl, once per content, and return the hash."""
-    tmp = out / "part.tmp.stl"
-    export_stl(printing.on_bed(name, builder(cfg), cfg), str(tmp))
+    cfg = config(choice)
+    tmp = out / f"{os.getpid()}.tmp.stl"  # one per worker process
+    export_stl(printing.on_bed(name, printed_parts(cfg)[name](cfg), cfg), str(tmp))
     digest = hashlib.sha256(tmp.read_bytes()).hexdigest()[:16]
-    final = out / f"{digest}.stl"
-    tmp.replace(final) if not final.exists() else tmp.unlink()
+    tmp.replace(out / f"{digest}.stl")  # the same content from two workers replaces the same bytes
     return digest
 
 
@@ -131,11 +133,12 @@ def build_configurator(out: Path = build.BUILD / "configurator", options: dict =
     """Export every part key of `options` to `out` and write out/manifest.json. Returns the manifest."""
     out.mkdir(parents=True, exist_ok=True)
     parts = {}
-    for name, keys in sorted(plan(options).items()):
-        deps = depends(name)
-        files = {k: _export(name, printed_parts(config(c))[name], config(c), out) for k, c in keys.items()}
-        parts[name] = {"depends": list(deps), "files": files}
-        print(f"built {name}: {len(files)} keys, {len(set(files.values()))} files")
+    with ProcessPoolExecutor() as pool:  # the exports are independent and CPU-bound: a 4-core runner took 32 minutes in one process
+        pending = {name: (depends(name), {k: pool.submit(_export, name, c, out) for k, c in keys.items()}) for name, keys in sorted(plan(options).items())}
+        for name, (deps, futures) in pending.items():
+            files = {k: f.result() for k, f in futures.items()}
+            parts[name] = {"depends": list(deps), "files": files}
+            print(f"built {name}: {len(files)} keys, {len(set(files.values()))} files")
     bom = {key(BOM_DEPENDS, c): bom_rows(config(c)) for c in {key(BOM_DEPENDS, c): c for c in combinations(options)}.values()}
     manifest = {"options": {k: list(v) for k, v in options.items()}, "parts": parts, "bom": {"depends": list(BOM_DEPENDS), "rows": bom}}
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1), encoding="utf-8")
