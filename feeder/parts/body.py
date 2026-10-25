@@ -13,6 +13,8 @@
 - Wall extender (optional): one open arc over the low side above the wall top, a sleeve over the outside of the wall
   top, screwed to the wall. The high side stays open.
 - Track band: C ring on the core's deck round the plate, printed with the core. Its gap is over the exit.
+- Wiper (optional, `track.wiper_h`): a fixed arm on the band's inner face just before the exit, its underside above
+  one upright case of the plate set, so a standing or stacked case is knocked back. Part of the core.
 - Track gate: band sector in the band gap, on the exit insert. Its face sits behind the band face, the band ends
   have a lead-in chamfer and lap behind the gate ends, so it lifts out but cannot move inward.
 - Exit insert: wear part with the drop opening and the funnel to the drop tube. A block that fills a vertical
@@ -252,6 +254,27 @@ def _band(cfg: Config) -> Part:
     return body
 
 
+def wiper_z(cfg: Config = CFG) -> float:
+    """Wiper underside: `wiper_h` above an upright case of the plate set, which stands on the deck."""
+    return layout.levels(cfg).deck_top + layout.caliber(cfg).case_length + cfg.track.wiper_h
+
+
+def _wiper(cfg: Config) -> Part:
+    """Box on the band upstream of the exit, one band thickness wide, from the band top down to `wiper_z`, reaching
+    `wiper_reach` over the plate and half way into the band so it joins both band halves. Flat underside: the
+    reach stays under `print.bridge`."""
+    t, p = cfg.track, cfg.print
+    if t.wiper_reach > p.bridge:
+        raise ValueError(f"wiper_reach {t.wiper_reach} is over print.bridge {p.bridge}")
+    z0, z1 = wiper_z(cfg), band_top(cfg)
+    if z1 - z0 < p.min_wall:
+        raise ValueError(f"wiper_h {t.wiper_h} leaves the arm {z1 - z0:.1f} mm thick, under print.min_wall")
+    r_in = layout.band_inner_r(cfg)
+    r_out = r_in + t.band_t / 2
+    ang = EXIT_ANGLE - cfg.case_plate.direction * (_gap_angles(cfg)[1] + math.degrees((t.band_t / 2) / r_out))  # clear of the gate lap
+    return Rot(Z=ang) * Pos(r_out - (t.wiper_reach + t.band_t / 2) / 2, 0, z0) * Box(t.wiper_reach + t.band_t / 2, t.band_t, z1 - z0, align=BOTTOM)
+
+
 @per_config
 def track_gate(cfg: Config = CFG) -> Part:
     """Band sector over the exit on the deck and the exit insert, its face `gate_setback` behind the band face. Its outer ends
@@ -341,6 +364,8 @@ def core(cfg: Config = CFG) -> Part:
     body += Rot(Z=m.angle) * _can_block(cfg)
     body -= Rot(Z=m.angle) * can_tunnel(cfg)
     body += _band(cfg)
+    if cfg.track.wiper_h:
+        body += _wiper(cfg)
     body -= _exit_cut(cfg)
     return body
 
