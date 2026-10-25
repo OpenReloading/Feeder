@@ -227,6 +227,9 @@ def test_assembly_has_no_interference(assembled):
         if any(getattr(ba.max, a) <= getattr(bb.min, a) or getattr(bb.max, a) <= getattr(ba.min, a) for a in "XYZ"):
             continue
         overlap = pa & pb
+        if overlap is None:  # no common volume: the parts must then really be apart
+            assert pa.distance_to(pb) > 0, f"{na} touches {nb}"
+            continue
         volume = overlap.volume if overlap.solids() else 0.0
         assert volume < 1e-3, f"{na} overlaps {nb} by {volume:.4f} mm3"
 

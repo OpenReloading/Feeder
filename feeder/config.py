@@ -397,18 +397,38 @@ class Electronics:
     # knob 15 mm shaft and 16 knob estimated. DC jack Switchcraft L722A: .313 in hole, panel up to .125 in, longer
     # bushing .319 in, 5 A at 12 V DC resistive (https://media.e-sonic.com/productfiles/mf-sc/plf6.pdf), body and nut size
     # estimated. GX12 and all other panel nuts: no drawing found, estimates, unverified. The jack barrel is the hole (8.2)
-    # less the 0.2 clearance of the other holes. The GX12 body ends 12 behind the inner face of the panel, the depth
-    # `test_panel_holes_leave_room` assumes.
+    # less the 0.2 clearance of the other holes. The GX12 envelope ends `socket_depth` (30, body plus
+    # solder cups, unverified) behind the inner face of the panel: thread 8.5 and body 23.9 less the 2.4 mm wall.
     panel_parts: tuple = (
         ("PWM knob", PanelPart("PWM knob", 7.0, 7.0, 10.0, 2.0, (17.0, 17.0, 9.5), (16.0, 15.0))),
         ("toggle switch", PanelPart("toggle switch", 6.35, 6.1, 9.5, 2.0, (13.0, 7.9, 20.0), (3.0, 10.4))),
         ("DC jack", PanelPart("DC jack", 7.95, 8.1, 11.0, 2.0, (12.0, 11.0, 14.0))),
-        ("motor", PanelPart("GX12 2-pin socket", 12.0, 8.5, 15.0, 2.0, (13.0, 13.0, 5.9), (16.0, 2.5))),
-        ("sensor", PanelPart("GX12 3-pin socket", 12.0, 8.5, 15.0, 2.0, (13.0, 13.0, 5.9), (16.0, 2.5))),
+        ("motor", PanelPart("GX12 2-pin socket", 12.0, 8.5, 15.0, 2.0, (13.0, 13.0, 23.9), (16.0, 2.5))),
+        ("sensor", PanelPart("GX12 3-pin socket", 12.0, 8.5, 15.0, 2.0, (13.0, 13.0, 23.9), (16.0, 2.5))),
     )
     pwm_board: tuple = (50.0, 50.0, 13.6)  # PWM controller (listing: 50 x 32 PCB, height unverified; kept at 50 x 50 for the knob and terminals): across x, along z (about 25 round its knob), depth with parts on the board (estimate, unverified)
     relay_board: tuple = (71.0, 39.0)  # timer relay module PCB over its holes: across x, along z (DROK 200391 sheet, 7.1 x 3.9 x 2.5 cm: https://m.media-amazon.com/images/I/91rcHqMUeoL.pdf)
     relay_parts: tuple = (56.0, 24.0, 23.4)  # display, relay and terminal blocks between the mounting screw heads: across x, along z, height above the PCB (25 mm module height less the PCB, estimate, unverified)
+    socket_z: tuple = (19.5, 45.0)  # side sockets stacked along z in the front band: the first as low as the corner post and the nut allow, the second above the DC jack, so the service loops pass it
+    socket_depth: float = 30.0  # free depth behind the inner wall face for a side socket: body, solder cups and the start of the wire bend. No drawing found, seller listings say about 30 mm overall, unverified: measure on delivery
+    edge_r: float = 1.5  # chamfer on the outside edges that touch the bed, fillet on the others
+    tie_slot: tuple = (3.5, 1.5)  # cable-tie tunnel: tie width (+1) and thickness (+0.3) for a 2.5 x 100 mm tie, unverified
+    tie_gap: float = 1.6  # material between a tie tunnel and the pocket or the wall
+    fuse_holder: tuple = (12.0, 52.0)  # inline 5 x 20 mm fuse holder body: diameter, length. Seller values, unverified: measure on delivery
+    splice: tuple = (30.0, 19.0, 9.0)  # 5-way lever splice connector (two, +12 V and 0 V): length, width, height with the levers shut. Seller listing, unverified
+    splice_clear: float = 12.0  # free height above a splice connector for its open levers, estimate, unverified: all the room in front of the cradle up to the PWM board
+    service_loop: float = 30.0  # free wire length behind each side socket, folded beside it
+    label_size: float = 6.0  # font size of the lid text, caps about 4.4 mm high
+    label_depth: float = 0.6  # engraving depth in the outer face of the lid, which prints on the bed
+    label_pitch: float = 7.5  # line spacing of the lid text
+    label_block_gap: float = 4.0  # extra space between the text blocks of the two sockets, so they read as two lists
+    front_refs: tuple = ("U1", "Q1", "J1")  # wiring part (feeder.wiring) behind each hole of `front_holes`
+    side_refs: tuple = ("X1", "X2")  # and of `side_holes`
+    lid_titles: tuple = (("U1", "SPEED"), ("Q1", "POWER"), ("J1", "12V IN"), ("X1", "MOTOR"), ("X2", "SENSOR"))  # lid text titles by wiring part, the pins and polarity come from `feeder.wiring`
+    label_font: str = "DejaVu Sans"  # bold, in the dev container image; the Pages workflow installs fonts-dejavu-core
+    label_gap: float = 11.0  # lid text starts this far from the middle line, clear of the 16 mm knob
+    cradle_z: tuple = (80.0, 104.0)  # z of the fuse holder cradle and of the splice connectors on the back wall: clear of the relay below and the PWM board in front
+    pad_len: float = 12.0  # tie pad length along z, about the width of a wire bundle
 
 
 @dataclass(frozen=True)
