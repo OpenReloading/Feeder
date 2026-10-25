@@ -10,6 +10,8 @@ exclude_docs: generated/steps.md   # snippet of index.md
 theme:
   name: material
   custom_dir: overrides   # partials/source.html: header facts rendered at build time
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
   font: false   # system fonts: no requests to Google Fonts
   palette:
     - media: "(prefers-color-scheme: light)"
