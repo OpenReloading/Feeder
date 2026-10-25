@@ -185,3 +185,18 @@ button:focus-visible {
   height: auto;
   border-radius: 0.3rem;
 }
+
+/* The assembly page prints its step list in place of the viewer */
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block;
+  }
+
+  .md-content iframe {
+    display: none;
+  }
+}
