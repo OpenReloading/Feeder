@@ -38,6 +38,8 @@ The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenRe
 
 `.github/workflows/pages.yml` runs the tests, builds the guide and deploys `site/` to GitHub Pages on every push to `main` (pull requests build only).
 
+The configurator page (`guide/configurator.md`, `guide/javascripts/configurator.js`) picks the options, lists the parts and the BOM for the choice and zips the print files in the browser. It reads `build/configurator/` through `hooks/configurator_files.py`: run `build.py --no-test --configurator` before `mkdocs build` to see it locally. A push to `main` builds those files in CI; other builds and local builds without them show a notice instead.
+
 `build/<name>.stl` and `.step` are in the modelled orientation (assembly frame for the body). `build/print/<name>.stl` is each part as it goes on the bed (`feeder/printing.py`): flipped where it prints upside down, turned across the bed diagonal where it is wider than the bed.
 
 ## Configuration
