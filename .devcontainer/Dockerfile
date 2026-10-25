@@ -4,3 +4,5 @@ FROM mcr.microsoft.com/devcontainers/python:3.14-bookworm@sha256:68aef3859e340a2
 RUN apt-get update \
  && apt-get install -y --no-install-recommends procps libgl1 libglu1-mesa \
  && rm -rf /var/lib/apt/lists/*
+
+USER vscode
