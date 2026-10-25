@@ -9,6 +9,11 @@ is counted during the warm-up turns.
 The wall extender is fitted when the fill is above the wall's capacity at the tilt (`layout.capacity`), as the
 README tells users. A case goes back below the wall top; when the pile leaves no room there it counts as
 `overfill` and is dropped on top anyway.
+
+`start` is how the run begins: "settled" (the pile lies on the plate), "dumped" (it hits the plate at the speed of a fall
+from the wall top, as poured in from above), "tilt_change" (it settles at the far end of the mount's tilt range, then the
+tilt goes to `tilt` in `CHANGE_S`) or "dumped_tilt_change" (dumped at the far end, then the tilt change). A spill counts
+from the first step, the pile settling and the tilt change included.
 """
 
 import math
@@ -21,8 +26,10 @@ import numpy as np
 from feeder.config import CFG, Config
 from feeder.parts import layout
 from feeder.parts import slip_clutch as sc
-from sim.model import EXIT, MM, mjcf, opening, wall_top
+from sim.model import EXIT, MM, G, mjcf, opening, wall_top
 
+START = ("settled", "dumped", "tilt_change", "dumped_tilt_change")
+CHANGE_S = 1.0  # s the tilt takes to go from the far end of the range to `tilt`: the link is swapped or the body pushed, not run along the rod
 CHUNK = 0.05  # s between checks
 DEEP = 1.5  # mm, contact overlap counted in `deep_share`: the pocket clearance per side
 
@@ -39,15 +46,20 @@ def wilson(k: int, n: int, zq: float = 1.96) -> tuple[float, float]:
 
 def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Config = CFG, com_ratio: float | None = None,  # noqa: C901, PLR0912, PLR0913, PLR0915
         mu: float | None = None, seed: int = 1, seconds: float | None = None, extender: bool | None = None,
-        plate: str | None = None, case: str | None = None) -> dict:
+        plate: str | None = None, case: str | None = None, start: str = "settled") -> dict:
     """Simulate and return the metrics. `seconds` replaces warm-up and `revs` by a plain run (smoke tests).
-    `extender` None fits it when `n_cases` is above the wall's capacity. `plate` is a plate set
-    (`case_plate.caliber`), `case` a key of `calibers.table` (default: the plate's envelope case)."""
+    `extender` None fits it when `n_cases` is above the wall's capacity at the steeper of `tilt` and the tilt the run
+    starts at. `plate` is a plate set (`case_plate.caliber`), `case` a key of `calibers.table` (default: the plate's
+    envelope case), `start` one of `START`."""
+    if start not in START:
+        raise ValueError(f"start {start!r} is not one of {START}")
     if plate:
         cfg = replace(cfg, case_plate=replace(cfg.case_plate, caliber=plate))
     s = cfg.sim
+    lo, hi = cfg.mount.tilt_range
+    tilt_from = (lo if abs(tilt - lo) > abs(tilt - hi) else hi) if "tilt_change" in start else tilt
     if extender is None:
-        extender = layout.capacity(tilt, cfg=cfg) < n_cases
+        extender = layout.capacity(max(tilt, tilt_from), cfg=cfg) < n_cases
     model = mujoco.MjModel.from_xml_string(mjcf(tilt, n_cases, cfg, com_ratio, mu, extender, case))
     data = mujoco.MjData(model)
     rng = np.random.default_rng(seed)
@@ -59,17 +71,22 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
     hinge = model.jnt_dofadr[model.joint("hinge").id]
     hinge_q = model.jnt_qposadr[model.joint("hinge").id]
 
-    def place(i: int, x: float, y: float, zz: float):
+    # dumped: the pile hits the plate at the speed of a fall from the wall top along gravity (a start at rest from that
+    # height would land beyond the low wall at a steep tilt)
+    dump_v = math.sqrt(2 * G * (z.wall_top - pt) / math.cos(math.radians(tilt_from)) * MM) if "dumped" in start else 0.0
+
+    def place(i: int, x: float, y: float, zz: float, v: float = 0.0):
         q = rng.normal(size=4)
         data.qpos[qa[i]:qa[i] + 7] = [x * MM, y * MM, zz * MM, *(q / np.linalg.norm(q))]
         data.qvel[va[i]:va[i] + 6] = 0
+        data.qvel[va[i]:va[i] + 3] = [0, -v * math.sin(math.radians(tilt_from)), -v * math.cos(math.radians(tilt_from))]  # along gravity
 
     cell = 22.0  # a case fits a 22 mm cell in any orientation (diagonal 21.6), so the start lattice has no overlap
     grid = np.arange(-R, R + 1, cell)
     spots = [(x, y) for x in grid for y in grid if cfg.cap.d / 2 + cell / 2 < math.hypot(x, y) < layout.plate_r(cfg) - cell / 2]
     for i in range(n_cases):
         x, y = spots[i % len(spots)]
-        place(i, x, y, pt + 40 + cell * (i // len(spots)))
+        place(i, x, y, pt + 40 + cell * (i // len(spots)), dump_v)
 
     def respawn(i: int) -> bool:
         """On top of the pile on the low side, above the highest case near the spot so nothing overlaps, and below
@@ -91,6 +108,11 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
     warm = 0.0 if seconds else s.warmup_revs * 60 / rpm
     total = seconds if seconds else warm + revs * 60 / rpm
     data.ctrl[0] = w
+
+    def tilt_to(deg: float):
+        model.opt.gravity[:] = [0, -G * math.sin(math.radians(deg)), -G * math.cos(math.radians(deg))]
+
+    tilt_to(tilt_from)
     m = dict(exits=0, base_down=0, mouth_down=0, sideways=0, lost=0, spilled=0, overfill=0)  # noqa: C408
     torque, speed, deepest, deepest_pair, lost_at, spilled_at, deep_checks = [], [], 0.0, "", [], [], 0
     turn0 = None
@@ -99,6 +121,8 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
     travel = rpm * 6 * CHUNK  # deg the plate turns between checks
     t0 = time.time()
     while data.time < total:
+        if "tilt_change" in start:
+            tilt_to(tilt_from + (tilt - tilt_from) * min(1.0, max(0.0, (data.time - warm) / CHANGE_S)))
         mujoco.mj_step(model, data, nstep=n_step)
         counting = data.time >= warm
         if counting:
@@ -118,11 +142,11 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
             ang = math.degrees(math.atan2(above[i, 1], above[i, 0]))
             ra = math.hypot(above[i, 0], above[i, 1])
             inside = abs((ang - EXIT + 180) % 360 - 180) <= half + travel and r0 - 1 <= ra <= r1 + 1
-            if counting:
-                if r[i] > R + cfg.body.wall_t + 2:
-                    m["spilled"] += 1
-                    spilled_at.append(f"{ang:.0f}@{above[i, 2]:.0f}")
-                elif not inside:
+            if r[i] > R + cfg.body.wall_t + 2:
+                m["spilled"] += 1
+                spilled_at.append(f"{ang:.0f}@{above[i, 2]:.0f}")
+            elif counting:
+                if not inside:
                     m["lost"] += 1
                     lost_at.append(f"{ang:.0f}@{ra:.0f}")
                 else:
@@ -143,7 +167,7 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
     tq = np.array(torque) if torque else np.zeros(1)
     slip = sc.slip_torque(cfg.clutch.springs_fitted, cfg.clutch.friction_mu[0], cfg)
     return dict(
-        valid=m["lost"] == 0, plate=cfg.case_plate.caliber, case=case or "", tilt=tilt, rpm=rpm, cases=n_cases, extender=extender, com_ratio=com_ratio if com_ratio is not None else s.com_ratio,
+        valid=m["lost"] == 0, plate=cfg.case_plate.caliber, case=case or "", start=start, tilt=tilt, rpm=rpm, cases=n_cases, extender=extender, com_ratio=com_ratio if com_ratio is not None else s.com_ratio,
         mu=mu if mu is not None else cfg.case_plate.drag_mu, seed=seed, turns=round(turns, 2), **m,
         cases_per_h=round(m["base_down"] / counted * 3600, 1), fill=round(m["base_down"] / passes, 4) if passes else 0.0,
         fill_lo=round(lo, 4), fill_hi=round(hi, 4),
@@ -151,5 +175,5 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
         torque_mean=round(float(tq.mean()), 3), torque_p95=round(float(np.percentile(tq, 95)), 3), torque_max=round(float(tq.max()), 3),
         slip_share=round(float(np.mean(tq > slip)), 4), speed_ratio=round(float(np.mean(speed)) / w, 3) if speed else 0.0,
         deepest_mm=round(deepest, 2), deepest_pair=deepest_pair, deep_share=round(deep_checks / max(1, len(torque)), 4),
-        lost_at=" ".join(lost_at), spilled_at=" ".join(spilled_at), rtf=round(total / wall, 3),
+        lost_at=" ".join(lost_at), spilled_at=" ".join(spilled_at[:50]), rtf=round(total / wall, 3),
     )

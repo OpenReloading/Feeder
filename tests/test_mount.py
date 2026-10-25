@@ -177,12 +177,13 @@ def test_link_and_pivot_loads():
 
 
 def _rim():
-    """Rim top points (x, y, z), body frame, every 15 deg: the extender top over its arc, the wall top elsewhere."""
-    bd, R = CFG.body, layout.bowl_r()
+    """Rim top points (x, y, z), body frame, every 15 deg: the outer top edge of the extender over its arc (it leans in), the wall top elsewhere."""
+    bd = CFG.body
     span = b.extender_span() if bd.extender_h else (1, 0)
     pts = []
     for a in range(0, 360, 15):
-        ro = R + (2 * bd.wall_t + FIT if span[0] <= a <= span[1] else bd.wall_t)
+        on_arc = any(span[0] <= a + k <= span[1] for k in (0, 360))
+        ro = b.rim_r(a) + (2 * bd.wall_t + FIT if on_arc else bd.wall_t)
         pts.append((ro * math.cos(math.radians(a)), ro * math.sin(math.radians(a)), b.rim_top(a)))
     return pts
 

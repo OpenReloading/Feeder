@@ -9,6 +9,7 @@ Find the symptom, try the first fix, then the next. Config values are in `feeder
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Cases leave mouth down | tilt too flat, so mouth-down cases stay in the pockets | Fit the next steeper tilt link (`mount.fixed_tilts`: 45, 50, 55) or set the adjustable link steeper. Above 55 deg fit the wall extender |
+| Cases fly over the wall | fill above about 250 9mm cases, or tilt above 55 deg without the wall extender | Take brass off down to 250 cases. Above 55 deg fit the wall extender: it leans inward, 60 mm above the wall on the low side. The wall is never lower than 45 mm above the plate and 51 mm at the high end |
 | Cases leave mouth down at every tilt | pocket too wide for the case | Smaller `case_plate.pocket_clearance`, or the plate set that matches the caliber |
 | Pockets pass the exit empty | too little brass on the plate, or the tilt too steep | Add brass up to about 250 9mm cases. Go one tilt step flatter: at 62 deg the simulated rate is a quarter to a third of the rate at 45 deg |
 | Few cases per hour | plate too slow | Turn the PWM knob up. The simulated rate at 45 deg rises from about 1,000 per hour at 0.75 rpm to 1,900 at 1.5 rpm |
