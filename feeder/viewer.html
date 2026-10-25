@@ -365,7 +365,7 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
   };
   const tiltedPts = sphere(TILT), levelPts = sphere(0);
   const target = new THREE.Box3().setFromPoints(tiltedPts).getCenter(new THREE.Vector3());
-  const radius = Math.max(...tiltedPts.concat(levelPts).map(p => p.distanceTo(target))) + 30;
+  const radius = tiltedPts.concat(levelPts).reduce((m, p) => Math.max(m, p.distanceTo(target)), 0) + 30;
   controls.target.copy(target);
   if (!reduce) t = 0;
 

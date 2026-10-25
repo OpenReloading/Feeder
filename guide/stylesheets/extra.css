@@ -172,3 +172,16 @@ button:focus-visible {
     gap: 8px;
   }
 }
+
+/* Prose lines of about 75 characters; tables, admonitions and components keep the full width */
+.md-content__inner > :is(p, ul, ol) {
+  max-width: 62ch;
+}
+
+/* Render on the home page (the light and dark image share this selector) */
+.md-typeset img[src*="assets/feeder-"] {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  border-radius: 0.3rem;
+}
