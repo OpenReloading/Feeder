@@ -29,7 +29,7 @@ Band, gate and exit insert print top down. Skirt, no brim: a brim takes the band
 import math  # noqa: I001
 from dataclasses import replace
 
-from build123d import Align, Axis, Box, Circle, Cylinder, Part, Plane, Polygon, Pos, Rot, Vector, extrude, loft, revolve
+from build123d import Align, Axis, Box, Circle, Cone, Cylinder, Part, Plane, Polygon, Pos, Rot, Vector, extrude, loft, revolve
 from shapely.geometry import MultiPoint
 from shapely.geometry.polygon import orient
 
@@ -360,8 +360,9 @@ def wall_slant(cfg: Config = CFG) -> float:
 
 
 def wall_low(cfg: Config = CFG) -> float:
-    """Lowest wall top: one case length above the plate top of any plate, so cases on it stay in at the high side."""
-    return max(layout.levels(s).plate_top + layout.caliber(s).case_length for s in layout.plate_sets(cfg))
+    """Lowest wall top: `wall_low` above the plate top of every plate the body takes (the highest governs), and not below
+    one case length above any of them, so cases on it stay in at the high side."""
+    return max(layout.levels(s).plate_top + max(cfg.body.wall_low, layout.caliber(s).case_length) for s in layout.plate_sets(cfg))
 
 
 def wall_top_at(y: float, cfg: Config = CFG) -> float:
@@ -507,29 +508,54 @@ def extender_span(cfg: Config = CFG) -> tuple[float, float]:
 
 
 def extender_top_at(y: float, cfg: Config = CFG) -> float:
-    """Extender top at `y`: a flat top `extender_h` above the full wall top, falling at the wall slant."""
+    """Extender top plane at `y`: a flat top `extender_h` above the full wall top, falling at the wall slant."""
     return layout.levels(cfg).wall_top + cfg.body.extender_h - (y + layout.bowl_r(cfg)) * math.tan(math.radians(wall_slant(cfg)))
+
+
+def _extender_rim(ang: float, cfg: Config) -> tuple[float, float]:
+    """(radius, z) of the inner top edge of the extender at `ang` deg. Above the full wall top the inner face leans
+    toward the axis by `extender_lean`, so the edge is where that face meets the top plane."""
+    b, R = cfg.body, layout.bowl_r(cfg)
+    ts, ta, s = math.tan(math.radians(wall_slant(cfg))), math.tan(math.radians(b.extender_lean)), math.sin(math.radians(ang))
+    u = b.extender_h - R * ts * (1 + s)  # height over the full wall top, straight wall
+    if u > 0:
+        u /= 1 - ta * ts * s
+    return R - max(u, 0.0) * ta, layout.levels(cfg).wall_top + u
+
+
+def _on_extender(ang: float, extender: bool, cfg: Config) -> bool:
+    a0, a1 = extender_span(cfg)
+    return bool(extender and cfg.body.extender_h and (ang - a0) % 360 <= a1 - a0)
 
 
 def rim_top(ang: float, extender: bool = True, cfg: Config = CFG) -> float:
     """Top of the bowl rim at body-frame angle `ang` deg: the extender top over its arc, the wall top elsewhere."""
-    y = layout.bowl_r(cfg) * math.sin(math.radians(ang))
-    if extender and cfg.body.extender_h and extender_span(cfg)[0] <= ang % 360 <= extender_span(cfg)[1]:
-        return extender_top_at(y, cfg)
-    return wall_top_at(y, cfg)
+    if _on_extender(ang, extender, cfg):
+        return _extender_rim(ang, cfg)[1]
+    return wall_top_at(layout.bowl_r(cfg) * math.sin(math.radians(ang)), cfg)
+
+
+def rim_r(ang: float, extender: bool = True, cfg: Config = CFG) -> float:
+    """Radius of the inner rim edge at `ang` deg: the bowl radius, less the lean of the extender over its arc."""
+    return _extender_rim(ang, cfg)[0] if _on_extender(ang, extender, cfg) else layout.bowl_r(cfg)
 
 
 @per_config
 def extender(cfg: Config = CFG) -> Part:
     """Wall extender: wall above the wall top up to a flat top `extender_h` above the full wall top, falling at the wall
-    slant, sleeve down over the outside of the wall, over the arc `extender_span`. Prints on its flat top."""
+    slant, leaning toward the axis by `extender_lean` above the full wall top, sleeve down over the outside of the
+    wall, over the arc `extender_span`. Prints on its flat top."""
     b, f = cfg.body, cfg.print.fit
     z = layout.levels(cfg)
     R = layout.bowl_r(cfg)
+    r_out = R + 2 * b.wall_t + f
     tall = z.wall_top + b.extender_h - z.bottom + 100  # only the slanted top cuts it
     top = Pos(0, -R, z.wall_top + b.extender_h) * Rot(X=-wall_slant(cfg)) * Box(2000, 2000, 2000, align=(Align.CENTER, Align.CENTER, Align.MAX))
-    body = (_ring(R, R + 2 * b.wall_t + f, z.bottom, tall) & top) - _below_wall_top(cfg)
-    body += (_ring(R + b.wall_t + f, R + 2 * b.wall_t + f, z.bottom, tall) & _below_wall_top(cfg)) - _below_wall_top(cfg, -b.extender_lap)
+    drop, lean_h = math.tan(math.radians(b.extender_lean)), b.extender_h + 10  # the top plane cuts below lean_h
+    lean = Pos(0, 0, z.wall_top) * (Cone(r_out, r_out - lean_h * drop, lean_h, align=BOTTOM) - Cone(R, R - lean_h * drop, lean_h, align=BOTTOM))
+    body = (_ring(R, r_out, z.bottom, z.wall_top - z.bottom) & top) - _below_wall_top(cfg)
+    body += (lean & top) - _below_wall_top(cfg)
+    body += (_ring(R + b.wall_t + f, r_out, z.bottom, tall) & _below_wall_top(cfg)) - _below_wall_top(cfg, -b.extender_lap)
     body += _extender_ribs(cfg) & top
     body &= _wedge(*extender_span(cfg), 2 * R, z.bottom, tall)
     return body - _extender_nut_holes(cfg)
@@ -578,15 +604,20 @@ def _extender_wall_holes(cfg: Config) -> Part:
 
 
 def _extender_ribs(cfg: Config) -> Part:
-    """Ribs outside the sleeve from each wall screw up to the flat top, so they print without overhang."""
+    """Ribs outside the sleeve from each wall screw up to the flat top, so they print without overhang: straight to the
+    full wall top, then leaning with the outer face."""
     b = cfg.body
     nut = fasteners.nut_data(b.joint_screw_size)
     w = hex_corner_r(nut["s"]) * 2 + 2 * cfg.print.min_wall
     r0 = layout.bowl_r(cfg) + 2 * b.wall_t + cfg.print.fit
-    top = layout.levels(cfg).wall_top + b.extender_h
+    wall_top = layout.levels(cfg).wall_top
+    t = nut["m"] + 1
+    lean = b.extender_lean
     out = None
     for ang, z in extender_wall_screws(cfg):
-        rib = Rot(Z=ang) * Pos(r0 - 1 + (nut["m"] + 1) / 2, 0, z - w / 2) * Box(nut["m"] + 1, w, top - z + w / 2 + 2 * layout.bowl_r(cfg), align=BOTTOM)  # the slanted top cuts it
+        straight = Pos(r0 - 1, 0, z - w / 2) * Box(t, w, wall_top - z + w / 2, align=(Align.MIN, Align.CENTER, Align.MIN))
+        leaning = Pos(r0 - 1, 0, wall_top - t) * Rot(Y=-lean) * Box(t, w, (b.extender_h + 10 + t) / math.cos(math.radians(lean)), align=(Align.MIN, Align.CENTER, Align.MIN))  # the slanted top cuts it
+        rib = Rot(Z=ang) * (straight + leaning)
         out = rib if out is None else out + rib
     return out
 

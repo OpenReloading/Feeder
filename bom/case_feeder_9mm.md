@@ -17,7 +17,7 @@ Default: split body, Pololu 2693 metal hub, simple PWM speed controller, no micr
 | `body_wall_0`, `body_wall_1`, `body_wall_2` | 1 each (split `arcs`) |
 | `body_half_0`, `body_half_1` | 1 each, instead of core and walls (split `halves`) |
 | `body` | 1, instead of core and walls (split `one_piece`, 233.0 mm plate) |
-| `body_extender` | 1, optional, 60 mm more wall over a 150 deg arc on the low side |
+| `body_extender` | 1, optional, 60 mm more wall over a 200 deg arc on the low side, leaning 25 deg toward the bowl axis |
 | `body_track_gate` | 1 |
 | `body_exit_insert` | 1 |
 | `drop_tube` | 1 |

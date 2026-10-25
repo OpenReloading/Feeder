@@ -168,7 +168,8 @@ class Body:
     wall_segments: int = 3  # arcs only
     wall_t: float = 3.6  # each half of the seam lap joint stays over print.min_wall
     wall_h: float = 125.0  # above the plate bottom, the same for every plate: holds the design fill up to 55 deg with the 9mm plate (layout.capacity), the extender only for 60, tune on hardware
-    heap_angle: float = 0.0  # deg brass may heap above level toward the high side. Wall top falls at mount.tilt_range[0] minus this toward the high side: 0 is the flattest tilt, no spills in the simulation at 40 and 45 deg with 250 cases. More keeps a flatter, taller high side
+    heap_angle: float = 25.0  # deg brass may heap above level toward the high side. Wall top falls at mount.tilt_range[0] minus this toward the high side: 0 is exactly the level brass line at the flattest tilt, so a heap or a case thrown up by the turning plate goes over the flanks. 25 (wall slant 15) keeps the high end about 50 mm and the centre about 85 mm above the plate; 20 would put the high end on the wall_low floor. No spills in the simulation at 40, 45 and 60 deg with 250 cases (README)
+    wall_low: float = 45.0  # mm above the plate top of every plate set: lowest wall top, also in the exit sector, about two 9mm cases (19.15 mm each) and more than the longest case of any set (revolver 32.8 mm), so a case standing on the plate stays in with room for a heap and for cases the plate throws up (issue 53)
     deck_t: float = 4.0  # flat deck the case bases slide on, out to the wall
     cup_wall: float = 3.0
     cup_clearance: float = 2.0  # radial, around the rotating clutch and the motor screw heads
@@ -185,7 +186,8 @@ class Body:
     halves_seam: float = 35.0  # deg, halves: seam plane through the shaft, clear of the can tunnel (along motor.angle), motor screws, exit and mount
     post_screws: int = 3  # halves: ISO 4762 M3 (joint_screw_size, joint_screw_length) per seam post into a heat-set insert
     extender_h: float = 60.0  # wall extender above the wall top, one open arc over the low side, optional part. 0: none
-    extender_arc: float = 150.0  # deg, arc centred on the low side (-y): at least the 125 deg where level brass at the steepest tilt stands above the wall top (test_body), 150 fits the bed turned on its slanted flat top, 160 does not (printing.fits)
+    extender_arc: float = 200.0  # deg, arc centred on the low side (-y): at least the angle where level brass at the steepest tilt stands above the wall top (test_body). 200 is the widest the bed takes on its slanted flat top turned about z, 205 does not fit (printing.fits, test_body); the exit sector stays open
+    extender_lean: float = 25.0  # deg from vertical toward the bowl axis above the full wall top, so a case thrown up falls back in: 20 to 30 deg, 25 prints without support turned on its slanted flat top (test_body) and puts the top edge 28 mm inside the wall
     extender_lap: float = 15.0  # extender sleeve down over the outside of the wall top
     extender_wall_screws: int = 4  # over the arc: ISO 10642 M3 from inside the bowl through wall and sleeve into an ISO 4032 nut captive in a rib on the sleeve
     can_relief: float = 10.0  # flat top of the can tunnel above the bottom plane, the can rises up to 8.5 (seller drawings)
@@ -203,7 +205,7 @@ class Mount:
     bolt_y: tuple = (-55.0, -95.0)
     tube_shape: str = "round"  # "round" or "square" (owner: 25 mm tube)
     tube_d: float = 25.0  # round diameter or square side
-    body_mass: float = 3.25  # kg at the plate top for the load checks: CAD estimate up to 2.84 (fill 0.8, 0.5 kg motor, unmodelled mass, 1 kg brass) plus 0.38 for the wall extender (the open arc weighs 0.22)
+    body_mass: float = 3.35  # kg at the plate top for the load checks: CAD estimate up to 2.91 (fill 0.8, 0.5 kg motor, unmodelled mass, 1 kg brass) plus 0.44 for the wall extender (the open arc weighs 0.25)
     unmodelled_mass: float = 0.15  # kg screws, inserts, sensor, cables, hose end, estimate, counted at the exit side
     tilt_range: tuple = (40.0, 60.0)  # deg from horizontal (owner), the adjustable link covers it
     tilt_margin: float = 2.0  # deg beyond the range that clearances still cover

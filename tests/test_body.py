@@ -270,23 +270,54 @@ def test_halves_seam_screws_pass_both_posts():
     assert layout.levels(cfg).bottom + b.post_h(cfg) < layout.levels(cfg).wall_top - B.extender_lap  # posts stay under the extender sleeve
 
 
+def _in_arc(ang, a0, a1):
+    return any(a0 <= ang + k <= a1 for k in (0, 360))
+
+
 def test_extender_is_an_open_arc_over_the_low_side_that_holds_level_brass_at_the_steepest_tilt():
     ext = b.extender()
     a0, a1 = b.extender_span()
     assert ext.is_valid and len(ext.solids()) == 1  # noqa: PT018
-    assert (a0 + a1) / 2 == 270 and a1 - a0 < 180  # centred on the low side, the high side stays open  # noqa: PT018
-    assert ext.bounding_box().max.Y < 0
+    assert (a0 + a1) / 2 == 270  # centred on the low side
+    clear = [abs((end - b.EXIT_ANGLE + 180) % 360 - 180) for end in (a0, a1)]
+    assert min(clear) > b.exit_half_angle()  # the exit sector stays open
     R, z = layout.bowl_r(), layout.levels()
     tan = math.tan(math.radians(CFG.mount.tilt_range[1]))
-    level = z.wall_top + B.extender_h - R * tan  # level brass surface at y = 0, from the extender top on the low side
+    level = b.rim_top(270) - b.rim_r(270) * tan  # level brass surface at y = 0, from the extender rim on the low side
     for ang in range(360):
         y = R * math.sin(math.radians(ang))
         if b.wall_top_at(y) + y * tan < level - 1e-6:  # the wall alone would let the brass over
-            assert a0 <= ang <= a1, ang
-    assert b.rim_top(270) == pytest.approx(z.wall_top + B.extender_h)
-    assert b.rim_top(90) == pytest.approx(b.wall_low())  # open high side
+            assert _in_arc(ang, a0, a1), ang
+    assert b.rim_top(270) > z.wall_top  # above the full wall top
+    assert b.rim_top(270) == pytest.approx(b.extender_top_at(-b.rim_r(270)))  # on the top plane, at the inner edge
+    assert b.rim_top(90) == pytest.approx(b.wall_top_at(R))  # open high side
     assert b.rim_top(90, extender=False) == b.rim_top(90)
+    assert b.rim_r(90) == b.rim_r(90, extender=False) == R
     assert B.extender_lap >= 15
+    for ang in (a0 + 1, 270, a1 - 1, (a1 - 1) % 360, (a0 - 1) % 360, (a1 + 1) % 360):  # the arc passes 0 deg: both sides of each end
+        on = _in_arc(ang, a0, a1)
+        assert (b.rim_r(ang) < R) == on and (b.rim_top(ang) > b.rim_top(ang, extender=False)) == on, ang  # noqa: PT018
+
+
+def test_extender_leans_toward_the_axis_above_the_full_wall_top():
+    ext = b.extender()
+    R, z = layout.bowl_r(), layout.levels()
+
+    def inner_face(zz):  # y of the inner face at the low side, from a thin probe along y
+        probe = ext & Pos(0, -R / 2, zz) * Box(0.5, R + 20, 0.1)
+        return -probe.bounding_box().max.Y
+
+    z1, z2 = z.wall_top + 5, b.rim_top(270) - 5
+    assert inner_face(z.wall_top + 0.2) == pytest.approx(R, abs=0.2)  # starts flush with the wall at the full wall top
+    lean = math.degrees(math.atan((inner_face(z1) - inner_face(z2)) / (z2 - z1)))
+    assert lean == pytest.approx(B.extender_lean, abs=0.5)
+    assert inner_face(b.rim_top(270) - 0.2) == pytest.approx(b.rim_r(270), abs=0.5)  # the rim sits where `rim_r` says
+
+
+def test_extender_arc_is_the_widest_the_bed_takes():
+    wider = replace(CFG, body=replace(B, extender_arc=B.extender_arc + 5))
+    assert printing.fits(printing.on_bed("body_extender", b.extender()))
+    assert not printing.fits(printing.on_bed("body_extender", b.extender(wider), wider), wider)
 
 
 def _overlap_volume(a, c):
@@ -318,13 +349,19 @@ def test_wall_top_is_open_on_the_high_side_and_holds_level_brass():
     assert b.wall_top_at(-R) == pytest.approx(z.wall_top)
     assert b.wall_top_at(R) == pytest.approx(max(b.wall_low(), z.wall_top - 2 * R * math.tan(math.radians(b.wall_slant()))))
     assert b.wall_low() >= z.plate_top + CAL.case_length  # a case standing on the plate stays in
+    floor = z.plate_top + B.wall_low
+    assert b.wall_low() >= floor
+    assert all(b.wall_low() >= layout.levels(s).plate_top + B.wall_low for s in layout.plate_sets(CFG))  # the same wall for every plate set
+    assert b.wall_top_at(R) >= floor  # the high end
+    exit_sector = range(round(b.EXIT_ANGLE - b.exit_half_angle()), round(b.EXIT_ANGLE + b.exit_half_angle()) + 1)
+    assert all(b.rim_top(ang) >= floor for ang in exit_sector)
     t = math.radians(CFG.mount.tilt_range[0])  # flattest tilt: the level brass surface leans least in the body frame
     world = lambda y, zz: y * math.sin(t) + zz * math.cos(t)  # noqa: E731
     ring = b._wall_ring(CFG)
     for y in range(-120, 121, 20):
         assert world(y, b.wall_top_at(y)) >= world(-R, z.wall_top) - 1e-6  # brass level with the low-side top stays in
         x = math.sqrt(R ** 2 - y ** 2) + B.wall_t / 2
-        top = (ring & Pos(x, y, 0) * Box(0.5, 0.1, 1000)).bounding_box().max.Z  # a thin probe: the top falls 0.84 mm per mm of y at the wall slant
+        top = (ring & Pos(x, y, 0) * Box(0.5, 0.1, 1000)).bounding_box().max.Z  # a thin probe: the top falls tan(slant) mm per mm of y
         assert top == pytest.approx(b.wall_top_at(y), abs=0.2), y  # the wall solid follows the profile
 
 
@@ -333,8 +370,8 @@ def test_bowl_holds_the_design_fill():
     z = layout.levels()  # noqa: F841
     assert layout.capacity(cp_.tilt) >= cp_.fill_cases  # default tilt, no extender
     assert layout.capacity(cp_.tilt, rim=lambda a: b.rim_top(a, extender=False)) == layout.capacity(cp_.tilt)  # the wall top profile gives the level plane
-    assert layout.capacity(hi, rim=b.rim_top) >= cp_.fill_cases  # steepest tilt with the extender
-    assert all(layout.capacity(t, rim=b.rim_top) >= layout.capacity(t) for t in (lo, cp_.tilt, hi))  # the extender never holds less
+    assert layout.capacity(hi, rim=b.rim_top, rim_r=b.rim_r) >= cp_.fill_cases  # steepest tilt with the extender
+    assert all(layout.capacity(t, rim=b.rim_top, rim_r=b.rim_r) >= layout.capacity(t) for t in (lo, cp_.tilt, hi))  # the extender never holds less
     assert layout.capacity(45, 70) < cp_.fill_cases < layout.capacity(40, 95)  # the estimate's scale: 70 mm was too low
 
 

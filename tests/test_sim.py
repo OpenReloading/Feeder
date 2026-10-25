@@ -5,13 +5,14 @@ import subprocess
 import sys
 
 import mujoco
+import numpy as np
 import pytest
 
 from feeder.config import CFG
 from feeder.parts import body as b
 from feeder.parts import case_plate, layout
 from sim import model as sm
-from sim.run import run, wilson
+from sim.run import START, run, wilson
 
 
 def test_model_has_the_drop_opening_and_the_plate_hulls():
@@ -58,17 +59,44 @@ def test_extender_raises_the_wall_by_its_height_on_the_low_side():
     assert all(sm.wall_top(y, True) >= sm.wall_top(y, False) for y in (-R, 0, R))
 
 
+def _inner_top(g):
+    """(radius, z) mm of the inner top corner of a box that leans in: the corner at local (-x, +z) half sizes."""
+    w, x, y, z = g.quat
+    rot = [[1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y)],
+           [2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x)],
+           [2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y)]]
+    corner = g.pos + np.array(rot) @ [-g.size[0], 0, g.size[2]]
+    return math.hypot(corner[0], corner[1]) / sm.MM, corner[2] / sm.MM
+
+
 def test_extender_arc_stands_on_the_low_side_only_in_the_sim_wall():
     step = 360 / CFG.sim.segments
+    R = layout.bowl_r()
     for extender in (False, True):
         m = mujoco.MjModel.from_xml_string(sm.mjcf(60.0, 1, extender=extender))
         for i in range(CFG.sim.segments):
-            g = m.geom(f"wall{i}")
-            assert (g.pos[2] + g.size[2]) / sm.MM == pytest.approx(b.rim_top((i + 0.5) * step, extender)), (extender, i)
+            ang = (i + 0.5) * step
+            leans = extender and b.rim_r(ang) < R
+            assert (f"lean{i}" in [m.geom(k).name for k in range(m.ngeom)]) == leans, (extender, i)
+            if leans:
+                r, zz = _inner_top(m.geom(f"lean{i}"))
+                assert r == pytest.approx(b.rim_r(ang), abs=0.1) and zz == pytest.approx(b.rim_top(ang), abs=0.1), i  # noqa: PT018
+            else:
+                g = m.geom(f"wall{i}")
+                assert (g.pos[2] + g.size[2]) / sm.MM == pytest.approx(b.rim_top(ang, extender)), (extender, i)
     m = mujoco.MjModel.from_xml_string(sm.mjcf(60.0, 1, extender=True))
-    low, high = m.geom(f"wall{round(270 / step - 0.5)}"), m.geom(f"wall{round(90 / step - 0.5)}")
-    assert (low.pos[2] + low.size[2]) / sm.MM == pytest.approx(layout.levels().wall_top + CFG.body.extender_h, abs=1)
-    assert (high.pos[2] + high.size[2]) / sm.MM == pytest.approx(b.wall_low(), abs=1)  # open high side
+    low, high = m.geom(f"lean{round(270 / step - 0.5)}"), m.geom(f"wall{round(90 / step - 0.5)}")
+    assert _inner_top(low)[1] == pytest.approx(b.rim_top(270), abs=0.1)
+    assert _inner_top(low)[0] < R - 10  # leans in
+    assert (high.pos[2] + high.size[2]) / sm.MM == pytest.approx(b.wall_top_at(R), abs=1)  # open high side
+
+
+def test_starts_dumped_and_tilt_change_run_and_keep_a_small_pile_in():
+    for start in START[1:]:
+        r = run(60.0, 6.0, n_cases=20, seconds=2.0, start=start)
+        assert r["start"] == start and r["lost"] == 0 and r["spilled"] == 0, start  # noqa: PT018
+    with pytest.raises(ValueError, match="start"):
+        run(45.0, 6.0, n_cases=1, seconds=0.1, start="poured")
 
 
 def test_case_option_sets_the_case_size_on_any_plate():

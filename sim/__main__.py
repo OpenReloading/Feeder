@@ -11,12 +11,13 @@ import itertools
 import json
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
+from typing import Any
 
 from sim.run import run
 
 OUT = Path(__file__).parent.parent / "build" / "sim"
-KEYS = ("plate", "case", "tilt", "rpm", "cases", "com_ratio", "mu", "seed")
-TEXT = ("plate", "case")
+KEYS = ("plate", "case", "tilt", "rpm", "cases", "com_ratio", "mu", "seed", "start")
+TEXT = ("plate", "case", "start")
 
 
 def _floats(s: str) -> list[float]:
@@ -37,10 +38,10 @@ def sweep(a) -> None:
     path = Path(a.out)
     path.parent.mkdir(parents=True, exist_ok=True)
     done = _done(path)
-    todo = [dict(plate=pl, case=a.case or None, tilt=t, rpm=r, n_cases=a.cases, revs=a.revs, com_ratio=c, mu=m, seed=s)  # noqa: C408
-            for pl, t, r, c, m, s in itertools.product(a.plate.split(","), _floats(a.tilt), _floats(a.rpm), _floats(a.com), _floats(a.mu),
-                                                       range(1, a.seeds + 1))
-            if (pl, a.case, t, r, a.cases, c, m, s) not in done]
+    todo: list[dict[str, Any]] = [dict(plate=pl, case=a.case or None, tilt=t, rpm=r, n_cases=a.cases, revs=a.revs, com_ratio=c, mu=m, seed=s, start=st)  # noqa: C408
+            for pl, t, r, c, m, s, st in itertools.product(a.plate.split(","), _floats(a.tilt), _floats(a.rpm), _floats(a.com), _floats(a.mu),
+                                                           range(1, a.seeds + 1), a.start.split(","))
+            if (pl, a.case, t, r, a.cases, c, m, s, st) not in done]
     print(f"{len(todo)} points to run, {len(done)} done", flush=True)
     # submit `run` itself: under forkserver and spawn a function defined in `__main__` is not importable in the worker
     with ProcessPoolExecutor(max_workers=min(a.workers, 6)) as ex:  # each worker holds a 250 case pile; the host has about 10 GB free
@@ -90,7 +91,7 @@ def calibrate(a) -> None:
     with open(a.measured) as f:  # noqa: PTH123
         measured = [{k: float(v) for k, v in r.items()} for r in csv.DictReader(f)]
     pairs = list(itertools.product(_floats(a.mu), _floats(a.com)))
-    jobs = [dict(tilt=m["tilt"], rpm=m["rpm"], n_cases=a.cases, revs=a.revs, mu=mu, com_ratio=c) for mu, c in pairs for m in measured]  # noqa: C408
+    jobs: list[dict[str, Any]] = [dict(tilt=m["tilt"], rpm=m["rpm"], n_cases=a.cases, revs=a.revs, mu=mu, com_ratio=c) for mu, c in pairs for m in measured]  # noqa: C408
     with ProcessPoolExecutor(max_workers=min(a.workers, 6)) as ex:
         sims = [f.result() for f in [ex.submit(run, **kw) for kw in jobs]]
     out = []
@@ -117,6 +118,7 @@ def main() -> None:
     r.add_argument("--tilt", type=float, default=45.0)
     r.add_argument("--rpm", type=float, default=1.5)
     r.add_argument("--seconds", type=float, help="plain run without warm-up (quick look)")
+    r.add_argument("--start", default="settled", help="settled, dumped, tilt_change or dumped_tilt_change (see sim/run.py)")
     for q in (r, sub.add_parser("sweep", help="grid into a CSV"), sub.add_parser("calibrate", help="fit mu and com_ratio")):
         q.add_argument("--cases", type=int, default=250)
         q.add_argument("--revs", type=float, default=3.0, help="counted plate turns after the warm-up")
@@ -130,6 +132,7 @@ def main() -> None:
     s.add_argument("--case", default="", help="case of calibers.table on every plate (default: each plate's envelope case)")
     s.add_argument("--rpm", default="0.75,1.5,3,6.5")
     s.add_argument("--seeds", type=int, default=1)
+    s.add_argument("--start", default="settled", help="starts (settled, dumped, tilt_change, dumped_tilt_change), comma separated")
     s.add_argument("--out", default=str(OUT / "sweep.csv"))
     sub.choices["calibrate"].add_argument("measured", help="CSV with tilt, rpm, cases_per_h, base_down_share")
     sub.choices["calibrate"].set_defaults(mu="0.2,0.3,0.4", com="0.33,0.36,0.39")
@@ -137,7 +140,7 @@ def main() -> None:
     pl.add_argument("csv", nargs="?", default=str(OUT / "sweep.csv"))
     a = p.parse_args()
     if a.cmd == "run":
-        print(json.dumps(run(a.tilt, a.rpm, a.cases, a.revs, seconds=a.seconds)))
+        print(json.dumps(run(a.tilt, a.rpm, a.cases, a.revs, seconds=a.seconds, start=a.start)))
     else:
         {"sweep": sweep, "plot": plot, "calibrate": calibrate}[a.cmd](a)
 

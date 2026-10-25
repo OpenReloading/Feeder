@@ -89,18 +89,19 @@ def tipping_moment(tilt: float, cfg: Config = CFG) -> float:
     return cp.drag_mass * G * math.cos(math.radians(tilt)) * arm / 1000
 
 
-def capacity(tilt: float, wall_h: float | None = None, cfg: Config = CFG, rim=None) -> int:
+def capacity(tilt: float, wall_h: float | None = None, cfg: Config = CFG, rim=None, rim_r=None) -> int:
     """Cases the bowl holds at `tilt` with brass level at the lowest the rim lets it stand: bowl volume under that level
     surface less the cap, over the case envelope at `case_plate.packing`. The rim is the body wall, `wall_h` above the
     plate top (default), level with its top on the low side; or `rim(ang)`, the rim top (z) at body-frame angle `ang` deg
-    (`body.rim_top`): the surface then stands as high as no rim point is below it."""
+    (`body.rim_top`), at radius `rim_r(ang)` (`body.rim_r`, default the bowl radius: a leaning extender edge sits
+    further in): the surface then stands as high as no rim point is below it."""
     z = levels(cfg)
     tan = math.tan(math.radians(tilt))
     if rim is None:
         wall_h = z.wall_top - z.plate_top if wall_h is None else wall_h
         level = z.plate_top + wall_h - bowl_r(cfg) * tan  # level surface height at y = 0
     else:
-        level = min(rim(a) + bowl_r(cfg) * math.sin(math.radians(a)) * tan for a in range(360))
+        level = min(rim(a) + (rim_r(a) if rim_r else bowl_r(cfg)) * math.sin(math.radians(a)) * tan for a in range(360))
     R, cal, n = bowl_r(cfg), caliber(cfg), 200
     cap_r, cap_h = cfg.cap.d / 2, sc.levels(cfg).cap_top - sc.levels(cfg).plate_bottom - plate_h(cfg)
     step, vol = 2 * R / n, 0.0

@@ -22,6 +22,7 @@ from feeder.parts import case_plate, layout
 from feeder.parts import slip_clutch as sc
 
 MM = 1e-3
+G = 9.81  # m/s2
 EXIT = b.EXIT_ANGLE
 CACHE = Path(__file__).parent.parent / "build" / "sim" / "cache"
 
@@ -79,6 +80,19 @@ def _box(name: str, ra: float, rb: float, za: float, zb: float, ang: float, half
             f'pos="{rm * math.cos(a) * MM} {rm * math.sin(a) * MM} {(za + zb) / 2 * MM}" euler="0 0 {ang}" rgba="{rgba}"/>')
 
 
+def _leaning_box(name: str, ang: float, half: float, r: float, z0: float, top: float, lean: float, thick: float, rgba: str) -> str:  # noqa: PLR0913
+    """Box on the inner face that starts at radius `r`, height `z0` and leans toward the axis by `lean` deg, up to the
+    height `top`, `thick` mm thick outward, `half` deg each way."""
+    lam, a = math.radians(lean), math.radians(ang)
+    length = (top - z0) / math.cos(lam)
+    rm, zm = r + thick / 2 * math.cos(lam) - length / 2 * math.sin(lam), z0 + thick / 2 * math.sin(lam) + length / 2 * math.cos(lam)
+    hw = (r + thick) * math.sin(math.radians(half)) + 0.2
+    x = (math.cos(lam) * math.cos(a), math.cos(lam) * math.sin(a), math.sin(lam))
+    y = (-math.sin(a), math.cos(a), 0.0)
+    return (f'<geom name="{name}" type="box" size="{thick / 2 * MM} {hw * MM} {length / 2 * MM}" '
+            f'pos="{rm * math.cos(a) * MM} {rm * math.sin(a) * MM} {zm * MM}" xyaxes="{" ".join(f"{v:.9f}" for v in (*x, *y))}" rgba="{rgba}"/>')
+
+
 def _off(ang: float) -> float:
     return abs((ang - EXIT + 180) % 360 - 180)
 
@@ -118,7 +132,11 @@ def mjcf(tilt: float, n_cases: int, cfg: Config = CFG, com_ratio: float | None =
         else:
             static.append(_box(f"gate{i}", r_band + cfg.track.gate_setback, R, z.deck_top, band_top, ang, step / 2, "0.66 0.55 0.88 1"))
         top = b.rim_top(ang, extender, cfg)
-        static.append(_box(f"wall{i}", R, R + cfg.body.wall_t, band_top, top, ang, step / 2, "0.7 0.7 0.7 0.15"))
+        if b.rim_r(ang, extender, cfg) < R:  # the extender leans in above the full wall top
+            static.append(_box(f"wall{i}", R, R + 2 * cfg.body.wall_t, band_top, z.wall_top, ang, step / 2, "0.7 0.7 0.7 0.15"))
+            static.append(_leaning_box(f"lean{i}", ang, step / 2, R, z.wall_top, top, cfg.body.extender_lean, 2 * cfg.body.wall_t, "0.7 0.7 0.7 0.15"))
+        else:
+            static.append(_box(f"wall{i}", R, R + cfg.body.wall_t, band_top, top, ang, step / 2, "0.7 0.7 0.7 0.15"))
 
     hulls = plate_hulls(cfg)
     assets = [f'<mesh name="h{i}" vertex="{" ".join(f"{c * MM:.6g}" for c in v.ravel())}" face="{" ".join(map(str, f.ravel()))}"/>'
@@ -139,7 +157,7 @@ def mjcf(tilt: float, n_cases: int, cfg: Config = CFG, com_ratio: float | None =
              f'<geom class="disc" type="cylinder" size="{(rc - 0.5) * MM} {disc * MM}" pos="0 0 {(L / 2 - disc) * MM}"/>'
              f'<geom class="disc" type="cylinder" size="{(rc - 0.5) * MM} {disc * MM}" pos="0 0 {(disc - L / 2) * MM}"/></body>'
              for i in range(n_cases)]
-    g, t = 9.81, math.radians(tilt)
+    g, t = G, math.radians(tilt)
     nl = "\n"
     return f"""<mujoco model="feeder">
 <option timestep="{s.timestep}" integrator="implicitfast" solver="PGS" iterations="{s.iterations}" tolerance="1e-5" gravity="0 {-g * math.sin(t)} {-g * math.cos(t)}"/>
