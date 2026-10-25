@@ -53,18 +53,14 @@ jobs:
           .venv/bin/pip install -r pylock.toml
           .venv/bin/pip install -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
-      # guide data in the background while the test files run on the runner's cores. The root site (the main build)
-      # also builds the configurator's print files, which mkdocs copies into the site. The preview leaves them out: the
-      # configurator page shows its notice there, and the files would take the develop job past its time limit
+      # guide data in the background while the test files run on the runner's cores. The configurator's print files are
+      # not built here: with the tests they need more CPU than one runner has in 30 minutes (job `configurator`)
       - env:
           TESTS: ${{ steps.scope.outputs.tests || 'tests' }}
           # the other ref of a push was tested by its own push
           TESTED: ${{ matrix.site == 'head' || github.ref == format('refs/heads/{0}', matrix.site) }}
-          RELEASE: ${{ matrix.site == 'main' }}
         run: |
-          args=(--no-test --guide)
-          if [ "$RELEASE" = true ]; then args+=(--configurator); fi
-          .venv/bin/python build.py "${args[@]}" > guide.log 2>&1 &
+          .venv/bin/python build.py --no-test --guide > guide.log 2>&1 &
           guide=$!
           tests=0
           if [ "$TESTED" = true ]; then
@@ -111,10 +107,38 @@ jobs:
       - env:
           RESULT: ${{ needs.site.result }}
         run: test "$RESULT" = success
+  # The print files of the configurator page (about 44 CPU minutes) for the root site, built on a runner of their own
+  # beside `site (main)`. The preview leaves them out: its configurator page shows its notice.
+  configurator:
+    if: github.event_name != 'pull_request' && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.ref == 'refs/heads/main' && github.sha || 'refs/heads/main' }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglu1-mesa fonts-dejavu-core
+      - run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -r pylock.toml
+          .venv/bin/pip install --no-deps -e .
+      - run: .venv/bin/python build.py --no-test --configurator
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: configurator
+          path: build/configurator
+          retention-days: 1
+          if-no-files-found: error
   # main at the root, the preview under develop/. Without the preview artifact the root deploys alone.
   assemble:
     if: github.event_name != 'pull_request' && contains(fromJSON('["refs/heads/main", "refs/heads/develop"]'), github.ref)
-    needs: site
+    needs: [site, configurator]
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions: {}
@@ -123,6 +147,11 @@ jobs:
         with:
           name: site-main
           path: public
+      # where hooks/configurator_files.py puts them in a local build
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: configurator
+          path: public/configurator/data
       - id: preview
         continue-on-error: true
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
