@@ -3,6 +3,8 @@
 import math
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
+from dataclasses import replace
 
 import mujoco
 import numpy as np
@@ -125,3 +127,38 @@ def test_cli_sweep_runs_a_point_in_worker_processes(tmp_path):
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)  # noqa: PLW1510
     assert r.returncode == 0, r.stderr[-800:]
     assert len(out.read_text().splitlines()) == 2  # header and the one point
+
+
+def _wiper_geom(cfg):
+    """(pos, half size) in mm of the wiper box in the model, None when it has none."""
+    g = ET.fromstring(sm.mjcf(45.0, 1, cfg)).find(".//geom[@name='wiper']")
+    return None if g is None else ([float(v) / sm.MM for v in g.get("pos", "").split()], [float(v) / sm.MM for v in g.get("size", "").split()])
+
+
+def test_wiper_box_is_in_the_model_only_when_set_and_matches_the_cad_arm():
+    assert _wiper_geom(CFG) is None
+    cfg = replace(CFG, track=replace(CFG.track, wiper_h=1.5))
+    geom = _wiper_geom(cfg)
+    assert geom is not None
+    pos, size = geom
+    assert pos[2] - size[2] == pytest.approx(b.wiper_z(cfg), abs=1e-3)
+    assert pos[2] + size[2] == pytest.approx(b.band_top(cfg), abs=1e-3)
+    c = (b.core(cfg) - b.core()).center()
+    assert math.hypot(pos[0] - c.X, pos[1] - c.Y) < 3  # the CAD arm's centre is the box's, less the band overlap
+
+
+def test_stacked_start_runs_and_counts_standing_and_doubles():
+    r = run(45.0, 6.0, n_cases=4, seconds=0.05, start="stacked")
+    assert r["start"] == "stacked" and r["lost"] == 0 and {"standing", "doubles"} <= r.keys()  # noqa: PT018
+
+
+def test_the_wiper_knocks_stacked_cases_off_before_the_exit():
+    """Flat plate (at a working tilt the upper case of a column slides off within 0.1 s, the model's cases having round
+    ends against each other): the columns over the pockets upstream of the exit reach it without the wiper and lose
+    their upper case under it."""
+    def go(h: float) -> dict:
+        cfg = replace(CFG, track=replace(CFG.track, wiper_h=h))
+        return run(0.0, 6.0, n_cases=40, seconds=4.0, cfg=cfg, start="stacked")
+    off, on = go(0.0), go(1.5)
+    assert off["standing"] > 0
+    assert on["standing"] < off["standing"]

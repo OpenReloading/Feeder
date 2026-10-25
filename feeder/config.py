@@ -252,6 +252,8 @@ class Track:
     gate_setback: float = 0.5  # gate face behind the band face, more than the 2 fits of band and gate against the wall
     gate_chamfer: float = 1.0  # 45 deg lead-in on the band ends at the gate, either rotation direction
     gate_lap: float = 6.0  # band ends lap behind the gate ends, so the gate cannot move inward
+    wiper_h: float = 0.0  # fixed wiper arm over the plate just before the exit: its underside this far above an upright case of the plate set (`case_plate.caliber`), so a case standing on a pocket or stacked above one is knocked back. 0: no wiper. Start value 1.5 (the longest plate set leaves `band_above` less this for the arm, at least `print.min_wall`), tune on hardware
+    wiper_reach: float = 15.0  # arm reach inward from the band face over the plate, at most `print.bridge` (printed without supports), about one pocket
 
 
 @dataclass(frozen=True)

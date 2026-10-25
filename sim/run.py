@@ -12,8 +12,16 @@ README tells users. A case goes back below the wall top; when the pile leaves no
 
 `start` is how the run begins: "settled" (the pile lies on the plate), "dumped" (it hits the plate at the speed of a fall
 from the wall top, as poured in from above), "tilt_change" (it settles at the far end of the mount's tilt range, then the
-tilt goes to `tilt` in `CHANGE_S`) or "dumped_tilt_change" (dumped at the far end, then the tilt change). A spill counts
+tilt goes to `tilt` in `CHANGE_S`) or "dumped_tilt_change" (dumped at the far end, then the tilt change). "stacked" puts two
+cases on top of each other over every pocket in the `STACK_ARC` before the exit and the rest of the pile above them. At a working
+tilt the upper case slides off within about 0.1 s (round ends on each other), so it is a start for the wiper on a flat plate. A spill counts
 from the first step, the pile settling and the tilt change included.
+
+`standing` and `doubles` are counted for every case that enters the exit zone (the angles of the gate lap on either
+side of the exit, the opening's radii) once per pass, from the first counted step (from the first step in a "stacked"
+start, as the stacks are gone after the warm-up): `standing` is a case upright on the plate
+top instead of in a pocket (its centre more than half a plate height above the pocket level), `doubles` a case
+with another case stacked directly on it. Both reach the opening together with the case under them.
 """
 
 import math
@@ -24,12 +32,14 @@ import mujoco
 import numpy as np
 
 from feeder.config import CFG, Config
-from feeder.parts import layout
+from feeder.parts import body as bd
+from feeder.parts import case_plate, layout
 from feeder.parts import slip_clutch as sc
 from sim.model import EXIT, MM, G, mjcf, opening, wall_top
 
-START = ("settled", "dumped", "tilt_change", "dumped_tilt_change")
+START = ("settled", "dumped", "tilt_change", "dumped_tilt_change", "stacked")
 CHANGE_S = 1.0  # s the tilt takes to go from the far end of the range to `tilt`: the link is swapped or the body pushed, not run along the rod
+STACK_ARC = 60.0  # deg upstream of the exit that start with a two case column over every pocket ("stacked" start)
 CHUNK = 0.05  # s between checks
 DEEP = 1.5  # mm, contact overlap counted in `deep_share`: the pocket clearance per side
 
@@ -81,12 +91,23 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
         data.qvel[va[i]:va[i] + 6] = 0
         data.qvel[va[i]:va[i] + 3] = [0, -v * math.sin(math.radians(tilt_from)), -v * math.cos(math.radians(tilt_from))]  # along gravity
 
+    if start == "stacked":  # a two case column over every pocket in the STACK_ARC upstream of the exit, upright base down
+        rc, L = layout.pocket_circle_r(cfg), layout.caliber(cfg).case_length if not case else cfg.calibers.table[case].case_length
+        angs = [a for a in case_plate.pocket_angles(cfg) if 0 < (EXIT - a) * cfg.case_plate.direction % 360 <= STACK_ARC][:n_cases // 2]
+        n_col = len(angs)
+        for k, ang in enumerate(angs):
+            for j in range(2):
+                i = 2 * k + j
+                data.qpos[qa[i]:qa[i] + 7] = [rc * math.cos(math.radians(ang)) * MM, rc * math.sin(math.radians(ang)) * MM,
+                                              (z.deck_top + L / 2 + 0.3 + j * (L + 0.5)) * MM, 1, 0, 0, 0]
+    else:
+        n_col = 0
     cell = 22.0  # a case fits a 22 mm cell in any orientation (diagonal 21.6), so the start lattice has no overlap
     grid = np.arange(-R, R + 1, cell)
     spots = [(x, y) for x in grid for y in grid if cfg.cap.d / 2 + cell / 2 < math.hypot(x, y) < layout.plate_r(cfg) - cell / 2]
-    for i in range(n_cases):
-        x, y = spots[i % len(spots)]
-        place(i, x, y, pt + 40 + cell * (i // len(spots)), dump_v)
+    for i in range(2 * n_col, n_cases):
+        x, y = spots[(i - 2 * n_col) % len(spots)]
+        place(i, x, y, pt + 40 + 30 * (start == "stacked") + cell * ((i - 2 * n_col) // len(spots)), dump_v)
 
     def respawn(i: int) -> bool:
         """On top of the pile on the low side, above the highest case near the spot so nothing overlaps, and below
@@ -113,7 +134,26 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
         model.opt.gravity[:] = [0, -G * math.sin(math.radians(deg)), -G * math.cos(math.radians(deg))]
 
     tilt_to(tilt_from)
-    m = dict(exits=0, base_down=0, mouth_down=0, sideways=0, lost=0, spilled=0, overfill=0)  # noqa: C408
+    m = dict(exits=0, base_down=0, mouth_down=0, sideways=0, lost=0, spilled=0, overfill=0, standing=0, doubles=0)  # noqa: C408
+    zone_half, rim_d = bd._gap_angles(cfg)[1], layout.caliber(cfg).rim_d if not case else cfg.calibers.table[case].rim_d
+    length = layout.caliber(cfg).case_length if not case else cfg.calibers.table[case].case_length
+
+    def exit_flags(qp: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Per case in the exit zone: (standing, double), `qp` the cases' x, y, z (m) and quaternion."""
+        p = qp[:, :3] / MM
+        r = np.hypot(p[:, 0], p[:, 1])
+        ang = np.degrees(np.arctan2(p[:, 1], p[:, 0]))
+        zone = (np.abs((ang - EXIT + 180) % 360 - 180) <= zone_half) & (r0 - 1 <= r) & (r <= r1 + 1) & (p[:, 2] > z.deck_top)
+        upright = 1 - 2 * (qp[:, 4] ** 2 + qp[:, 5] ** 2) > 0.8  # case axis within about 37 deg of the plate axis
+        standing = zone & upright & (p[:, 2] > z.deck_top + length / 2 + layout.plate_h(cfg) / 2)
+        double = np.zeros(n_cases, bool)
+        for i in np.flatnonzero(zone):
+            near = np.hypot(p[:, 0] - p[i, 0], p[:, 1] - p[i, 1]) < rim_d
+            double[i] = bool(np.any(near & (p[:, 2] - p[i, 2] > 0.7 * length)))
+        return standing, double
+
+    was_standing, was_double = exit_flags(data.qpos[qa[:, None] + np.arange(7)])  # what starts in the zone is not counted
+
     torque, speed, deepest, deepest_pair, lost_at, spilled_at, deep_checks = [], [], 0.0, "", [], [], 0
     turn0 = None
     above = data.qpos[qa[:, None] + np.arange(3)] / MM
@@ -137,6 +177,11 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
                     deepest, deepest_pair = -c.dist / MM, f"{model.geom(c.geom1).name or model.body(model.geom_bodyid[c.geom1]).name}/{model.geom(c.geom2).name or model.body(model.geom_bodyid[c.geom2]).name}"
         p = data.qpos[qa[:, None] + np.arange(3)] / MM
         r = np.hypot(p[:, 0], p[:, 1])
+        if counting or start == "stacked":
+            standing, double = exit_flags(data.qpos[qa[:, None] + np.arange(7)])
+            m["standing"] += int(np.sum(standing & ~was_standing))
+            m["doubles"] += int(np.sum(double & ~was_double))
+            was_standing, was_double = standing, double
         out = (p[:, 2] < z.deck_top) | (r > R + cfg.body.wall_t + 2)
         for i in np.flatnonzero(out):
             ang = math.degrees(math.atan2(above[i, 1], above[i, 0]))

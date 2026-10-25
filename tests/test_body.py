@@ -13,7 +13,7 @@ from feeder.config import CFG, GENERIC_8MM_FLANGE
 from feeder.lib import fasteners
 from feeder.lib.features import d_bore  # noqa: F401
 from feeder.parts import body as b
-from feeder.parts import case_plate as cp  # noqa: F401
+from feeder.parts import case_plate as cp
 from feeder.parts import layout
 from feeder.parts import slip_clutch as sc
 
@@ -432,3 +432,51 @@ def test_generic_hub_keeps_the_outlet_where_it_is_under_the_body():
     assert layout.levels(cfg).deck_top > layout.levels(CFG).deck_top  # the taller hub raises the deck
     assert b.outlet(cfg)[0].Z == pytest.approx(b.outlet(CFG)[0].Z)  # noqa: SIM300
     assert b.with_hub(CFG, CFG.metal_hub) == CFG  # the default hub changes nothing
+
+
+def _with_wiper(h: float = 1.5, **kw):
+    return replace(CFG, track=replace(CFG.track, wiper_h=h, **kw))
+
+
+def test_wiper_is_off_by_default_and_adds_one_arm_to_the_core():
+    assert T.wiper_h == 0
+    cfg = _with_wiper()
+    base, on = b.core(), b.core(cfg)
+    assert len(on.solids()) == 1  # joined to the band
+    arm = (on - base).volume
+    t = cfg.track
+    z0, z1 = b.wiper_z(cfg), b.band_top(cfg)
+    assert 0 < arm <= (t.wiper_reach + t.band_t / 2) * t.band_t * (z1 - z0)  # less than the box: the band half it overlaps is already there
+    assert arm > t.wiper_reach * t.band_t * (z1 - z0) * 0.9
+    assert (base - on).volume < 1e-3  # nothing cut away
+
+
+def test_wiper_clears_an_upright_case_of_every_plate_set_and_the_plate():
+    for ps in layout.plate_sets(_with_wiper()):
+        z = layout.levels(ps)
+        assert b.wiper_z(ps) == pytest.approx(z.deck_top + layout.caliber(ps).case_length + ps.track.wiper_h)
+        assert b.wiper_z(ps) - z.deck_top > layout.caliber(ps).case_length  # a case that stands upright passes under
+        assert b.wiper_z(ps) - z.plate_top > layout.caliber(ps).case_length - layout.plate_h(ps)  # one upright in its pocket
+        assert b.band_top(ps) - b.wiper_z(ps) >= MW
+    cfg = _with_wiper()
+    arm = b.core(cfg) - b.core()
+    assert (arm & cp.plate(cfg)).volume < 1e-3  # the plate turns under it
+    assert (arm & b.track_gate(cfg)).volume < 1e-3 and (arm & b.exit_insert(cfg)).volume < 1e-3  # noqa: PT018
+    inner = layout.band_inner_r(cfg) - cfg.track.wiper_reach
+    assert min(v.Z for v in arm.vertices()) >= b.wiper_z(cfg) - 1e-6
+    assert min(math.hypot(v.X, v.Y) for v in arm.vertices()) >= inner - 1e-6
+
+
+def test_wiper_is_upstream_of_the_exit_in_either_direction():
+    for d in (1, -1):
+        cfg = replace(_with_wiper(), case_plate=replace(CFG.case_plate, direction=d))
+        c = (b.core(cfg) - b.core(replace(cfg, track=replace(cfg.track, wiper_h=0)))).center()
+        off = (math.degrees(math.atan2(c.Y, c.X)) - b.EXIT_ANGLE) * d  # plate turns toward +off for d = 1
+        assert -30 < off < -b._gap_angles(cfg)[1]
+
+
+def test_wiper_reach_and_thickness_are_checked():
+    with pytest.raises(ValueError, match="bridge"):
+        b.core(_with_wiper(wiper_reach=CFG.print.bridge + 1))
+    with pytest.raises(ValueError, match="min_wall"):
+        b.core(_with_wiper(h=100.0))

@@ -10,9 +10,11 @@ import csv
 import itertools
 import json
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
+from feeder.config import CFG
 from sim.run import run
 
 OUT = Path(__file__).parent.parent / "build" / "sim"
@@ -118,7 +120,8 @@ def main() -> None:
     r.add_argument("--tilt", type=float, default=45.0)
     r.add_argument("--rpm", type=float, default=1.5)
     r.add_argument("--seconds", type=float, help="plain run without warm-up (quick look)")
-    r.add_argument("--start", default="settled", help="settled, dumped, tilt_change or dumped_tilt_change (see sim/run.py)")
+    r.add_argument("--start", default="settled", help="settled, dumped, tilt_change, dumped_tilt_change or stacked (see sim/run.py)")
+    r.add_argument("--wiper-h", type=float, default=0.0, help="fixed wiper arm over the plate before the exit, its underside this far above an upright case (track.wiper_h, 0: none)")
     for q in (r, sub.add_parser("sweep", help="grid into a CSV"), sub.add_parser("calibrate", help="fit mu and com_ratio")):
         q.add_argument("--cases", type=int, default=250)
         q.add_argument("--revs", type=float, default=3.0, help="counted plate turns after the warm-up")
@@ -132,7 +135,7 @@ def main() -> None:
     s.add_argument("--case", default="", help="case of calibers.table on every plate (default: each plate's envelope case)")
     s.add_argument("--rpm", default="0.75,1.5,3,6.5")
     s.add_argument("--seeds", type=int, default=1)
-    s.add_argument("--start", default="settled", help="starts (settled, dumped, tilt_change, dumped_tilt_change), comma separated")
+    s.add_argument("--start", default="settled", help="starts (settled, dumped, tilt_change, dumped_tilt_change, stacked), comma separated")
     s.add_argument("--out", default=str(OUT / "sweep.csv"))
     sub.choices["calibrate"].add_argument("measured", help="CSV with tilt, rpm, cases_per_h, base_down_share")
     sub.choices["calibrate"].set_defaults(mu="0.2,0.3,0.4", com="0.33,0.36,0.39")
@@ -140,7 +143,8 @@ def main() -> None:
     pl.add_argument("csv", nargs="?", default=str(OUT / "sweep.csv"))
     a = p.parse_args()
     if a.cmd == "run":
-        print(json.dumps(run(a.tilt, a.rpm, a.cases, a.revs, seconds=a.seconds, start=a.start)))
+        cfg = replace(CFG, track=replace(CFG.track, wiper_h=a.wiper_h))
+        print(json.dumps(run(a.tilt, a.rpm, a.cases, a.revs, cfg=cfg, seconds=a.seconds, start=a.start)))
     else:
         {"sweep": sweep, "plot": plot, "calibrate": calibrate}[a.cmd](a)
 
