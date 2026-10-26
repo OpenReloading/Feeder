@@ -31,7 +31,7 @@ Default: split body, Pololu 2693 metal hub, 7 A PWM speed controller, no microco
 | `electronics_box` or `electronics_box_left` | 1, right or left of the tube as the user sees it |
 | `electronics_lid` | 1 |
 
-Other calibers: plate, exit insert, drop tube and its chain parts come per plate set from `build/plates/<set>/` (README, Plate sets). The rest stays.
+Other calibers: plate, exit insert, drop tube and its chain parts come per plate set from `build/plates/<set>/` (`docs/design.md`, Plate sets). The rest stays.
 
 ## Drive and clutch
 
