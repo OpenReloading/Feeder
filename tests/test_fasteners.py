@@ -69,7 +69,7 @@ def test_generic_hub_takes_two_screws_with_nuts_under_the_flange():
     cfg = replace(CFG, metal_hub=GENERIC_8MM_FLANGE)
     hub = _counts(cfg, "slip_clutch_carrier_metal_hub")
     default = _counts(CFG, "slip_clutch_carrier_metal_hub")
-    assert hub["ISO 4762 M3 x 12"] == 2 and hub["ISO 4032 M3 nut"] == 2  # README: 2 x ISO 4762 M3 x 12 with ISO 4032 M3 nuts  # noqa: PT018
+    assert hub["ISO 4762 M3 x 12"] == 2 and hub["ISO 4032 M3 nut"] == 2  # docs/design.md: 2 x ISO 4762 M3 x 12 with ISO 4032 M3 nuts  # noqa: PT018
     assert default["ISO 4762 M3 x 10"] == 3 and "ISO 4032 M3 nut" not in default  # tapped holes  # noqa: PT018
     assert {k: v for k, v in hub.items() if not k.startswith(("ISO 4762 M3", "ISO 4032"))} == {k: v for k, v in default.items() if not k.startswith("ISO 4762 M3")}
 

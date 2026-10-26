@@ -6,7 +6,7 @@ from pathlib import Path
 import build
 from feeder import guide
 
-README = Path(__file__).parent.parent / "README.md"
+DESIGN = Path(__file__).parent.parent / "docs" / "design.md"
 
 
 def test_bom_checklist_has_every_part_once_with_unique_ids():
@@ -23,7 +23,7 @@ def test_bom_checklist_has_every_part_once_with_unique_ids():
 
 
 def test_tilt_section_markers_for_the_guide_page():
-    text = README.read_text(encoding="utf-8")
+    text = DESIGN.read_text(encoding="utf-8")
     assert text.index("--8<-- [start:tilt]") < text.index("Tilt choice.") < text.index("--8<-- [end:tilt]")
 
 
