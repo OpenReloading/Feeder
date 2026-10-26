@@ -1,5 +1,0 @@
-# The development preview (develop under /develop/ of the released site), built by .github/workflows/pages.yml.
-# Everything else is mkdocs.yml; hooks/preview.py reads `extra.preview`.
-INHERIT: mkdocs.yml
-extra:
-  preview: true

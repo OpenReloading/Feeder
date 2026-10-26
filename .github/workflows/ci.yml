@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [develop]
+    branches: [main]
   pull_request:
 permissions: {}
 concurrency:
@@ -9,9 +9,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   workflows:
-    # The promotion pull request (develop -> main) repeats what the push to develop already checked. Matching the head
-    # repository too keeps a fork branch named develop from skipping the checks.
-    if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -29,8 +26,6 @@ jobs:
   # ruff and basedpyright from the hash-locked requirements-dev.txt. Rules are in pyproject.toml, the basedpyright
   # baseline in .basedpyright/baseline.json, the ruff baseline as noqa comments.
   lint-python:
-    # skipped on the promotion pull request, see `workflows`
-    if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -50,8 +45,7 @@ jobs:
       - run: .venv/bin/ruff check .
       - run: .venv/bin/basedpyright --pythonpath .venv/bin/python
   dependency-review:
-    # also skipped on the promotion pull request, see `workflows`
-    if: ${{ github.event_name == 'pull_request' && !(github.head_ref == 'develop' && github.base_ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    if: github.event_name == 'pull_request'
     permissions:
       contents: read
     runs-on: ubuntu-latest
