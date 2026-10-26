@@ -4,4 +4,4 @@ title: Tilt and capacity
 
 # Tilt and capacity
 
---8<-- "README.md:tilt"
+--8<-- "docs/design.md:tilt"

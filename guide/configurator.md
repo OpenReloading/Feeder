@@ -12,7 +12,7 @@ Pick the options of your feeder. The page lists the parts to print and the parts
 
 <div id="configurator-unavailable" class="admonition info" hidden>
 <p class="admonition-title">No print files on this page</p>
-<p>The print files are built when a release is published, so this copy of the site has none. You can still read the options. Build the files yourself with <code>build.py --configurator</code> (see the README).</p>
+<p>The print files are built when a release is published, so this copy of the site has none. You can still read the options. Build the files yourself with <code>build.py --configurator</code> (see docs/development.md in the repository).</p>
 </div>
 
 <form id="configurator-form" autocomplete="off">

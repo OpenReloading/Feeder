@@ -7,7 +7,7 @@ below the deck anywhere else is lost (a tunnelling fault of the model) and one p
 is counted during the warm-up turns.
 
 The wall extender is fitted when the fill is above the wall's capacity at the tilt (`layout.capacity`), as the
-README tells users. A case goes back below the wall top; when the pile leaves no room there it counts as
+`docs/design.md` tells users. A case goes back below the wall top; when the pile leaves no room there it counts as
 `overfill` and is dropped on top anyway.
 
 `start` is how the run begins: "settled" (the pile lies on the plate), "dumped" (it hits the plate at the speed of a fall
