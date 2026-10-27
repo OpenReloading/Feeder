@@ -1,5 +1,7 @@
 # Feeder
 
+[![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/hUCSjDYNaa)
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="guide/assets/feeder-dark.png">
   <img src="guide/assets/feeder-light.png" alt="Render of the assembled feeder on its tilt mount" width="480">
