@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "feeder-metric"
-version = "0.1.0"
+version = "0.2.0"
 description = "Parametric brass and bullet collator for reloading, built in build123d"
 license = "MIT"
 requires-python = ">=3.11,<3.15"
