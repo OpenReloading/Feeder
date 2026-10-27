@@ -89,3 +89,7 @@ Other starts, 1.5 rpm, cases spilled of 250 (cases per hour). Spills count from 
 | `dumped_tilt_change`: dumped at the far end, then the tilt change | 0 (1,500) | not run | 0 (570) |
 
 `dumped` with the extender fitted at 40 and 45 deg: 0 spilled (1,530 and 1,560). The dump starts the pile on the plate with the fall speed along gravity, it does not pour a stream over the rim, so a pour from beyond the high wall is not simulated.
+
+## Pull requests and releases
+
+Pull request titles follow Conventional Commits (`feat:`, `fix:`, `docs:`, ...), because the squash merge uses the title as the commit message and the check `conventional` verifies it. release-please keeps one release pull request open from those commits, and every Monday at 05:00 UTC it is merged automatically once its checks pass, which tags the version and creates the GitHub Release. Put the label `hold` on the release pull request to skip a week, or run the workflow `Release weekly` by hand to release on another day.

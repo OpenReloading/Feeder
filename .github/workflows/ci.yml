@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
 permissions: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
@@ -44,14 +45,15 @@ jobs:
       - run: .venv/bin/pip install -r pylock.toml
       - run: .venv/bin/ruff check .
       - run: .venv/bin/basedpyright --pythonpath .venv/bin/python
+  # compares a pull request with its base: only a pull request runs the step, the job still reports on merge_group
   dependency-review:
-    if: github.event_name == 'pull_request'
     permissions:
       contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+      - if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
           fail-on-severity: high
           fail-on-scopes: runtime, development, unknown
