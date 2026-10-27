@@ -25,7 +25,8 @@ header p { margin: 0; max-width: 68ch; color: var(--muted) }
 .specs { display: flex; flex-wrap: wrap; gap: 8px 22px; font-family: var(--f-mono); font-size: 13px; font-variant-numeric: tabular-nums }
 .specs b { font-weight: 500; color: var(--fg) }
 .specs span { color: var(--muted) }
-.stage { position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 6px; height: clamp(360px, 62vh, 620px); overflow: hidden; touch-action: none }
+.stage { position: relative; background: var(--stage); border: 1px solid var(--line); border-radius: 6px; height: clamp(360px, 62vh, 620px); overflow: hidden; touch-action: pan-y }
+.stage.grab { touch-action: none }
 .stage canvas { display: block; width: 100%; height: 100% }
 .hint { position: absolute; left: 12px; bottom: 10px; font-family: var(--f-mono); font-size: 11px; color: var(--muted); pointer-events: none }
 .status { position: absolute; left: 12px; top: 10px; right: 12px; font-family: var(--f-display); font-weight: 500; font-size: 17px; pointer-events: none }
@@ -59,7 +60,7 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
 /* Embedded in the guide: the page scrolls, not the frame, and the site's heading is the only one */
 .embedded { overflow: hidden }
 .embedded h1 { display: none }
-.embedded .stage { height: clamp(360px, 70vw, 560px); touch-action: pan-y }
+.embedded .stage { height: clamp(360px, 70vw, 560px) }
 [hidden] { display: none !important }
 </style>
 
@@ -74,7 +75,7 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
   <div class="stage" id="stage">
     <div class="loading" id="loading">Loading models…</div>
     <div class="status" id="status"></div>
-    <div class="hint">Drag to orbit · scroll or pinch to zoom · right-drag to pan</div>
+    <div class="hint" id="hint"></div>
   </div>
 
   <section class="card" id="card" hidden aria-live="polite">
@@ -101,6 +102,7 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
         <button id="assemble">Assembled</button>
         <button id="cut" aria-pressed="false">Section cut</button>
         <button id="tilt" aria-pressed="true">Tilted</button>
+        <button id="grab" aria-pressed="false">Orbit mode</button>
       </div>
       <div>
         <label class="k" for="time">Assembly progress</label>
@@ -213,11 +215,27 @@ ol.steps li small { display: block; margin-top: 3px; font-family: var(--f-mono);
   camera.position.copy(camDir).multiplyScalar(900);
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  if (embedded) {  // one finger scrolls the page, two fingers orbit and zoom
-    controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
-    for (const type of ["touchstart", "touchmove"]) stage.addEventListener(type, e => { if (e.touches.length < 2) e.stopPropagation(); }, { capture: true });
-    if (matchMedia("(pointer: coarse)").matches) document.querySelector(".hint").textContent = "One finger scrolls · two fingers orbit and zoom";
-  }
+  // The page keeps its scroll: a plain wheel and one finger pass through to it unless the viewer is held (click on the stage, or the Orbit mode button).
+  // Pinch zooms and two fingers pan (OrbitControls' default); Ctrl or Cmd with the wheel zooms.
+  let held = false;
+  const hint = document.getElementById("hint"), grab = document.getElementById("grab");
+  const coarse = matchMedia("(pointer: coarse)").matches;
+  const setHeld = on => {
+    held = on;
+    stage.classList.toggle("grab", on);
+    grab.setAttribute("aria-pressed", on);
+    hint.textContent = coarse
+      ? (on ? "One finger orbits · pinch zooms · two fingers pan" : "One finger scrolls the page · pinch zooms · two fingers pan")
+      : (on ? "Drag to orbit · scroll to zoom · right-drag to pan" : "Drag to orbit · Ctrl or Cmd + scroll to zoom · right-drag to pan");
+  };
+  setHeld(false);
+  grab.onclick = () => setHeld(!held);
+  stage.addEventListener("pointerdown", e => { if (e.pointerType !== "touch") setHeld(true); });
+  document.addEventListener("pointerdown", e => { if (!stage.contains(e.target) && e.target !== grab) setHeld(false); });
+  addEventListener("keydown", e => { if (e.key === "Escape") setHeld(false); });
+  addEventListener("blur", () => setHeld(false));
+  stage.addEventListener("wheel", e => { if (!held && !e.ctrlKey && !e.metaKey) e.stopPropagation(); }, { capture: true });
+  for (const type of ["touchstart", "touchmove"]) stage.addEventListener(type, e => { if (!held && e.touches.length < 2) e.stopPropagation(); }, { capture: true });
   scene.add(new THREE.HemisphereLight(0xffffff, 0x445055, 0.75));
   const key = new THREE.DirectionalLight(0xffffff, 0.75); key.position.set(120, 400, 280); scene.add(key);
   const rim = new THREE.DirectionalLight(0xffffff, 0.3); rim.position.set(-300, 120, -250); scene.add(rim);
