@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  merge_group:
   workflow_dispatch:
 permissions: {}
 concurrency:
@@ -10,7 +11,7 @@ concurrency:
   # a newer push or pull request commit cancels the older build, but a run on main (the deployment) is never cancelled
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 # `build` is the check the ruleset requires. A push or dispatch on main also builds the configurator print files,
-# `assemble` merges them into the site and `deploy` publishes it. A pull request only builds.
+# `assemble` merges them into the site and `deploy` publishes it. A pull request and a merge group only build.
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -66,7 +67,7 @@ jobs:
           size=$(du -sm site | cut -f1)
           echo "site: $size MB"
           test "$size" -lt 800
-      - if: github.event_name != 'pull_request'
+      - if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: site
