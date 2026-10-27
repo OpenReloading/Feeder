@@ -1,5 +1,5 @@
 site_name: Feeder 9mm case feeder
-site_url: https://openreloading.github.io/Feeder/
+site_url: !ENV [SITE_URL, 'https://openreloading.github.io/Feeder/']
 site_description: Parametric brass collator for reloading. Build guide, BOM and assembly steps generated from feeder/config.py.
 repo_url: https://github.com/OpenReloading/Feeder
 repo_name: OpenReloading/Feeder
