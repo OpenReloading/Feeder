@@ -36,9 +36,16 @@ back=$(git symbolic-ref --short -q HEAD || git rev-parse HEAD)
 trap 'git switch --quiet "$back" 2>/dev/null || git switch --quiet --detach "$back"' EXIT
 git switch --quiet --detach "$tag"
 rm -rf build/configurator
-# the container's .venv was installed from the lock it was created with, not necessarily the tag's
-devcontainer exec --docker-path podman --workspace-folder . .venv/bin/pip install --quiet -r pylock.toml
-devcontainer exec --docker-path podman --workspace-folder . .venv/bin/python build.py --no-test --configurator
+# a fresh environment from the tag's lock, thrown away afterwards: the container's .venv comes from the lock it was created with
+devcontainer exec --docker-path podman --workspace-folder . sh -c '
+  set -e
+  env=$(mktemp -d)
+  trap "rm -rf $env" EXIT
+  python -m venv "$env"
+  "$env/bin/pip" install --quiet -r pylock.toml
+  "$env/bin/pip" install --quiet --no-deps -e .
+  "$env/bin/python" build.py --no-test --configurator
+'
 archive=$(mktemp -d)/configurator-$tag.tar.gz
 tar -czf "$archive" -C build/configurator .
 gh release upload "$tag" "$archive" --clobber
