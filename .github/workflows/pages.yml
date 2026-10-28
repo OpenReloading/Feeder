@@ -149,6 +149,7 @@ jobs:
       contents: read
     outputs:
       found: ${{ steps.asset.outputs.found }}
+      asset: ${{ steps.asset.outputs.id }}
     steps:
       # a release without the asset (the script has not run yet) leaves the page on its notice; the run after the
       # upload (gh workflow run pages.yml) publishes the files
@@ -159,9 +160,13 @@ jobs:
           TAG: ${{ needs.latest.outputs.tag }}
         run: |
           mkdir data
-          if gh release download "$TAG" --repo "$REPO" --pattern "configurator-$TAG.tar.gz" --output - | tar -xz -C data \
-            && test -f data/manifest.json; then
+          id=$(gh release view "$TAG" --repo "$REPO" --json assets --jq ".assets[] | select(.name == \"configurator-$TAG.tar.gz\") | .id")
+          if [ -n "$id" ]; then
+            # an asset that cannot be downloaded or unpacked fails the job
+            gh release download "$TAG" --repo "$REPO" --pattern "configurator-$TAG.tar.gz" --output - | tar -xz -C data
+            test -f data/manifest.json
             echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "id=$id" >> "$GITHUB_OUTPUT"
           else
             echo "::notice::release $TAG has no configurator-$TAG.tar.gz; the configurator page shows its notice"
           fi
@@ -181,6 +186,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions: {}
+    # the configurator asset this assembly contains, for the freshness check of deploy
+    outputs:
+      asset: ${{ needs.stable-configurator.outputs.asset }}
     steps:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -222,7 +230,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      # a run that is behind (a push or a release came in while it built) leaves the deployment to the newer run, so an
+      # a run that is behind (a push, a release or the configurator upload came in while it built) leaves the deployment to the newer run, so an
       # older assembly never replaces a newer one
       - id: fresh
         env:
@@ -230,14 +238,19 @@ jobs:
           REPO: ${{ github.repository }}
           BUILT_MAIN: ${{ needs.build.outputs.sha }}
           BUILT_TAG: ${{ needs.latest.outputs.tag }}
+          BUILT_ASSET: ${{ needs.assemble.outputs.asset }}
         run: |
           main=$(gh api "repos/$REPO/commits/main" --jq .sha)
           tag=$(gh release list --repo "$REPO" --limit 1000 --exclude-drafts --exclude-pre-releases --json tagName,isLatest \
             --jq '.[] | select(.isLatest) | .tagName')
-          if [ "$main" = "$BUILT_MAIN" ] && [ "$tag" = "$BUILT_TAG" ]; then
+          asset=
+          if [ -n "$tag" ]; then
+            asset=$(gh release view "$tag" --repo "$REPO" --json assets --jq ".assets[] | select(.name == \"configurator-$tag.tar.gz\") | .id")
+          fi
+          if [ "$main" = "$BUILT_MAIN" ] && [ "$tag" = "$BUILT_TAG" ] && [ "$asset" = "$BUILT_ASSET" ]; then
             echo "current=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice::main or the latest release moved during this run; the newer run deploys"
+            echo "::notice::main, the latest release or its configurator asset changed during this run; the newer run deploys"
           fi
       - if: steps.fresh.outputs.current == 'true'
         id: deployment
