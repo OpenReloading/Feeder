@@ -92,4 +92,4 @@ Other starts, 1.5 rpm, cases spilled of 250 (cases per hour). Spills count from 
 
 ## Pull requests and releases
 
-Pull request titles follow Conventional Commits (`feat:`, `fix:`, `docs:`, ...), because the squash merge uses the title as the commit message and the check `conventional` verifies it. release-please keeps one release pull request open from those commits, and every Monday at 05:00 UTC it is merged automatically once its checks pass, which tags the version and creates the GitHub Release. Put the label `hold` on the release pull request to skip a week, or run the workflow `Release weekly` by hand to release on another day.
+Pull request titles follow Conventional Commits (`feat:`, `fix:`, `docs:`, ...), because the squash merge uses the title as the commit message and the check `conventional` verifies it. release-please keeps one release pull request open from those commits, and every Monday at 14:00 Europe/Berlin it is merged automatically once its checks pass, which tags the version and creates the GitHub Release. Put the label `hold` on the release pull request to skip a week, or run the workflow `Release weekly` by hand to release on another day.
