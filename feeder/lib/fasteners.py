@@ -5,7 +5,7 @@ Tools are solids to subtract. Each starts at z = 0 and runs into -z, so place th
 
 from functools import cache  # cached screws are shared: callers read them, never move or change them  # noqa: I001
 
-from bd_warehouse.fastener import CounterSunkScrew, HexHeadScrew, HexNut, PlainWasher, SetScrew, SocketHeadCapScrew
+from bd_warehouse.fastener import CounterSunkScrew, HexHeadScrew, HexNut, PlainWasher, SocketHeadCapScrew
 from build123d import Align, Cone, Cylinder, Part, RegularPolygon, extrude, Pos
 
 from feeder.config import CFG
@@ -25,12 +25,6 @@ def _thread(size: str) -> str:
 def hex_screw(size: str, length: float) -> HexHeadScrew:
     """ISO 4017 hex head screw, full thread."""
     return HexHeadScrew(size=_thread(size), length=length, fastener_type="iso4017", simple=True)
-
-
-@cache
-def set_screw(size: str, length: float) -> SetScrew:
-    """ISO 4026 set screw, flat point."""
-    return SetScrew(size=_thread(size), length=length, fastener_type="iso4026", simple=True)
 
 
 @cache
