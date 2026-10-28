@@ -2,3 +2,26 @@
 mkdocs==1.6.1
 mkdocs-material==9.7.7
 mkdocs-buildguide @ git+https://github.com/OpenReloading/BuildGuide@6677e7ce72628981f141584719befd514adff38c#subdirectory=packages/mkdocs
+# Their dependencies that pylock.toml does not already install (docs/development.md "Build guide site")
+attrs==26.1.0
+babel==2.18.0
+backrefs==8.1
+click==8.5.0
+colorama==0.4.6
+ghp-import==2.1.0
+Jinja2==3.1.6
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+Markdown==3.11.2
+MarkupSafe==3.0.4
+mergedeep==1.3.4
+mkdocs-get-deps==0.2.2
+mkdocs-material-extensions==1.3.1
+paginate==0.5.7
+pathspec==1.1.1
+pymdown-extensions==12.3
+PyYAML==6.0.3
+pyyaml_env_tag==1.1
+referencing==0.37.0
+rpds-py==2026.9.1
+watchdog==6.0.0
