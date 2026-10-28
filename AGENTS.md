@@ -23,7 +23,7 @@ Parametric brass and bullet collator for reloading, built in build123d with metr
 
 ## Branches
 
-- `main` is the default and only long-lived branch; it is the Pages source. Branch from it and open pull requests against it (squash merge, linear history).
+- `main` is the default and only long-lived branch. Pages: the root is the latest release built from its tag, `/next/` is `main`. Branch from it and open pull requests against it (squash merge, linear history).
 
 ## Agent skills
 

@@ -4,25 +4,52 @@ on:
     branches: [main]
   pull_request:
   merge_group:
+  release:
+    types: [published]
   workflow_dispatch:
 permissions: {}
 concurrency:
   group: pages-${{ github.ref }}
-  # a newer push or pull request commit cancels the older build, but a run on main (the deployment) is never cancelled
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-# `build` is the check the ruleset requires. A push or dispatch on main also builds the configurator print files,
-# `assemble` merges them into the site and `deploy` publishes it. A pull request and a merge group only build.
+  # a newer pull request commit cancels the older build, but a run that deploys (main, a release) is never cancelled
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+# `build` is the check the ruleset requires. One deployment replaces the whole site, so a push, a release or a dispatch
+# builds both editions: `main` goes to /next/ (`build`, `configurator`) and the latest release, built from its tag, to
+# the root (`stable-site`, `stable-configurator`). `assemble` merges them and `deploy` publishes. Until a release exists
+# the root redirects to /next/. A pull request and a merge group only build.
 jobs:
+  latest:
+    if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.latest.outputs.tag }}
+    steps:
+      - id: latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          tag=$(gh release list --repo "$REPO" --limit 1000 --exclude-drafts --exclude-pre-releases --json tagName,isLatest \
+            --jq '.[] | select(.isLatest) | .tagName')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
       contents: read
+    outputs:
+      sha: ${{ steps.rev.outputs.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          # a release run starts on the tag and a dispatch can name one; this edition is main
+          ref: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' && 'main' || '' }}
           persist-credentials: false
           fetch-depth: 2
+      - id: rev
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       # a pull request that changes only docs runs the README test, not the geometry tests (HEAD^1 is the base)
       - id: scope
         if: github.event_name == 'pull_request'
@@ -61,6 +88,7 @@ jobs:
       # the header's repository facts come from the GitHub API at build time
       - env:
           GITHUB_TOKEN: ${{ github.token }}
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/next/
         run: .venv/bin/mkdocs build --strict
       # the Pages artifact limit is 1 GB
       - run: |
@@ -77,15 +105,20 @@ jobs:
   # The print files of the configurator page (about 44 CPU minutes, 32 minutes measured on a runner) on their own runner
   # beside `build`. Pull requests leave them out: their configurator page shows its notice.
   configurator:
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: read
+    outputs:
+      sha: ${{ steps.rev.outputs.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' && 'main' || '' }}
           persist-credentials: false
+      - id: rev
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: '3.14'
@@ -101,9 +134,76 @@ jobs:
           path: build/configurator
           retention-days: 1
           if-no-files-found: error
+  # The latest release, built from its own tag with the build files of that tag (guide and configurator on separate runners
+  # as for main). No release yet: both jobs are skipped.
+  stable-site:
+    needs: latest
+    if: needs.latest.outputs.tag != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.latest.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglu1-mesa fonts-dejavu-core
+      - run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -r pylock.toml
+          .venv/bin/pip install -r requirements-guide.txt
+          .venv/bin/pip install --no-deps -e .
+      - run: .venv/bin/python build.py --no-test --guide
+      - env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: .venv/bin/mkdocs build --strict
+      - run: |
+          size=$(du -sm site | cut -f1)
+          echo "site: $size MB"
+          test "$size" -lt 800
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site-stable
+          path: site
+          retention-days: 1
+          if-no-files-found: error
+  stable-configurator:
+    needs: latest
+    if: needs.latest.outputs.tag != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.latest.outputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglu1-mesa fonts-dejavu-core
+      - run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -r pylock.toml
+          .venv/bin/pip install --no-deps -e .
+      - run: .venv/bin/python build.py --no-test --configurator
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: configurator-stable
+          path: build/configurator
+          retention-days: 1
+          if-no-files-found: error
   assemble:
-    if: github.ref == 'refs/heads/main'
-    needs: [build, configurator]
+    needs: [latest, build, configurator, stable-site, stable-configurator]
+    # the stable jobs are skipped while there is no release
+    if: >-
+      ${{ !cancelled() && needs.latest.result == 'success' && needs.build.result == 'success' && needs.configurator.result == 'success'
+      && (needs.latest.outputs.tag == '' || (needs.stable-site.result == 'success' && needs.stable-configurator.result == 'success')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions: {}
@@ -111,12 +211,24 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: site
-          path: public
+          path: public/next
       # where hooks/configurator_files.py puts them in a local build
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: configurator
+          path: public/next/configurator/data
+      - if: needs.latest.outputs.tag != ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: site-stable
+          path: public
+      - if: needs.latest.outputs.tag != ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: configurator-stable
           path: public/configurator/data
+      - if: needs.latest.outputs.tag == ''
+        run: echo '<!doctype html><meta http-equiv="refresh" content="0; url=next/">' > public/index.html
       # the Pages artifact limit is 1 GB
       - run: |
           size=$(du -sm public | cut -f1)
@@ -126,8 +238,7 @@ jobs:
         with:
           path: public
   deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: assemble
+    needs: [latest, build, configurator, assemble]
     # deployments of different runs queue instead of overlapping
     concurrency:
       group: pages-deploy
@@ -135,11 +246,31 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
+      contents: read
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
+      # a run that is behind (a push or a release came in while it built) leaves the deployment to the newer run, so an
+      # older assembly never replaces a newer one
+      - id: fresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BUILT_MAIN: ${{ needs.build.outputs.sha }}
+          BUILT_CONFIGURATOR: ${{ needs.configurator.outputs.sha }}
+          BUILT_TAG: ${{ needs.latest.outputs.tag }}
+        run: |
+          main=$(gh api "repos/$REPO/commits/main" --jq .sha)
+          tag=$(gh release list --repo "$REPO" --limit 1000 --exclude-drafts --exclude-pre-releases --json tagName,isLatest \
+            --jq '.[] | select(.isLatest) | .tagName')
+          if [ "$main" = "$BUILT_MAIN" ] && [ "$main" = "$BUILT_CONFIGURATOR" ] && [ "$tag" = "$BUILT_TAG" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::main or the latest release moved during this run, or the two main builds differ; the newer run deploys"
+          fi
+      - if: steps.fresh.outputs.current == 'true'
+        id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

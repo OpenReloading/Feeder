@@ -27,7 +27,7 @@ The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenRe
 .venv/bin/mkdocs build --strict               # site/
 ```
 
-`.github/workflows/pages.yml` runs the tests and builds the guide on every pull request (job `build`, a required check), and on every push to `main` also builds the configurator print files, merges them into the site and deploys it to GitHub Pages. If `build` or the `configurator` job fails, nothing is deployed. The `github-pages` environment must allow deployments from `main`.
+`.github/workflows/pages.yml` runs the tests and builds the guide on every pull request (job `build`, a required check). A push to `main`, a published release and a manual run build both editions into one site and deploy it to GitHub Pages: `main` goes to `/next/` (jobs `build`, `configurator`) and the latest release, built from its tag, to the root (jobs `stable-site`, `stable-configurator`). Until the first release exists the root redirects to `/next/`. If a build job fails, nothing is deployed. The `github-pages` environment must allow deployments from `main` and from the release tags (`v*`). `site_url` in `mkdocs.yml` reads `SITE_URL`.
 
 The configurator page (`guide/configurator.md`, `guide/javascripts/configurator.js`) picks the options, lists the parts and the BOM for the choice and zips the print files in the browser. It reads `build/configurator/` through `hooks/configurator_files.py`: run `build.py --no-test --configurator` before `mkdocs build` to see it locally. A push to `main` builds those files in CI in the job `configurator` (its own runner, so the tests do not compete with it); other builds and local builds without them show a notice instead.
 
