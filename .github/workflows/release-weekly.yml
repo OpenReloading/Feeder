@@ -1,8 +1,6 @@
 name: Release weekly
+# Merges the release pull request on dispatch only (release-configurator.sh); there is no schedule.
 on:
-  schedule:
-    - cron: '0 14 * * 1' # Monday 14:00
-      timezone: Europe/Berlin
   workflow_dispatch:
 permissions: {}
 jobs:

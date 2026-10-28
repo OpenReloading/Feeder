@@ -13,9 +13,10 @@ concurrency:
   # a newer pull request commit cancels the older build, but a run that deploys (main, a release) is never cancelled
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 # `build` is the check the ruleset requires. One deployment replaces the whole site, so a push, a release or a dispatch
-# builds both editions: `main` goes to /next/ (`build`, `configurator`) and the latest release, built from its tag, to
-# the root (`stable-site`, `stable-configurator`). `assemble` merges them and `deploy` publishes. Until a release exists
-# the root redirects to /next/. A pull request and a merge group only build.
+# builds both editions: `main` goes to /next/ (`build`, without the configurator's print files, which its page announces
+# as built on release) and the latest release, built from its tag, to the root (`stable-site`, `stable-configurator`).
+# `assemble` merges them and `deploy` publishes. Until a release exists the root redirects to /next/. A pull request and
+# a merge group only build.
 jobs:
   latest:
     if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
@@ -69,8 +70,7 @@ jobs:
           .venv/bin/pip install -r pylock.toml
           .venv/bin/pip install -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
-      # guide data in the background while the test files run on the runner's cores. The configurator's print files are
-      # not built here: with the tests they need more CPU than one runner has in 30 minutes (job `configurator`)
+      # guide data in the background while the test files run on the runner's cores
       - env:
           TESTS: ${{ steps.scope.outputs.tests || 'tests' }}
         run: |
@@ -102,40 +102,9 @@ jobs:
           path: site
           retention-days: 1
           if-no-files-found: error
-  # The print files of the configurator page (about 44 CPU minutes, 32 minutes measured on a runner) on their own runner
-  # beside `build`. Pull requests leave them out: their configurator page shows its notice.
-  configurator:
-    if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    permissions:
-      contents: read
-    outputs:
-      sha: ${{ steps.rev.outputs.sha }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' && 'main' || '' }}
-          persist-credentials: false
-      - id: rev
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: '3.14'
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglu1-mesa fonts-dejavu-core
-      - run: |
-          python3 -m venv .venv
-          .venv/bin/pip install -r pylock.toml
-          .venv/bin/pip install --no-deps -e .
-      - run: .venv/bin/python build.py --no-test --configurator
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: configurator
-          path: build/configurator
-          retention-days: 1
-          if-no-files-found: error
-  # The latest release, built from its own tag with the build files of that tag (guide and configurator on separate runners
-  # as for main). No release yet: both jobs are skipped.
+  # The latest release, built from its own tag: the guide here, the configurator's print files (about 44 CPU minutes) on
+  # the maintainer's machine with release-configurator.sh, which attaches them to the release as configurator-<tag>.tar.gz.
+  # No release yet: both jobs are skipped.
   stable-site:
     needs: latest
     if: needs.latest.outputs.tag != ''
@@ -175,34 +144,39 @@ jobs:
     needs: latest
     if: needs.latest.outputs.tag != ''
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 5
     permissions:
       contents: read
+    outputs:
+      found: ${{ steps.asset.outputs.found }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ needs.latest.outputs.tag }}
-          persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: '3.14'
-      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglu1-mesa fonts-dejavu-core
-      - run: |
-          python3 -m venv .venv
-          .venv/bin/pip install -r pylock.toml
-          .venv/bin/pip install --no-deps -e .
-      - run: .venv/bin/python build.py --no-test --configurator
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      # a release without the asset (the script has not run yet) leaves the page on its notice; the run after the
+      # upload (gh workflow run pages.yml) publishes the files
+      - id: asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ needs.latest.outputs.tag }}
+        run: |
+          mkdir data
+          if gh release download "$TAG" --repo "$REPO" --pattern "configurator-$TAG.tar.gz" --output - | tar -xz -C data \
+            && test -f data/manifest.json; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::release $TAG has no configurator-$TAG.tar.gz; the configurator page shows its notice"
+          fi
+      - if: steps.asset.outputs.found == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: configurator-stable
-          path: build/configurator
+          path: data
           retention-days: 1
           if-no-files-found: error
   assemble:
-    needs: [latest, build, configurator, stable-site, stable-configurator]
+    needs: [latest, build, stable-site, stable-configurator]
     # the stable jobs are skipped while there is no release
     if: >-
-      ${{ !cancelled() && needs.latest.result == 'success' && needs.build.result == 'success' && needs.configurator.result == 'success'
+      ${{ !cancelled() && needs.latest.result == 'success' && needs.build.result == 'success'
       && (needs.latest.outputs.tag == '' || (needs.stable-site.result == 'success' && needs.stable-configurator.result == 'success')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -212,17 +186,12 @@ jobs:
         with:
           name: site
           path: public/next
-      # where hooks/configurator_files.py puts them in a local build
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: configurator
-          path: public/next/configurator/data
       - if: needs.latest.outputs.tag != ''
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: site-stable
           path: public
-      - if: needs.latest.outputs.tag != ''
+      - if: needs.stable-configurator.outputs.found == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: configurator-stable
@@ -238,7 +207,7 @@ jobs:
         with:
           path: public
   deploy:
-    needs: [latest, build, configurator, assemble]
+    needs: [latest, build, assemble]
     # deployments of different runs queue instead of overlapping
     concurrency:
       group: pages-deploy
@@ -260,16 +229,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           BUILT_MAIN: ${{ needs.build.outputs.sha }}
-          BUILT_CONFIGURATOR: ${{ needs.configurator.outputs.sha }}
           BUILT_TAG: ${{ needs.latest.outputs.tag }}
         run: |
           main=$(gh api "repos/$REPO/commits/main" --jq .sha)
           tag=$(gh release list --repo "$REPO" --limit 1000 --exclude-drafts --exclude-pre-releases --json tagName,isLatest \
             --jq '.[] | select(.isLatest) | .tagName')
-          if [ "$main" = "$BUILT_MAIN" ] && [ "$main" = "$BUILT_CONFIGURATOR" ] && [ "$tag" = "$BUILT_TAG" ]; then
+          if [ "$main" = "$BUILT_MAIN" ] && [ "$tag" = "$BUILT_TAG" ]; then
             echo "current=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice::main or the latest release moved during this run, or the two main builds differ; the newer run deploys"
+            echo "::notice::main or the latest release moved during this run; the newer run deploys"
           fi
       - if: steps.fresh.outputs.current == 'true'
         id: deployment
