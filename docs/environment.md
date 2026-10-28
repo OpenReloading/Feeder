@@ -16,6 +16,7 @@ Python packages (top-level pins in `pyproject.toml`, full lock in `pylock.toml`)
 | cadquery-ocp-novtk | 8.0.1.1.0 |
 | trimesh | 5.1.1 |
 | manifold3d | 3.5.4 |
+| networkx | 3.7 |
 | shapely | 2.2.0 |
 | rtree | 1.4.1 |
 | numpy | 2.5.4 |
@@ -23,7 +24,10 @@ Python packages (top-level pins in `pyproject.toml`, full lock in `pylock.toml`)
 | pandas | 3.0.6 |
 | matplotlib | 3.11.2 |
 | pytest | 9.1.1 |
+| pytest-xdist | 3.8.0 |
 | pytest-cov | 7.1.0 |
 | ocp_vscode (optional viewer) | 4.2.0 |
+| mujoco (simulation) | 3.16.0 |
+| coacd (simulation) | 1.0.14 |
 
 Git is used on the host.
