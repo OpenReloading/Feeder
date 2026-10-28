@@ -27,6 +27,7 @@ All dimensions and options are in `feeder/config.py` (frozen dataclasses, instan
 | `drop_tube` | bayonet (lug size, twist, notch lift), M18x1 sensor (length, thread), lock nut and window sizes, hose sizes and barb |
 | `drop_chain` | optional chain parts (`parts`), spacer length, bend angle and leg length of the angled piece |
 | `mount` | tilt mount: body inserts, tube (round or square, 25 mm), tilt range 40 to 60 deg, M10 pivot, tilt link pins and rod, fixed link angles, body mass and load limits, unmodelled mass |
+| `sim` | simulation of brass on the plate: case mass, centre of mass height, solver step and iterations, plate collider thresholds, warm-up turns, box segments round the bowl ([Simulation](development.md#simulation)) |
 
 ## Parts
 
