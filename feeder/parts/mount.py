@@ -62,10 +62,6 @@ def pivot_point(cfg: Config = CFG) -> tuple[float, float]:
     return cfg.mount.pivot_y, layout.levels(cfg).bottom - cfg.mount.pivot_depth
 
 
-def underside_to_pivot(cfg: Config = CFG) -> float:
-    return cfg.mount.pivot_depth - cfg.mount.yoke_t
-
-
 def tilt_span(cfg: Config = CFG) -> tuple[float, float]:
     """Tilt range plus margin, deg."""
     lo, hi = cfg.mount.tilt_range
