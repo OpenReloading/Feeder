@@ -24,7 +24,7 @@ from build123d import Box, Circle, Cylinder, Location, Part, Plane, Polygon, Pos
 from feeder.config import CFG, Config
 from feeder.lib.cache import per_config
 from feeder.lib import fasteners
-from feeder.lib.features import teardrop
+from feeder.lib.features import hex_corner_r, teardrop
 from feeder.parts import body as body_part
 from feeder.parts import layout
 from feeder.parts import slip_clutch as sc
@@ -114,7 +114,7 @@ def clamp_bolt_length(cfg: Config = CFG) -> float:
 
 
 def _nut_corner_r(size: str, cfg: Config) -> float:
-    return (fasteners.nut_data(size)["s"] + 2 * cfg.fasteners.head_fit) / math.sqrt(3)
+    return hex_corner_r(fasteners.nut_data(size)["s"] + 2 * cfg.fasteners.head_fit)
 
 
 # statics ---------------------------------------------------------------------------------------------------
@@ -168,7 +168,7 @@ def link_pin_d(cfg: Config = CFG) -> float:
 def link_w(cfg: Config = CFG) -> float:
     """Link and rod end width: the rod end window takes a turning nut, with two walls each side."""
     n = fasteners.nut_data(cfg.mount.link_rod_size)
-    return 2 * n["s"] / math.sqrt(3) + 2 * cfg.print.fit + 4 * cfg.print.min_wall
+    return 2 * hex_corner_r(n["s"]) + 2 * cfg.print.fit + 4 * cfg.print.min_wall
 
 
 def link_gap(cfg: Config = CFG) -> float:
