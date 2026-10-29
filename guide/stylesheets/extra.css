@@ -139,14 +139,16 @@
   .md-content__inner {
     margin-inline: 0;
   }
+}
 
-  /* Body text 16 px on a phone (0.8rem at the theme's 125% root): tables, notes, search results */
+/* Body text 16 px up to 820 px wide (0.8rem at the theme's 125% root): tables, notes, search results */
+@media screen and (max-width: 820px) {
   .md-typeset :is(table:not([class]), .admonition, details),
   .md-search-result :is(.md-typeset, h1, h2) {
     font-size: 0.8rem;
   }
 
-  /* Phone browsers zoom into fields under 16 px */
+  /* Phone and tablet browsers zoom into fields under 16 px */
   .md-search__input {
     font-size: 0.8rem;
   }
@@ -416,7 +418,7 @@ html .md-footer-meta.md-typeset .md-social__link {
   font-size: 16px;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 820px) {
   [data-md-color-scheme] .ag-guide :is(.ag-head p, .ag-bom-table td, .ag-bom-table strong, .ag-step-note) {
     font-size: 16px;
   }
@@ -429,7 +431,7 @@ html .md-footer-meta.md-typeset .md-social__link {
   overflow-wrap: break-word;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 820px) {
   .md-typeset code {
     font-size: max(0.85em, 0.8rem);
   }
