@@ -716,11 +716,11 @@ html .md-footer-meta.md-typeset .md-social__link {
   color: var(--muted);
 }
 
-/* 15 drawing units: at least 12 px while the names are shown (drawing 384 px wide or more, see the container query) */
+/* 17 drawing units: at least 12 px while the names are shown (drawing 352 px wide or more, see the container query) */
 .feeder-hero__labels text {
   fill: var(--muted);
   stroke: none;
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .md-typeset .feeder-hero__figure figcaption {
@@ -740,8 +740,8 @@ html .md-footer-meta.md-typeset .md-social__link {
   }
 }
 
-/* Narrow drawing (a phone, or the two-column hero just above 900 px): the drawing keeps the numbers, the names move into a two-column list */
-@container (max-width: 383px) {
+/* Narrow drawing (a phone): the drawing keeps the numbers, the names move into a two-column list */
+@container (max-width: 351px) {
   .feeder-hero__name {
     display: none;
   }
