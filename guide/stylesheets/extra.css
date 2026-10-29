@@ -1,32 +1,32 @@
-/* One green token set, shared with the AutoLever docs. Light is the default scheme, dark is Material's slate. */
+/* Warm palette: brass accent, slate for labels and control borders. Light is the default scheme, dark is Material's slate. */
 :root,
 [data-md-color-scheme="default"] {
-  --page: #ffffff;
-  --surface: #f6f7f4;
-  --surface-alt: #eef2e8;
-  --ink: #24342e;
-  --muted: #5e6c5f;
-  --accent: #21634c;
-  --accent-hover: #174735;
-  --header-bg: #21634c;
-  --header-ink: #ffffff;
-  --line: #dce3dc;
-  --control-line: #74857a;
+  --page: #f2eee6;
+  --surface: #e8e2d6;
+  --line: #c9c0af; /* about 1.5:1: separators only, never text or a control border */
+  --ink: #1e1b17;
+  --muted: #524b40;
+  --accent: #7c5a10;
+  --accent-ink: #fff8e6;
+  --accent-2: #3b5368;
+  --header-bg: var(--ink);
+  --header-ink: var(--page);
   --warn: #c2410c;
+  --md-text-font: system-ui;
+  --md-code-font: ui-monospace;
 }
 
 [data-md-color-scheme="slate"] {
-  --page: #171c19;
-  --surface: #202722;
-  --surface-alt: #2b352e;
-  --ink: #e4ebe6;
-  --muted: #a9b6ac;
-  --accent: #72d6aa;
-  --accent-hover: #9be6c4;
-  --header-bg: #1b2622;
-  --header-ink: #e4ebe6;
-  --line: #3b4740;
-  --control-line: #6f8076;
+  --page: #1a1815;
+  --surface: #23201c;
+  --line: #3b362f;
+  --ink: #eee8dc;
+  --muted: #b5ada0;
+  --accent: #d2a64a;
+  --accent-ink: #1a1815;
+  --accent-2: #93a9bf;
+  --header-bg: var(--surface);
+  --header-ink: var(--ink);
   --warn: #f59e0b;
 }
 
@@ -35,21 +35,21 @@
   --md-default-bg-color: var(--page);
   --md-default-fg-color: var(--ink);
   --md-default-fg-color--light: var(--muted);
-  --md-default-fg-color--lighter: var(--control-line);
+  --md-default-fg-color--lighter: var(--accent-2);
   --md-default-fg-color--lightest: var(--line);
   --md-primary-fg-color: var(--header-bg);
   --md-primary-fg-color--light: var(--header-bg);
   --md-primary-fg-color--dark: var(--header-bg);
   --md-primary-bg-color: var(--header-ink);
   --md-primary-bg-color--light: var(--header-ink);
-  --md-accent-fg-color: var(--accent-hover);
+  --md-accent-fg-color: var(--accent);
   --md-accent-fg-color--transparent: transparent;
-  --md-accent-bg-color: var(--header-ink);
+  --md-accent-bg-color: var(--accent-ink);
   --md-typeset-color: var(--ink);
   --md-typeset-a-color: var(--accent);
   --md-typeset-table-color: var(--line);
   --md-typeset-table-color--light: var(--surface);
-  --md-code-bg-color: var(--surface-alt);
+  --md-code-bg-color: var(--surface);
   --md-code-fg-color: var(--ink);
   --md-footer-bg-color: var(--header-bg);
   --md-footer-bg-color--dark: var(--header-bg);
@@ -59,25 +59,133 @@
   --md-admonition-bg-color: var(--page);
 }
 
-.md-typeset a:focus-visible,
-.md-nav__link:focus-visible,
-.md-header a:focus-visible,
-.md-footer a:focus-visible,
-button:focus-visible {
+/* Type: system sans body, system mono labels, table headers and numbers */
+.md-typeset {
+  line-height: 1.6;
+}
+
+.md-typeset :is(h1, h2, h3, h4) {
+  font-weight: 500;
+}
+
+.md-typeset h1 {
+  letter-spacing: -0.015em;
+}
+
+.md-typeset table:not([class]) th,
+#configurator-form label,
+.md-typeset table[data-stack] td:not(:first-child)::before {
+  font-family: var(--md-code-font-family);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.md-typeset table:not([class]) th {
+  background: var(--surface);
+}
+
+.md-typeset a:hover {
+  text-decoration: underline;
+}
+
+/* Focus on every link, button and control; the header and footer are dark, so their outline is the header ink */
+:is(a, button, select, input, summary, label, [tabindex]):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.md-header a:focus-visible,
-.md-footer a:focus-visible {
+:is(.md-header, .md-footer) :is(a, button, label, input):focus-visible {
   outline-color: var(--header-ink);
+}
+
+/* The search input sits on the light search panel, so it keeps the accent outline */
+.md-header .md-search__input:focus-visible {
+  outline-color: var(--accent);
 }
 
 [data-md-color-scheme="slate"] .md-header {
   border-bottom: 1px solid var(--line);
 }
 
-/* Warnings take the warn token, not Material's orange */
+/* Interactive elements are at least 44 px high */
+.md-nav__link,
+.md-header__button,
+.md-footer__link,
+.md-source {
+  min-height: 44px;
+  align-items: center;
+}
+
+/* Buttons: brass primary, slate-bordered secondary */
+.md-typeset .md-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  border: 1px solid var(--accent-2);
+  background: transparent;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.md-typeset .md-button:is(:hover, :focus-visible) {
+  border-color: var(--accent);
+  background: transparent;
+  color: var(--accent);
+}
+
+.md-typeset .md-button--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.md-typeset .md-button--primary:is(:hover, :focus-visible) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--page);
+}
+
+.md-typeset .md-button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+#configurator-form select {
+  min-height: 44px;
+  margin-top: 0.3em;
+  padding: 0 0.6em;
+  border: 1px solid var(--accent-2);
+  border-radius: 0.2rem;
+  background: var(--page);
+  color: var(--ink);
+  font: inherit;
+  font-family: var(--md-text-font-family);
+  font-size: 0.8rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+#configurator-form select:hover {
+  border-color: var(--accent);
+}
+
+/* Admonitions in slate; warnings take the warn token, not Material's orange */
+.md-typeset :is(.admonition, details) {
+  border-color: var(--accent-2);
+}
+
+.md-typeset :is(.admonition, details) > :is(.admonition-title, summary) {
+  background-color: color-mix(in srgb, var(--accent-2) 12%, var(--page));
+}
+
+.md-typeset :is(.admonition, details) > :is(.admonition-title, summary)::before {
+  background-color: var(--accent-2);
+}
+
 .md-typeset .admonition.warning,
 .md-typeset details.warning {
   border-color: var(--warn);
@@ -93,15 +201,75 @@ button:focus-visible {
   background-color: var(--warn);
 }
 
-/* BuildGuide components sit on the page colour */
+/* BuildGuide components take the same tokens (their own defaults are green) */
 [data-md-color-scheme] .ag-guide {
   --ag-page: var(--page);
+  --ag-surface: var(--page);
+  --ag-surface-head: var(--surface);
+  --ag-surface-soft: var(--surface);
+  --ag-surface-chip: var(--surface);
   --ag-ink: var(--ink);
+  --ag-text: var(--ink);
   --ag-muted: var(--muted);
   --ag-accent: var(--accent);
+  --ag-primary: var(--accent);
+  --ag-primary-hover: var(--ink);
+  --ag-done: var(--accent);
+  --ag-focus: var(--accent);
+  --ag-glow: var(--accent);
   --ag-line: var(--line);
-  --ag-control-line: var(--control-line);
-  --ag-surface-head: var(--surface-alt);
+  --ag-divider: var(--line);
+  --ag-detail-line: var(--line);
+  --ag-control-line: var(--accent-2);
+  --ag-control-ink: var(--ink);
+  --ag-control-hover: var(--surface);
+  --ag-placeholder-line: var(--muted);
+  --ag-swatch-line: var(--muted);
+  --ag-arrow: var(--muted);
+  --ag-row-arrow: var(--muted);
+  --ag-row-hover: var(--surface);
+  --ag-bom-hover: var(--surface);
+  --ag-row-selected: color-mix(in srgb, var(--accent) 12%, var(--page));
+  --ag-row-selected-bar: var(--accent);
+  --ag-step-current-bg: color-mix(in srgb, var(--accent) 12%, var(--page));
+  --ag-step-current-line: var(--accent);
+}
+
+[data-md-color-scheme] .ag-guide .ag-primary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--accent-ink);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+[data-md-color-scheme] .ag-guide .ag-primary:hover {
+  color: var(--page);
+}
+
+[data-md-color-scheme] .ag-guide :is(
+  .ag-search input,
+  .ag-board-toolbar select,
+  .ag-board-controls button,
+  .ag-quiet,
+  .ag-have,
+  .ag-verify,
+  .ag-wire-row > button
+) {
+  min-height: 44px;
+}
+
+[data-md-color-scheme] .ag-guide .ag-bom-table th {
+  font-family: var(--md-code-font-family);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+[data-md-color-scheme] .ag-guide .ag-qty {
+  font-family: var(--md-code-font-family);
 }
 
 /* Inline code wraps at the <wbr> after a dot, never inside a name */
@@ -154,9 +322,6 @@ button:focus-visible {
   .md-typeset table[data-stack] td:not(:first-child)::before {
     content: attr(data-label);
     display: block;
-    color: var(--muted);
-    font-size: 1em;
-    font-weight: 600;
   }
 }
 
