@@ -113,6 +113,8 @@ def main() -> int:
         print(f"built {data.relative_to(ROOT)}")
         (ROOT / "guide" / "generated" / "steps.md").write_text(guide.steps_markdown(CFG), encoding="utf-8")
         (ROOT / "guide" / "generated" / "steps-detail.md").write_text(guide.steps_detail_markdown(CFG), encoding="utf-8")
+        (ROOT / "guide" / "generated" / "assembly-eyebrow.md").write_text(guide.assembly_eyebrow_markdown(CFG), encoding="utf-8")
+        (ROOT / "guide" / "generated" / "fasteners.md").write_text(guide.fasteners_markdown(CFG), encoding="utf-8")
         (ROOT / "guide" / "generated" / "assembly-row.md").write_text(guide.assembly_row_markdown(CFG), encoding="utf-8")
         (ROOT / "guide" / "generated" / "plate-groups.md").write_text(guide.plate_groups_markdown(), encoding="utf-8")
     if args.no_test:

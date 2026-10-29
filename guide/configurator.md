@@ -4,7 +4,7 @@ hide:
   - toc
 ---
 
-<div class="configurator-intro" markdown>
+<div class="page-intro" markdown>
 <p class="feeder-hero__eyebrow">Print files</p>
 
 # Configurator

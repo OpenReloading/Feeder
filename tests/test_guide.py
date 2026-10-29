@@ -4,7 +4,8 @@ import re
 from pathlib import Path
 
 import build
-from feeder import guide
+from feeder import assembly, guide
+from feeder.config import CFG
 
 DESIGN = Path(__file__).parent.parent / "docs" / "design.md"
 
@@ -37,6 +38,24 @@ def test_steps_detail_markdown_gives_every_step_its_text():
     titles, details = guide.steps_markdown().splitlines(), guide.steps_detail_markdown().splitlines()
     assert len(details) == len(titles)
     assert all(d.startswith(t.replace(". ", ". **", 1) + "**: ") and len(d) > len(t) + 6 for t, d in zip(titles, details, strict=True))
+
+
+def test_assembly_eyebrow_counts_the_steps():
+    assert f">{len(guide.steps_markdown().splitlines())} steps<" in guide.assembly_eyebrow_markdown()
+
+
+def test_fasteners_table_has_every_fastener_of_the_assembly_in_its_step():
+    rows = [line.strip("|").split(" | ") for line in guide.fasteners_markdown().splitlines()[2:]]
+    titles = guide.steps_markdown().splitlines()
+    counts: dict = {}
+    for f in assembly.fasteners_in_body(CFG):
+        counts[f.name] = counts.get(f.name, 0) + len(f.at)
+    got: dict = {}
+    for _, hardware, step in rows:
+        n, name = hardware.split(" x ", 1)
+        got[name] = got.get(name, 0) + int(n)
+        assert step.strip() in titles
+    assert got == counts
 
 
 def test_wiring_board_ends_exist_and_the_motor_runs_through_the_relay():

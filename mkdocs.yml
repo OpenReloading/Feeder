@@ -10,6 +10,8 @@ exclude_docs: |   # snippets of index.md and assembly.md
   generated/steps-detail.md
   generated/assembly-row.md
   generated/plate-groups.md
+  generated/assembly-eyebrow.md
+  generated/fasteners.md
 
 theme:
   name: material
