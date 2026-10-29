@@ -594,6 +594,90 @@ html .md-footer-meta.md-typeset .md-social__link {
   }
 }
 
+/* Home page sections below the hero */
+.md-typeset .feeder-intro h2 {
+  margin: 0 0 24px;
+  padding-top: 72px;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.md-typeset .feeder-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.md-typeset .feeder-card {
+  padding: 24px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.md-typeset .feeder-card > :last-child {
+  margin-bottom: 0;
+}
+
+.md-typeset .feeder-card__label {
+  margin: 0 0 8px;
+  font-family: var(--md-code-font-family);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+/* Numbered rows between hairlines, two columns above 820 px */
+.md-typeset .feeder-rows ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: row;
+}
+
+.md-typeset .feeder-rows li {
+  margin: 0;
+  padding: 16px 0 16px 40px;
+  border-top: 1px solid var(--line);
+  font-size: 16px;
+  counter-increment: row;
+  break-inside: avoid;
+}
+
+.md-typeset .feeder-rows li::before {
+  content: counter(row, decimal-leading-zero);
+  float: left;
+  margin-left: -40px;
+  font-family: var(--md-code-font-family);
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--accent-2);
+}
+
+@media screen and (min-width: 820px) {
+  .md-typeset .feeder-rows ol {
+    columns: 2;
+    column-gap: 32px;
+  }
+}
+
+/* The intro shows Tilt, When and the capacity; the link length stays on the tilt page */
+.md-typeset .feeder-tilt :is(th, td):nth-child(4) {
+  display: none;
+}
+
+.md-typeset .feeder-intro__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.md-typeset .feeder-intro__actions .md-button {
+  margin: 0;
+}
+
 /* The assembly page prints its step list in place of the viewer */
 .print-only {
   display: none;
