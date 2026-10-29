@@ -4,10 +4,12 @@ hide:
   - toc
 ---
 
-<div class="feeder-hero">
-<div class="feeder-hero__text">
+<div class="feeder-hero" markdown>
+<div class="feeder-hero__text" markdown>
 <p class="feeder-hero__eyebrow">Parametric brass collator for reloading</p>
-<h1>Build a 9mm case feeder</h1>
+
+# Build a 9mm case feeder
+
 <p class="feeder-hero__lead">A tilted plate turns under loose brass and drops the cases base down into a hose to the press. Every part is generated from <code>feeder/config.py</code> and exported as STL and STEP.</p>
 <p class="feeder-hero__actions"><a class="md-button md-button--primary" href="configurator/">Open the configurator</a> <a class="md-button" href="#start-here">Read the build guide</a></p>
 </div>
@@ -28,13 +30,13 @@ hide:
 <circle cx="400" cy="220" r="4"/>
 <g class="feeder-hero__labels">
 <path d="M 292 142 L 326 114 M 196 290 L 200 422 M 315 295 L 300 404 M 354 198 L 378 170 M 406 370 L 420 420 M 154 392 L 118 406 M 217 56 L 232 36"/>
-<text x="330" y="114">01 Plate</text>
-<text x="132" y="438">02 Body core</text>
-<text x="262" y="420">03 Motor</text>
-<text x="360" y="165">04 Tilt link</text>
-<text x="350" y="438">05 Stand tube</text>
-<text x="8" y="420">06 Drop tube</text>
-<text x="230" y="32">07 Extender, optional</text>
+<text x="330" y="114">01<tspan class="feeder-hero__name"> Plate</tspan></text>
+<text x="132" y="438">02<tspan class="feeder-hero__name"> Body core</tspan></text>
+<text x="262" y="420">03<tspan class="feeder-hero__name"> Motor</tspan></text>
+<text x="360" y="165">04<tspan class="feeder-hero__name"> Tilt link</tspan></text>
+<text x="350" y="438">05<tspan class="feeder-hero__name"> Stand tube</tspan></text>
+<text x="8" y="420">06<tspan class="feeder-hero__name"> Drop tube</tspan></text>
+<text x="230" y="32">07<tspan class="feeder-hero__name"> Extender, optional</tspan></text>
 </g>
 </g>
 </svg>

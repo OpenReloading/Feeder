@@ -569,10 +569,15 @@ html .md-footer-meta.md-typeset .md-social__link {
   }
 }
 
-/* Narrow drawing (a phone): the label names move out of the drawing into a two-column list */
+/* Narrow drawing (a phone): the drawing keeps the numbers, the names move into a two-column list */
 @container (max-width: 351px) {
-  .feeder-hero__labels {
+  .feeder-hero__name {
     display: none;
+  }
+
+  /* 20 drawing units: at least 11 px down to a 264 px drawing */
+  .feeder-hero__labels text {
+    font-size: 20px;
   }
 
   .md-typeset ul.feeder-hero__parts {
