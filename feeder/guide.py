@@ -10,6 +10,7 @@ from feeder.config import CFG, Config
 from feeder.wiring import WIRING_PARTS, WIRING_STEPS
 
 BOM = Path(__file__).resolve().parent.parent / "bom" / "case_feeder_9mm.md"
+CONFIGURATOR = BOM.parent.parent / "guide" / "configurator.md"
 FASTENER_PREFIX = "ISO|DIN|CNC Kitchen|Panel nut|Lock nut"  # BOM rows that the assembly places as fasteners
 FASTENER = re.compile(rf"^({FASTENER_PREFIX})[ ,]")
 LINK = re.compile(r"\[([^\]]*)\]\(([^)]*)\)")
@@ -71,6 +72,18 @@ def steps_markdown(cfg: Config = CFG) -> str:
 def steps_detail_markdown(cfg: Config = CFG) -> str:
     """The assembly steps with their text as a numbered Markdown list, for the printed assembly page."""
     return "".join(f"{i}. **{title}**: {text}\n" for i, (title, text) in enumerate(export._steps(cfg), 1))
+
+
+def assembly_row_markdown(cfg: Config = CFG) -> str:
+    """The assembly row of the introduction's "What you get" list, with the number of assembly steps."""
+    return f"1. [Assembly](assembly.md): {len(export._steps(cfg))} steps in the viewer, and the assembled feeder as STEP and 3MF.\n"
+
+
+def plate_groups_markdown(page: Path = CONFIGURATOR) -> str:
+    """The plate groups of the configurator page's plate options as a Markdown table (Group, Calibers)."""
+    group = re.search(r'<optgroup label="Plate groups">(.*?)</optgroup>', page.read_text(encoding="utf-8"), re.S)
+    rows = re.findall(r"<option[^>]*>([^:<]+): ([^<]+)</option>", group.group(1) if group else "")
+    return "| Group | Calibers |\n|---|---|\n" + "".join(f"| {name} | {calibers.replace('&amp;', '&')} |\n" for name, calibers in rows)
 
 
 def wiring_board() -> dict:

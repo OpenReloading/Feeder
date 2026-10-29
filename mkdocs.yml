@@ -8,6 +8,8 @@ docs_dir: guide
 exclude_docs: |   # snippets of index.md and assembly.md
   generated/steps.md
   generated/steps-detail.md
+  generated/assembly-row.md
+  generated/plate-groups.md
 
 theme:
   name: material

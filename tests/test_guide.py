@@ -25,6 +25,7 @@ def test_bom_checklist_has_every_part_once_with_unique_ids():
 def test_tilt_section_markers_for_the_guide_page():
     text = DESIGN.read_text(encoding="utf-8")
     assert text.index("--8<-- [start:tilt]") < text.index("Tilt choice.") < text.index("--8<-- [end:tilt]")
+    assert text.index("Tilt choice.") < text.index("--8<-- [start:tilt-table]") < text.index("| 45 deg |") < text.index("--8<-- [end:tilt-table]") < text.index("--8<-- [end:tilt]")
 
 
 def test_steps_markdown_numbers_every_assembly_step():
@@ -74,3 +75,13 @@ def test_wiring_page_checks_the_sensor_type_by_continuity_before_wiring():
     page = (Path(__file__).parent.parent / "guide" / "wiring.md").read_text(encoding="utf-8")
     assert page.index("## Check the sensor on delivery") < page.index("data-buildguide")
     assert "continuity" in page
+
+
+def test_assembly_row_counts_the_assembly_steps():
+    assert f": {len(guide.steps_markdown().splitlines())} steps " in guide.assembly_row_markdown()
+
+
+def test_plate_groups_table_has_each_group_of_the_configurator_options():
+    rows = guide.plate_groups_markdown().splitlines()[2:]
+    assert [r.split(" | ")[0].strip("| ") for r in rows] == [g.replace("_", " ") for g in guide.CFG.calibers.groups]
+    assert sum(r.count(",") + 1 for r in rows) == len(guide.CFG.calibers.table)
