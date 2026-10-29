@@ -255,8 +255,7 @@
   .ag-quiet,
   .ag-have,
   .ag-verify,
-  .ag-wire-row > button,
-  .ag-wire-row > input[type="checkbox"]
+  .ag-wire-row > button
 ) {
   min-height: 44px;
 }
