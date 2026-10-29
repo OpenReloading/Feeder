@@ -221,7 +221,7 @@ html .md-footer-meta.md-typeset .md-social__link {
 #configurator-form select {
   display: block;
   width: 100%;
-  height: 48px;
+  min-height: 48px;
   margin-top: 8px;
   padding: 0 12px;
   border: 1px solid var(--accent-2);
@@ -230,7 +230,8 @@ html .md-footer-meta.md-typeset .md-social__link {
   color: var(--ink);
   font: inherit;
   font-family: var(--md-text-font-family);
-  font-size: 15px;
+  /* 15px at the theme's 125% root, scales with the visitor's text size */
+  font-size: 0.75rem;
   letter-spacing: normal;
   text-transform: none;
 }
