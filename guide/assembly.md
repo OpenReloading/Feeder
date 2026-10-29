@@ -27,4 +27,6 @@ Each step moves its parts in first, then their screws, then their nuts. Drag to 
 
 ## Fasteners
 
+The table lists the fasteners of the default configuration. The parts to buy list of the [configurator](configurator.md) changes with the options you pick.
+
 --8<-- "guide/generated/fasteners.md"
