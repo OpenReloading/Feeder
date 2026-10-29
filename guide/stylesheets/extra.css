@@ -219,16 +219,18 @@ html .md-footer-meta.md-typeset .md-social__link {
 }
 
 #configurator-form select {
-  min-height: 44px;
-  margin-top: 0.3em;
-  padding: 0 0.6em;
+  display: block;
+  width: 100%;
+  height: 48px;
+  margin-top: 8px;
+  padding: 0 12px;
   border: 1px solid var(--accent-2);
-  border-radius: 0.2rem;
+  border-radius: 0;
   background: var(--page);
   color: var(--ink);
   font: inherit;
   font-family: var(--md-text-font-family);
-  font-size: 0.8rem;
+  font-size: 15px;
   letter-spacing: normal;
   text-transform: none;
 }
@@ -413,13 +415,101 @@ html .md-footer-meta.md-typeset .md-social__link {
   }
 }
 
-/* Configurator: a fieldset is as wide as its longest option unless told otherwise, so the pickers shrink to the page */
-#configurator-form fieldset {
-  min-width: 0;
+/* Configurator: intro, then the form left and the results right above 900 px */
+.md-typeset .configurator-intro .feeder-hero__eyebrow {
+  text-transform: uppercase;
 }
 
-#configurator-form select {
-  max-width: 100%;
+.md-typeset .configurator-intro h1 {
+  margin: 0.3em 0;
+  font-size: 44px;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.md-typeset .configurator-intro > p:last-child {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.configurator {
+  display: grid;
+  gap: 40px;
+}
+
+@media screen and (min-width: 900px) {
+  .configurator {
+    grid-template-columns: minmax(360px, 1fr) minmax(0, 1.4fr);
+    align-items: start;
+  }
+}
+
+/* A fieldset is as wide as its longest option unless told otherwise, so the pickers shrink to the column */
+#configurator-form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Material's admonition display would show the box while it is hidden */
+#configurator-unavailable[hidden] {
+  display: none;
+}
+
+/* Links in the hints and the parts to buy: a 44 px target without taller lines */
+#configurator-result td a,
+#configurator-form a {
+  padding-block: 13px;
+}
+
+/* One block per option: label, select, hint */
+.md-typeset #configurator-form p {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+#configurator-form label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.md-typeset #configurator-result h2:first-child {
+  margin-top: 0;
+}
+
+.md-typeset #configurator-result table {
+  border: 0;
+  border-radius: 0;
+}
+
+.md-typeset #configurator-result th {
+  padding: 14px;
+  border-bottom: 1px solid var(--accent-2);
+  background: transparent;
+}
+
+.md-typeset #configurator-result td {
+  padding: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.md-typeset .configurator__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.md-typeset .configurator__actions .md-button {
+  margin: 0;
+}
+
+.md-typeset .configurator__actions span {
+  font-family: var(--md-code-font-family);
+  font-size: 13px;
+  color: var(--muted);
 }
 
 /* Part names are one long word with underscores */
