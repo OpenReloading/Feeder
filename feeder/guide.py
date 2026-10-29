@@ -85,6 +85,26 @@ def assembly_row_markdown(cfg: Config = CFG) -> str:
     return f"1. [Assembly](assembly.md): {len(_viewer_steps(cfg))} steps in the viewer, and the assembled feeder as STEP and 3MF.\n"
 
 
+def assembly_eyebrow_markdown(cfg: Config = CFG) -> str:
+    """The eyebrow of the assembly page with the number of assembly steps."""
+    return f'<p class="feeder-hero__eyebrow">{len(_viewer_steps(cfg))} steps</p>\n'
+
+
+def fasteners_markdown(cfg: Config = CFG) -> str:
+    """The fasteners of the assembly as a Markdown table (Part, Hardware, Step), in step order. A fastener whose host
+    part is not placed raises KeyError, so the build fails."""
+    placed = assembly.placed(cfg)
+    used = export.used_steps(placed)
+    steps = export._steps(cfg)
+    step_of = {p.name: used.index(p.step) for p in placed}
+    counts: dict = {}
+    for f in assembly.fasteners_in_body(cfg):
+        key = (step_of[f.host], f.host, f.name)
+        counts[key] = counts.get(key, 0) + len(f.at)
+    return "| Part | Hardware | Step |\n|---|---|---|\n" + "".join(
+        f"| `{host}` | {n} x {name} | {i + 1}. {steps[used[i]][0]} |\n" for (i, host, name), n in sorted(counts.items()))
+
+
 def plate_groups_markdown(page: Path = CONFIGURATOR) -> str:
     """The plate groups of the configurator page's plate options as a Markdown table (Group, Calibers)."""
     group = re.search(r'<optgroup label="Plate groups">(.*?)</optgroup>', page.read_text(encoding="utf-8"), re.S)

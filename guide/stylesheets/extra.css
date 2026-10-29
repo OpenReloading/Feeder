@@ -416,23 +416,24 @@ html .md-footer-meta.md-typeset .md-social__link {
   }
 }
 
-/* Configurator: intro, then the form left and the results right above 900 px */
-.md-typeset .configurator-intro .feeder-hero__eyebrow {
+/* Page intro of the configurator and assembly pages: eyebrow, title, lead */
+.md-typeset .page-intro .feeder-hero__eyebrow {
   text-transform: uppercase;
 }
 
-.md-typeset .configurator-intro h1 {
+.md-typeset .page-intro h1 {
   margin: 0.3em 0;
   font-size: 44px;
   line-height: 1.1;
   color: var(--ink);
 }
 
-.md-typeset .configurator-intro > p:last-child {
+.md-typeset .page-intro > p:last-child {
   font-size: 17px;
   color: var(--muted);
 }
 
+/* Configurator: the form left and the results right above 900 px */
 .configurator {
   display: grid;
   gap: 40px;
@@ -769,6 +770,29 @@ html .md-footer-meta.md-typeset .md-social__link {
   margin: 0;
 }
 
+/* Assembly viewer: a hairline frame with a label bar above the iframe */
+.md-typeset .assembly-viewer {
+  margin-top: 24px;
+  border: 1px solid var(--line);
+}
+
+.md-typeset .assembly-viewer__bar {
+  margin: 0;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  font-family: var(--md-code-font-family);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.md-typeset .assembly-viewer iframe {
+  display: block;
+}
+
 /* The assembly page prints its step list in place of the viewer */
 .print-only {
   display: none;
@@ -779,7 +803,7 @@ html .md-footer-meta.md-typeset .md-social__link {
     display: block;
   }
 
-  .md-content iframe {
+  .assembly-viewer {
     display: none;
   }
 }
