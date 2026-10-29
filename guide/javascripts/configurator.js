@@ -43,7 +43,7 @@
     $("configurator-summary").textContent = `${names.length} files in the zip${total ? `, ${mb(total)}` : ""}.`;
     $("configurator-parts").replaceChildren(...names.map((n, i) => {
       const row = document.createElement("tr");
-      cell(row, n);
+      row.insertCell().append(...n.split(/(?<=_)/).flatMap((s, j) => (j ? [document.createElement("wbr"), s] : [s]))); // wraps after an underscore
       cell(row, "1");
       cell(row, bytes[i] ? mb(bytes[i]) : "");
       return row;
