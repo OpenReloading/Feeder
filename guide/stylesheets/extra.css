@@ -440,6 +440,160 @@ html .md-footer-meta.md-typeset .md-social__link {
   border-radius: 0.3rem;
 }
 
+/* Home page hero: text and drawing side by side above 900 px */
+.md-typeset .feeder-hero {
+  display: grid;
+  gap: 48px;
+  padding-top: 56px;
+}
+
+@media screen and (min-width: 900px) {
+  .md-typeset .feeder-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+.md-typeset .feeder-hero__eyebrow {
+  margin: 0;
+  font-family: var(--md-code-font-family);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--accent-2);
+}
+
+.md-typeset .feeder-hero h1 {
+  margin: 0.4em 0;
+  font-size: 54px;
+  line-height: 1.08;
+  color: var(--ink);
+}
+
+.md-typeset .feeder-hero__lead {
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.md-typeset .feeder-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.md-typeset .feeder-hero__actions .md-button {
+  margin: 0;
+}
+
+.md-typeset .feeder-hero__figure {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-align: left;
+  container-type: inline-size;
+}
+
+/* Hairline fill behind the drawing */
+.md-typeset .feeder-hero__figure::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background: repeating-linear-gradient(transparent 0 6px, var(--line) 6px 7px);
+}
+
+.md-typeset .feeder-hero__figure > * {
+  position: relative;
+}
+
+.feeder-hero__drawing {
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: none;
+  stroke: var(--accent-2);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.feeder-hero__drawing * {
+  vector-effect: non-scaling-stroke;
+}
+
+.feeder-hero__optional {
+  stroke-dasharray: 5 4;
+}
+
+.feeder-hero__cases {
+  stroke: var(--accent);
+}
+
+.feeder-hero__labels path {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.feeder-hero__labels text,
+.md-typeset ul.feeder-hero__parts,
+.md-typeset .feeder-hero__figure figcaption {
+  font-family: var(--md-code-font-family);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* 15 drawing units: at least 11 px while the labels are shown (drawing 352 px wide or more, see the container query) */
+.feeder-hero__labels text {
+  fill: var(--muted);
+  stroke: none;
+  font-size: 15px;
+}
+
+.md-typeset .feeder-hero__figure figcaption {
+  max-width: none;
+  margin: 12px 0 0;
+  font-style: normal;
+  text-align: left;
+}
+
+.md-typeset ul.feeder-hero__parts {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .md-typeset .feeder-hero h1 {
+    font-size: 34px;
+  }
+}
+
+/* Narrow drawing (a phone): the drawing keeps the numbers, the names move into a two-column list */
+@container (max-width: 351px) {
+  .feeder-hero__name {
+    display: none;
+  }
+
+  /* 20 drawing units: at least 11 px down to a 264 px drawing */
+  .feeder-hero__labels text {
+    font-size: 20px;
+  }
+
+  .md-typeset ul.feeder-hero__parts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 16px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .md-typeset ul.feeder-hero__parts li {
+    margin: 0;
+  }
+}
+
 /* The assembly page prints its step list in place of the viewer */
 .print-only {
   display: none;
