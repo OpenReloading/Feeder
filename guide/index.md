@@ -33,8 +33,8 @@ hide:
 <text x="330" y="114">01<tspan class="feeder-hero__name"> Plate</tspan></text>
 <text x="132" y="438">02<tspan class="feeder-hero__name"> Body core</tspan></text>
 <text x="262" y="420">03<tspan class="feeder-hero__name"> Motor</tspan></text>
-<text x="360" y="165">04<tspan class="feeder-hero__name"> Tilt link</tspan></text>
-<text x="350" y="438">05<tspan class="feeder-hero__name"> Stand tube</tspan></text>
+<text x="352" y="165">04<tspan class="feeder-hero__name"> Tilt link</tspan></text>
+<text x="340" y="438">05<tspan class="feeder-hero__name"> Stand tube</tspan></text>
 <text x="8" y="420">06<tspan class="feeder-hero__name"> Drop tube</tspan></text>
 <text x="230" y="32">07<tspan class="feeder-hero__name"> Extender, optional</tspan></text>
 </g>

@@ -96,9 +96,26 @@
 .md-header__button,
 .md-footer__link,
 .md-source,
-.md-footer-meta a {
+.md-footer-meta a,
+.md-skip,
+.md-search-result__more > summary {
   min-height: 44px;
   align-items: center;
+}
+
+.md-skip,
+.md-search-result__more > summary {
+  display: flex;
+}
+
+/* Links in running text: a 44 px target without taller lines */
+.md-typeset a:not([class]) {
+  padding-block: 11px;
+}
+
+/* The closed search panel is not a tab stop */
+[data-md-toggle="search"]:not(:checked) ~ .md-header .md-search__scrollwrap {
+  visibility: hidden;
 }
 
 /* The icon in the search field (back arrow on a phone) keeps its place and gets a 44 px target */
@@ -122,6 +139,24 @@
   .md-content__inner {
     margin-inline: 0;
   }
+}
+
+/* Body text 16 px up to 820 px wide (0.8rem at the theme's 125% root): tables, notes, search results */
+@media screen and (max-width: 820px) {
+  .md-typeset :is(table:not([class]), .admonition, details),
+  .md-search-result :is(.md-typeset, h1, h2) {
+    font-size: 0.8rem;
+  }
+
+  /* Phone and tablet browsers zoom into fields under 16 px */
+  .md-search__input {
+    font-size: 0.8rem;
+  }
+}
+
+/* Repository facts under the source link in the drawer */
+.md-source__facts {
+  font-size: 12px;
 }
 
 /* Header on the page colour; the logo file is white, so it is inverted in the light scheme */
@@ -230,8 +265,8 @@ html .md-footer-meta.md-typeset .md-social__link {
   color: var(--ink);
   font: inherit;
   font-family: var(--md-text-font-family);
-  /* 15px at the theme's 125% root, scales with the visitor's text size */
-  font-size: 0.75rem;
+  /* 16 px at the theme's 125% root (phone browsers zoom into smaller fields), scales with the visitor's text size */
+  font-size: 0.8rem;
   letter-spacing: normal;
   text-transform: none;
 }
@@ -350,10 +385,56 @@ html .md-footer-meta.md-typeset .md-social__link {
   font-family: var(--md-code-font-family);
 }
 
+/* Component labels at least 12 px */
+[data-md-color-scheme] .ag-guide :is(
+  .ag-source-link,
+  .ag-result-count,
+  .ag-status,
+  .ag-wire-row span,
+  .ag-wire-navigation span,
+  .ag-connection-detail small,
+  .ag-board-toolbar label,
+  .ag-board-legend span,
+  button small
+) {
+  font-size: 12px;
+}
+
+[data-md-color-scheme] .ag-guide .ag-source-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* The checkbox beside a connection: a 44 px high target */
+[data-md-color-scheme] .ag-guide .ag-wire-row > input[type="checkbox"] {
+  align-self: stretch;
+  min-height: 44px;
+  margin-block: 0;
+}
+
+/* Phone and tablet browsers zoom into fields under 16 px */
+[data-md-color-scheme] .ag-guide :is(.ag-search input, .ag-board-toolbar select) {
+  font-size: 16px;
+}
+
+@media screen and (max-width: 820px) {
+  [data-md-color-scheme] .ag-guide :is(.ag-head p, .ag-bom-table td, .ag-bom-table strong, .ag-step-note) {
+    font-size: 16px;
+  }
+}
+
 /* Inline code wraps at the <wbr> after a dot, never inside a name */
 .md-typeset code {
+  font-size: max(0.85em, 12px);
   word-break: normal;
   overflow-wrap: break-word;
+}
+
+@media screen and (max-width: 820px) {
+  .md-typeset code {
+    font-size: max(0.85em, 0.8rem);
+  }
 }
 
 /* Tables with long cells (data-stack, set by hooks/table_layout.py) show one block per row on a phone */
@@ -468,7 +549,7 @@ html .md-footer-meta.md-typeset .md-social__link {
 /* One block per option: label, select, hint */
 .md-typeset #configurator-form p {
   margin: 0 0 24px;
-  font-size: 14px;
+  font-size: 0.8rem;
   color: var(--muted);
 }
 
@@ -514,7 +595,7 @@ html .md-footer-meta.md-typeset .md-social__link {
   color: var(--muted);
 }
 
-/* Part names are one long word with underscores */
+/* Part names wrap after an underscore (<wbr> from configurator.js), inside a part only when it is still too long */
 #configurator-parts td:first-child {
   overflow-wrap: anywhere;
 }
@@ -633,15 +714,15 @@ html .md-footer-meta.md-typeset .md-social__link {
 .md-typeset ul.feeder-hero__parts,
 .md-typeset .feeder-hero__figure figcaption {
   font-family: var(--md-code-font-family);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 
-/* 15 drawing units: at least 11 px while the labels are shown (drawing 352 px wide or more, see the container query) */
+/* 17 drawing units: at least 12 px while the names are shown (drawing 352 px wide or more, see the container query) */
 .feeder-hero__labels text {
   fill: var(--muted);
   stroke: none;
-  font-size: 15px;
+  font-size: 17px;
 }
 
 .md-typeset .feeder-hero__figure figcaption {
@@ -667,9 +748,9 @@ html .md-footer-meta.md-typeset .md-social__link {
     display: none;
   }
 
-  /* 20 drawing units: at least 11 px down to a 264 px drawing */
+  /* 22 drawing units: at least 12 px down to a 264 px drawing */
   .feeder-hero__labels text {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .md-typeset ul.feeder-hero__parts {
