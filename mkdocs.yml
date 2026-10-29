@@ -37,10 +37,10 @@ hooks:
   - hooks/configurator_files.py   # build/configurator/ (build.py --configurator) into site/configurator/data/
 
 extra:
-  social:
-    - icon: fontawesome/brands/github
+  generator: false   # footer: licence note on the left, text links on the right
+  social:   # rendered as text by overrides/partials/social.html, which adds the "Build guide" link
+    - name: Source on GitHub
       link: https://github.com/OpenReloading/Feeder
-      name: Feeder on GitHub
 
 extra_css:
   - stylesheets/extra.css

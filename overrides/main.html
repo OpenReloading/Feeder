@@ -21,3 +21,9 @@
   <meta name="twitter:description" content="{{ description }}">
   <meta name="twitter:image" content="{{ image }}">
 {% endblock %}
+
+{#- Hairline band under the header; --band: none on :root switches it off. -#}
+{% block header %}
+  {{ super() }}
+  <div class="feeder-band" aria-hidden="true"></div>
+{% endblock %}
