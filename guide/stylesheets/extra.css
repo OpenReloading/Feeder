@@ -101,6 +101,11 @@
   outline-color: var(--header-ink);
 }
 
+/* The search input sits on the light search panel, so it keeps the accent outline */
+.md-header .md-search__input:focus-visible {
+  outline-color: var(--accent);
+}
+
 [data-md-color-scheme="slate"] .md-header {
   border-bottom: 1px solid var(--line);
 }
@@ -243,7 +248,16 @@
   color: var(--page);
 }
 
-[data-md-color-scheme] .ag-guide :is(.ag-search input, .ag-board-toolbar select, .ag-board-controls button) {
+[data-md-color-scheme] .ag-guide :is(
+  .ag-search input,
+  .ag-board-toolbar select,
+  .ag-board-controls button,
+  .ag-quiet,
+  .ag-have,
+  .ag-verify,
+  .ag-wire-row > button,
+  .ag-wire-row > input[type="checkbox"]
+) {
   min-height: 44px;
 }
 
