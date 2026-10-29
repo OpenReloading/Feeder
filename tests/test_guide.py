@@ -81,6 +81,12 @@ def test_assembly_row_counts_the_assembly_steps():
     assert f": {len(guide.steps_markdown().splitlines())} steps " in guide.assembly_row_markdown()
 
 
+def test_guide_steps_are_the_viewer_steps():
+    steps, used = guide.export._steps(guide.CFG), guide.export.used_steps(guide.assembly.placed(guide.CFG))
+    assert len(used) < len(steps)  # the default leaves out the optional drop tube chain
+    assert [line.split(". ", 1)[1] for line in guide.steps_markdown().splitlines()] == [steps[s][0] for s in used]
+
+
 def test_plate_groups_table_has_each_group_of_the_configurator_options():
     rows = guide.plate_groups_markdown().splitlines()[2:]
     assert [r.split(" | ")[0].strip("| ") for r in rows] == [g.replace("_", " ") for g in guide.CFG.calibers.groups]

@@ -66,6 +66,11 @@ def _steps(cfg: Config) -> list[tuple[str, str]]:
     ]
 
 
+def used_steps(placed: list) -> list[int]:
+    """The `Placed.step` values that have parts, in order: the viewer shows only these, renumbered."""
+    return sorted({p.step for p in placed})
+
+
 def _matrix(loc) -> list[float]:
     """Location as a column-major 4x4 matrix (three.js Matrix4.fromArray)."""
     t = loc.wrapped.Transformation()
@@ -123,7 +128,7 @@ def export_assembly(cfg: Config, out: Path, title: str, inline_libs: bool = True
 
     # viewer: steps that have parts, renumbered
     steps = _steps(cfg)
-    used = sorted({p.step for p in placed})
+    used = used_steps(placed)
     index = {s: i for i, s in enumerate(used)}
     step_of = {p.name: index[p.step] for p in placed}
     names = [p.name for p in placed]
