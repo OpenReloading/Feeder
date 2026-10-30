@@ -1,18 +1,16 @@
 # Feeder
 
-Parametric brass and bullet collator for reloading, built in build123d with metric DIN/ISO hardware. License MIT (`LICENSE`).
+Parametric brass and bullet collator for reloading, built in build123d with metric DIN/ISO hardware. Every command and its output: [docs/development.md](docs/development.md).
 
 ## Commands
 
 - Agents run on the host; file edits and Git stay there. Start the container with `devcontainer up --docker-path podman --workspace-folder .` (creates `.venv` from `pylock.toml`); run project commands with the prefix `devcontainer exec --docker-path podman --workspace-folder .`.
-- Build all parts and run the tests: `.venv/bin/python build.py`
-- Build only: `.venv/bin/python build.py --no-test`
-- Tests only: `.venv/bin/python -m pytest -q`
-- Coverage floors: `.venv/bin/python -m pytest -q -n 4 --dist loadfile --cov`, then `.venv/bin/coverage report --rcfile=sim/.coveragerc`. The `feeder` floor is `fail_under` in `pyproject.toml`, the `sim` floor is in `sim/.coveragerc`; CI (`pages.yml`) runs both on the whole suite. Keep a floor a little below the measured value and raise it when coverage rises. A partial run fails the floor. `sim/__main__.py` is omitted (CLI of the long sweeps).
+- Build all parts and run the tests: `.venv/bin/python build.py`. Build only: `.venv/bin/python build.py --no-test`. Tests only: `.venv/bin/python -m pytest -q`.
+- Coverage floors: `.venv/bin/python -m pytest -q -n 4 --dist loadfile --cov`, then `.venv/bin/coverage report --rcfile=sim/.coveragerc`. Floors: `fail_under` in `pyproject.toml` (`feeder`) and `sim/.coveragerc` (`sim`). Keep a floor a little below the measured value and raise it when coverage rises. A partial run fails the floor.
 - Lock: `pylock.toml` (PEP 751, wheels of Python 3.14, hashes) is what the dev container, CI build, tests and docs install (`pip install -r pylock.toml`). Dependabot updates `requirements.txt`, the pinned input; after that change regenerate the lock in the container with `.venv/bin/pip lock --only-binary :all: -r requirements.txt -o pylock.toml` (`tests/test_lock.py` fails when they differ). Packages held back in the `ignore` list of `.github/dependabot.yml` stay at their `requirements.txt` pins.
-- Build guide site: `.venv/bin/pip install -r requirements-guide.txt`, `.venv/bin/python build.py --no-test --guide`, `.venv/bin/mkdocs build --strict`
-- Release: from a clean checkout, `./release-configurator.sh` merges the open release pull request (waits for its checks), builds the configurator's print files from the new tag, attaches `configurator-<tag>.tar.gz` to the release and redeploys the site. `./release-configurator.sh <tag>` only publishes for that release. CI does not build the print files and there is no weekly release; `/next/` has none
-- Simulation: `.venv/bin/python -m sim run|sweep|plot|calibrate` (`docs/development.md` "Simulation"). A sweep runs for hours: at most 4 to 6 workers, never next to the test suite (host memory)
+- Build guide site: [docs/development.md](docs/development.md#build-guide-site).
+- Release ([docs/development.md](docs/development.md#pull-requests-and-releases)): from a clean checkout, `./release-configurator.sh` merges the open release pull request (waits for its checks), builds the configurator's print files from the new tag, attaches `configurator-<tag>.tar.gz` to the release and redeploys the site. `./release-configurator.sh <tag>` only publishes for that release. The workflow `Release weekly` runs only when dispatched (the script does that), never on a schedule. CI does not build the print files; `/next/` (built from `main`) has none.
+- Simulation: [docs/development.md](docs/development.md#simulation). A sweep runs for hours: at most 4 to 6 workers, never next to the test suite (host memory).
 
 ## Conventions
 
@@ -24,18 +22,10 @@ Parametric brass and bullet collator for reloading, built in build123d with metr
 
 ## Branches
 
-- `main` is the default and only long-lived branch. Pages: the root is the latest release built from its tag, `/next/` is `main`. Branch from it and open pull requests against it (squash merge, linear history).
+- `main` is the only long-lived branch. Branch from it and open pull requests against it (squash merge, linear history). The title follows Conventional Commits (check `conventional`).
 
 ## Agent skills
 
-### Issue tracker
-
-GitHub Issues in `OpenReloading/Feeder` via `gh`. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Default five labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+- Issue tracker: GitHub Issues in `OpenReloading/Feeder` via `gh`, see `docs/agents/issue-tracker.md`.
+- Triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`, see `docs/agents/triage-labels.md`.
+- Domain docs: single context, `GLOSSARY.md` and `docs/adr/`, see `docs/agents/domain.md`.
