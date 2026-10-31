@@ -35,9 +35,7 @@ SPLITS = ("arcs", "halves", "one_piece")
 def iter_parts(cfg: Config = CFG, modules: tuple[str, ...] | None = None):
     """Yield (name, builder) from every feeder.parts module's PARTS mapping, or its parts(cfg) where the part
     set depends on the config. Each builder takes the config."""
-    import feeder.parts  # noqa: PLC0415
-
-    for info in pkgutil.iter_modules(feeder.parts.__path__):
+    for info in pkgutil.iter_modules(importlib.import_module("feeder.parts").__path__):
         if modules is not None and info.name not in modules:
             continue
         module = importlib.import_module(f"feeder.parts.{info.name}")

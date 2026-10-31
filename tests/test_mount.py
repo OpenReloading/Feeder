@@ -35,7 +35,6 @@ DROP_TUBE = 150.0  # mm of drop tube kept free beyond the spigot end, long enoug
 
 @pytest.fixture(scope="module")
 def fixed():
-    z = layout.levels()  # noqa: F841
     o, d = b.outlet()
     path = Plane(origin=o, z_dir=d) * Cylinder(b.bore_d() / 2 + CFG.exit.wall, CFG.exit.spigot_len + DROP_TUBE, align=sc.BOTTOM)
     drop_tube = dt.placement() * dt.drop_tube()
