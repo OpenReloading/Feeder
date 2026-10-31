@@ -222,7 +222,7 @@ def cradle_bodies(cfg: Config = CFG) -> tuple[Part, Part]:
     in a groove cut to its half height, the connectors in rectangular pockets: both open toward the lid, so they
     print without supports. Each has a tie tunnel along z under it."""
     e, o = cfg.electronics, outline(cfg)
-    back, tw, tt = o["y1"] - e.box_wall, *e.tie_slot
+    back, (tw, tt) = o["y1"] - e.box_wall, e.tie_slot
     zf, zs = e.cradle_z
     lx, hh, wz = fuse_cradle_size(cfg)
     r = e.fuse_holder[0] / 2 + cfg.print.fit

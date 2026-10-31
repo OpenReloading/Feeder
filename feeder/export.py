@@ -11,7 +11,7 @@ from pathlib import Path
 from build123d import Color, Compound, Mesher, export_step, export_stl
 
 from feeder import assembly
-from feeder.config import CFG, Config  # noqa: F401
+from feeder.config import Config
 from feeder.parts import case_plate, layout, mount
 from feeder.parts import slip_clutch as sc
 
