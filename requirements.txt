@@ -68,7 +68,7 @@ pyparsing==3.3.3
 pytest==9.1.1
 pytest-cov==7.1.0
 pytest-xdist==3.8.0
-python-dateutil==2.9.0.post0
+python-dateutil==3.0.0
 questionary==2.1.1
 requests==2.34.2
 rtree==1.4.1
