@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.3.0](https://github.com/OpenReloading/Feeder/compare/v0.2.0...v0.3.0) (2026-10-31)
+
+
+### Features
+
+* **guide:** assembly page and viewer in the new look ([#144](https://github.com/OpenReloading/Feeder/issues/144)) ([6a170b0](https://github.com/OpenReloading/Feeder/commit/6a170b067df8b096d36696c934348e3133459bb1))
+* **guide:** brass and slate color tokens, type and focus rules ([#139](https://github.com/OpenReloading/Feeder/issues/139)) ([fd71a88](https://github.com/OpenReloading/Feeder/commit/fd71a88473be02a0b5f1bcfa548a6d474a8a3bfd))
+* **guide:** configurator page in the new look ([#143](https://github.com/OpenReloading/Feeder/issues/143)) ([999020a](https://github.com/OpenReloading/Feeder/commit/999020a5d0b764db2b7cb98eaac4d99e2fb86888))
+* **guide:** introduction hero with a side-view drawing ([#141](https://github.com/OpenReloading/Feeder/issues/141)) ([d8bd6a4](https://github.com/OpenReloading/Feeder/commit/d8bd6a4129472ac6e82585cffe2bde669ec40904))
+* **guide:** introduction sections below the hero ([#142](https://github.com/OpenReloading/Feeder/issues/142)) ([480a65b](https://github.com/OpenReloading/Feeder/commit/480a65bafa69d242ef3554f1f1b52932a0823f73))
+* **guide:** page-coloured header, hairline band, notice chip and text footer ([#140](https://github.com/OpenReloading/Feeder/issues/140)) ([329f892](https://github.com/OpenReloading/Feeder/commit/329f892ad32ffab1fdf4025b7b8cd867b7b61547))
+
+
+### Bug Fixes
+
+* clear the CodeQL quality alerts ([#155](https://github.com/OpenReloading/Feeder/issues/155)) ([815ec96](https://github.com/OpenReloading/Feeder/commit/815ec96f1eee81ad0699d19f07ef6502011d032c))
+* **guide:** phone layout pass over every page ([#145](https://github.com/OpenReloading/Feeder/issues/145)) ([8e6028f](https://github.com/OpenReloading/Feeder/commit/8e6028fb344c1ce0617174c1d770a7447bca81fa))
+
+
+### Documentation
+
+* **agents:** lean AGENTS.md and link docs/development.md ([#150](https://github.com/OpenReloading/Feeder/issues/150)) ([5ab35b9](https://github.com/OpenReloading/Feeder/commit/5ab35b9bfdf2091d29c6761404479f0507f18bb2))
+* **design:** add the sim section to the configuration table ([#133](https://github.com/OpenReloading/Feeder/issues/133)) ([14d81fa](https://github.com/OpenReloading/Feeder/commit/14d81fafc81597bfb36a4e1526c5054e3b0487a2))
+* **development:** describe the scripted release and the existing Pages jobs ([#135](https://github.com/OpenReloading/Feeder/issues/135)) ([7477064](https://github.com/OpenReloading/Feeder/commit/7477064017718620ac93ed7ca8941304c84e997d))
+* **development:** name the drop chain parts in the --plates row ([#123](https://github.com/OpenReloading/Feeder/issues/123)) ([b941da8](https://github.com/OpenReloading/Feeder/commit/b941da8e383000d3e1fe913cf609f9cbe4b0fb96))
+* **environment:** list networkx, pytest-xdist, mujoco and coacd ([#134](https://github.com/OpenReloading/Feeder/issues/134)) ([eebf486](https://github.com/OpenReloading/Feeder/commit/eebf48633a36750a0cf151ca2526b1323fb9d85b))
+
 ## [0.2.0](https://github.com/OpenReloading/Feeder/compare/v0.1.0...v0.2.0) (2026-10-27)
 
 
