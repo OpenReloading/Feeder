@@ -47,8 +47,22 @@ def test_social_card_is_built_from_the_logo_tokens_and_description():
     assert 'aria-label="OpenReloading Feeder"' in card
 
 
-def test_site_value_reads_quoted_and_commented_scalars():
-    assert social_card._scalar("'It''s a feeder: 9mm.'") == "It's a feeder: 9mm."
-    assert social_card._scalar('"9mm: case \\"feeder\\"."') == '9mm: case "feeder".'
-    assert social_card._scalar("Plain text   # a comment") == "Plain text"
+def test_site_value_reads_quoted_and_commented_scalars(tmp_path, monkeypatch):
+    (tmp_path / "mkdocs.yml").write_text(
+        "a: 'It''s a feeder: 9mm.'  # it's quoted\n"
+        'b: "9mm: case \\"feeder\\"."  # "comment"\n'
+        "c: Plain text   # a comment\n"
+        "d: !ENV [SITE_URL, 'https://example.org/x/']  # set in CI\n"
+        "e: !ENV [SITE_URL, https://example.org/y/]\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(social_card, "ROOT", tmp_path)
+    assert social_card.site_value("a") == "It's a feeder: 9mm."
+    assert social_card.site_value("b") == '9mm: case "feeder".'
+    assert social_card.site_value("c") == "Plain text"
+    assert social_card.site_value("d") == "https://example.org/x/"
+    assert social_card.site_value("e") == "https://example.org/y/"
+
+
+def test_site_value_of_the_real_config():
     assert social_card.site_value("site_url") == "https://openreloading.github.io/Feeder/"

@@ -23,22 +23,55 @@ def light_tokens() -> dict[str, str]:
 
 
 def site_value(key: str) -> str:
-    """A top-level scalar of mkdocs.yml: plain, single or double quoted; for `!ENV [NAME, default]` the default."""
+    """A top-level scalar of mkdocs.yml (plain, single or double quoted, with or without a trailing comment);
+    for `!ENV [NAME, default]` the default."""
     text = (ROOT / "mkdocs.yml").read_text(encoding="utf-8")
-    match = re.search(rf"^{key}:[ \t]*(.+)$", text, re.MULTILINE)
+    match = re.search(rf"^{re.escape(key)}:(.*)$", text, re.MULTILINE)
     if match is None:
         raise LookupError(key)
     raw = match.group(1).strip()
-    env = re.fullmatch(r"!ENV \[\w+,\s*(.+)\]", raw)
-    return _scalar(env.group(1).strip() if env else raw)
+    if raw.startswith("!ENV"):
+        inner = raw.removeprefix("!ENV").lstrip()
+        if not inner.startswith("[") or "," not in inner:
+            raise ValueError(raw)
+        value, rest = _scalar(inner[inner.index(",") + 1 :].lstrip(), flow=True)
+        rest = rest.lstrip()
+        if not rest.startswith("]"):
+            raise ValueError(raw)
+        _expect_comment(rest[1:])
+        return value
+    value, rest = _scalar(raw, flow=False)
+    _expect_comment(rest)
+    return value
 
 
-def _scalar(raw: str) -> str:
+def _scalar(raw: str, *, flow: bool) -> tuple[str, str]:
+    """The scalar at the start of raw and the text after it."""
     if raw.startswith("'"):
-        return raw[1 : raw.rindex("'")].replace("''", "'")
+        parts, i = [], 1
+        while True:
+            end = raw.index("'", i)
+            parts.append(raw[i:end])
+            if raw[end + 1 : end + 2] != "'":
+                return "".join(parts), raw[end + 1 :]
+            parts.append("'")
+            i = end + 2
     if raw.startswith('"'):
-        return json.loads(raw[: raw.rindex('"') + 1])  # YAML double-quoted escapes are a superset of JSON's
-    return re.sub(r"\s+#.*$", "", raw)  # plain scalar: a comment starts at " #"
+        i = 1
+        while raw[i] != '"':
+            i += 2 if raw[i] == "\\" else 1
+        return json.loads(raw[: i + 1]), raw[i + 1 :]  # YAML double-quoted escapes are a superset of JSON's
+    ends = [i for i in (raw.find(" #"), raw.find("\t#")) if i >= 0]
+    if flow:
+        ends += [i for i in (raw.find(","), raw.find("]")) if i >= 0]
+    end = min(ends, default=len(raw))
+    return raw[:end].strip(), raw[end:]
+
+
+def _expect_comment(rest: str) -> None:
+    rest = rest.strip()
+    if rest and not rest.startswith("#"):
+        raise ValueError(rest)
 
 
 def card_html() -> str:
