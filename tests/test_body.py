@@ -11,7 +11,6 @@ from test_mount import _unsupported
 from feeder import assembly, printing
 from feeder.config import CFG, GENERIC_8MM_FLANGE
 from feeder.lib import fasteners
-from feeder.lib.features import d_bore  # noqa: F401
 from feeder.parts import body as b
 from feeder.parts import case_plate as cp
 from feeder.parts import layout
@@ -387,7 +386,6 @@ def test_wall_top_is_open_on_the_high_side_and_holds_level_brass():
 
 def test_bowl_holds_the_design_fill():
     cp_, (lo, hi) = CFG.case_plate, CFG.mount.tilt_range
-    z = layout.levels()  # noqa: F841
     assert layout.capacity(layout.tilt()) >= cp_.fill_cases  # default tilt, no extender
     assert layout.capacity(layout.tilt(), rim=lambda a: b.rim_top(a, extender=False)) == layout.capacity(layout.tilt())  # the wall top profile gives the level plane
     assert layout.capacity(hi, rim=b.rim_top, rim_r=b.rim_r) >= cp_.fill_cases  # steepest tilt with the extender

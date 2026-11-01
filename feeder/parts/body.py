@@ -170,7 +170,6 @@ def exit_insert(cfg: Config = CFG) -> Part:
     layout.check_orientation(cfg)
     e = cfg.exit
     z = layout.levels(cfg)
-    length, r0, r1 = opening(cfg)  # noqa: RUF059
     body = _insert_block(cfg)
     body += _funnel(cfg, e.wall) - Pos(0, 0, z.bottom) * Box(1000, 1000, 1000, align=BOTTOM)  # funnel end and spigot below the body
     body += _spigot_frame(cfg) * spigot_lugs(cfg)
