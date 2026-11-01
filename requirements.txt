@@ -51,7 +51,7 @@ ocp_vscode==4.2.0
 ocpsvg==0.7.0
 orjson==3.13.0
 packaging==26.3
-pandas==3.0.6
+pandas==3.1.0
 parso==0.8.7
 pexpect==4.9.0
 pillow==13.0.0
