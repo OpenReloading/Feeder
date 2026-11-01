@@ -1,3 +1,5 @@
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="guide/assets/logo-dark.svg"><img src="guide/assets/logo.svg" width="320" alt="OpenReloading Feeder"></picture></p>
+
 # Feeder
 
 [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/hUCSjDYNaa)
