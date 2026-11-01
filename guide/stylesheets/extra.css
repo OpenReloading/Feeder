@@ -159,20 +159,27 @@
   font-size: 12px;
 }
 
-/* Header on the page colour; the logo file is white, so it is inverted in the light scheme */
+/* Header on the page colour */
 .md-header {
   border-bottom: 1px solid var(--line);
   box-shadow: none;
 }
 
-[data-md-color-scheme="default"] .md-logo img {
-  filter: invert(1);
+/* Wordmark of the scheme (partials/logo.html) on every width, in place of the site title */
+.md-header .md-header__button.md-logo {
+  display: block;
+  margin: 0 0.4rem 0 0;
+  padding: 4px 0;
 }
 
-.md-header__topic:first-child {
-  font-family: var(--md-code-font-family);
-  font-size: 20px;
-  font-weight: 500;
+.md-header .md-header__button.md-logo img {
+  width: auto;
+  height: 36px;
+}
+
+[data-md-color-scheme="default"] .md-logo img.md-logo__dark,
+[data-md-color-scheme="slate"] .md-logo img.md-logo__light {
+  display: none;
 }
 
 /* Band of hairlines under the header, decoration only; --band: none on :root switches it off. The header rule is its top line. */
