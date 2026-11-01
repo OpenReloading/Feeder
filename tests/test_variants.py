@@ -6,17 +6,27 @@ import json
 
 import pytest
 
-import variants
-from variants import combinations, config, depends, key, printed_parts
+from variants import (
+    BOM_DEPENDS,
+    OPTIONS,
+    build_configurator,
+    combinations,
+    config,
+    depends,
+    key,
+    plan,
+    printed_parts,
+    resolve,
+)
 
-SMALL = {**variants.OPTIONS, "plate": ("9mm_luger",), "link": ("adjustable", "50")}  # real builds: a plate set is the slow part
+SMALL = {**OPTIONS, "plate": ("9mm_luger",), "link": ("adjustable", "50")}  # real builds: a plate set is the slow part
 FIRST = {name: values[0] for name, values in SMALL.items()}
 
 
 @pytest.fixture(scope="module")
 def built(tmp_path_factory):
     out = tmp_path_factory.mktemp("configurator")
-    return out, variants.build_configurator(out, SMALL)
+    return out, build_configurator(out, SMALL)
 
 
 def test_manifest_covers_every_combination(built):
@@ -24,7 +34,7 @@ def test_manifest_covers_every_combination(built):
     assert json.loads((out / "manifest.json").read_text()) == manifest
     assert manifest["options"] == {k: list(v) for k, v in SMALL.items()}
     for choice in combinations(SMALL):
-        parts, bom = variants.resolve(manifest, choice)
+        parts, bom = resolve(manifest, choice)
         assert set(parts) == set(printed_parts(config(choice))), choice
         assert bom, choice
 
@@ -49,8 +59,8 @@ def test_identical_parts_share_one_file(built):
 
 def test_a_fixed_link_choice_has_its_link_and_no_rod_end_or_rod(built):
     _, manifest = built
-    adjustable, bom = variants.resolve(manifest, {**FIRST, "link": "adjustable"})
-    fixed, bom_fixed = variants.resolve(manifest, {**FIRST, "link": "50"})
+    adjustable, bom = resolve(manifest, {**FIRST, "link": "adjustable"})
+    fixed, bom_fixed = resolve(manifest, {**FIRST, "link": "50"})
     assert {n for n in adjustable if n.startswith("mount_")} >= {"mount_rod_end_adjust", "mount_rod_end_fixed"}
     assert {n for n in fixed if n.startswith("mount_link")} == {"mount_link_50"} and not [n for n in fixed if "rod_end" in n]  # noqa: PT018
     assert any(r["part"].startswith("DIN 976-1") for r in bom) and not any(r["part"].startswith("DIN 976-1") for r in bom_fixed)  # noqa: PT018
@@ -60,7 +70,7 @@ def test_bom_follows_the_extender_and_the_hub(built):
     _, manifest = built
 
     def qty(**option) -> dict:
-        return {r["part"]: r["qty"] for r in variants.resolve(manifest, {**FIRST, **option})[1]}
+        return {r["part"]: r["qty"] for r in resolve(manifest, {**FIRST, **option})[1]}
 
     default, bare, generic = qty(), qty(extender="without"), qty(hub="generic_8mm_flange")
     assert default["ISO 10642 M3 x 12"] == 4 and "ISO 10642 M3 x 12" not in bare  # the extender's screws  # noqa: PT018
@@ -72,11 +82,11 @@ def test_bom_follows_the_extender_and_the_hub(built):
 
 
 def test_every_combination_of_all_options_resolves():
-    plan = variants.plan()
+    planned = plan()
     for choice in combinations():
         for name in printed_parts(config(choice)):
-            assert key(depends(name), choice) in plan[name], (name, choice)
-        assert key(variants.BOM_DEPENDS, choice)
+            assert key(depends(name), choice) in planned[name], (name, choice)
+        assert key(BOM_DEPENDS, choice)
 
 
 ALTERNATIVE = {"split": "halves", "plate": "pocket_pistol", "extender": "without", "link": "50", "tube": "square", "hub": "generic_8mm_flange"}
