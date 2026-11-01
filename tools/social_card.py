@@ -7,6 +7,7 @@ tokens of guide/stylesheets/extra.css and site_description and site_url in mkdoc
 """
 
 import html
+import json
 import re
 from pathlib import Path
 
@@ -22,13 +23,22 @@ def light_tokens() -> dict[str, str]:
 
 
 def site_value(key: str) -> str:
-    """A plain value of mkdocs.yml; for `!ENV [NAME, default]` the default."""
+    """A top-level scalar of mkdocs.yml: plain, single or double quoted; for `!ENV [NAME, default]` the default."""
     text = (ROOT / "mkdocs.yml").read_text(encoding="utf-8")
-    value = re.search(rf"^{key}:\s*(.+)$", text, re.MULTILINE)
-    if value is None:
+    match = re.search(rf"^{key}:[ \t]*(.+)$", text, re.MULTILINE)
+    if match is None:
         raise LookupError(key)
-    env = re.fullmatch(r"!ENV \[\w+,\s*'([^']*)'\]", value.group(1).strip())
-    return env.group(1) if env else value.group(1).strip()
+    raw = match.group(1).strip()
+    env = re.fullmatch(r"!ENV \[\w+,\s*(.+)\]", raw)
+    return _scalar(env.group(1).strip() if env else raw)
+
+
+def _scalar(raw: str) -> str:
+    if raw.startswith("'"):
+        return raw[1 : raw.rindex("'")].replace("''", "'")
+    if raw.startswith('"'):
+        return json.loads(raw[: raw.rindex('"') + 1])  # YAML double-quoted escapes are a superset of JSON's
+    return re.sub(r"\s+#.*$", "", raw)  # plain scalar: a comment starts at " #"
 
 
 def card_html() -> str:

@@ -1,5 +1,6 @@
 """Logo, favicon and link preview of the guide: brass and slate tokens, both schemes, one card source."""
 
+import html
 import re
 from pathlib import Path
 
@@ -41,6 +42,13 @@ def test_social_card_is_built_from_the_logo_tokens_and_description():
     tokens = social_card.light_tokens()
     assert tokens["page"] in card
     assert tokens["accent"] in card
-    assert social_card.site_value("site_description").split(".")[0] in card
+    assert html.escape(social_card.site_value("site_description")) in card
     assert "openreloading.github.io/Feeder" in card
     assert 'aria-label="OpenReloading Feeder"' in card
+
+
+def test_site_value_reads_quoted_and_commented_scalars():
+    assert social_card._scalar("'It''s a feeder: 9mm.'") == "It's a feeder: 9mm."
+    assert social_card._scalar('"9mm: case \\"feeder\\"."') == '9mm: case "feeder".'
+    assert social_card._scalar("Plain text   # a comment") == "Plain text"
+    assert social_card.site_value("site_url") == "https://openreloading.github.io/Feeder/"
