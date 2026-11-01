@@ -22,6 +22,13 @@ def test_logo_and_favicon_use_only_the_site_tokens():
         assert _colors(ASSETS / name) <= tokens, name
 
 
+def test_black_and_white_variants_are_one_colour():
+    for name, color in (("logo-black.svg", "#000"), ("logo-white.svg", "#fff"), ("mark-black.svg", "#000"), ("mark-white.svg", "#fff")):
+        text = (ASSETS / name).read_text(encoding="utf-8")
+        assert f'color="{color}"' in text, name
+        assert not re.findall(r'(?:fill|stroke)="#', text), name
+
+
 def test_header_shows_the_wordmark_of_each_scheme():
     logo = (ROOT / "overrides/partials/logo.html").read_text(encoding="utf-8")
     assert "assets/logo.svg" in logo
