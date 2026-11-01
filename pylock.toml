@@ -751,14 +751,14 @@ sha256 = "202ca578cfeb7370784a8c33d6d05bc6e13b4f25b5053c30a152269fd10f0b88"
 
 [[packages]]
 name = "python-dateutil"
-version = "2.9.0.post0"
+version = "3.0.0"
 
 [[packages.wheels]]
-name = "python_dateutil-2.9.0.post0-py2.py3-none-any.whl"
-url = "https://files.pythonhosted.org/packages/ec/57/56b9bcc3c9c6a792fcbaf139543cee77261f3651ca9da0c93f5c1221264b/python_dateutil-2.9.0.post0-py2.py3-none-any.whl"
+name = "python_dateutil-3.0.0-py2.py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/5a/17/cebee01d1c0c1441174cf0456ddc91b280d79acb65340c05e41d77866ee8/python_dateutil-3.0.0-py2.py3-none-any.whl"
 
 [packages.wheels.hashes]
-sha256 = "a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"
+sha256 = "3c79630202e4152c6add678446984236efe4f57e84d8e892aab0637bab82e9fd"
 
 [[packages]]
 name = "questionary"
@@ -968,6 +968,17 @@ url = "https://files.pythonhosted.org/packages/65/f3/107a22063bf27bdccf2024833d3
 
 [packages.wheels.hashes]
 sha256 = "9ee6fc59062311ef8547596ab6b955e1b8aa46242d854bfc78f4f6b0eff35f9f"
+
+[[packages]]
+name = "tzdata"
+version = "2026.6"
+
+[[packages.wheels]]
+name = "tzdata-2026.6-py2.py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/0a/66/9a06c2227fedfd4919f0eaaa8b94377d9730882a7e4f95823c9a331ab5e1/tzdata-2026.6-py2.py3-none-any.whl"
+
+[packages.wheels.hashes]
+sha256 = "0a10eec6e13ef16b627fabed9a5f2ba61a62b1c67f327305f4e7e412a70b4aec"
 
 [[packages]]
 name = "urllib3"
