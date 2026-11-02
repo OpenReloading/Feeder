@@ -15,6 +15,7 @@ concurrency:
 # `build` is the check the ruleset requires. One deployment replaces the whole site, so a push, a release or a dispatch
 # builds both editions: `main` goes to /next/ (`build`, without the configurator's print files, which its page announces
 # as built on release) and the latest release, built from its tag, to the root (`stable-site`, `stable-configurator`).
+# The site is site/ (Docusaurus); DOCS_BASE_URL sets the path of each edition.
 # `assemble` merges them and `deploy` publishes. Until a release exists the root redirects to /next/. A pull request and
 # a merge group only build.
 jobs:
@@ -55,7 +56,7 @@ jobs:
       - id: scope
         if: github.event_name == 'pull_request'
         run: |
-          if git diff --name-only HEAD^1 HEAD | grep -qvE '^(docs/.*|guide/[^/]*\.md|[^/]*\.md|mkdocs\.yml|LICENSE)$'; then
+          if git diff --name-only HEAD^1 HEAD | grep -qvE '^(docs/.*|site/docs/[^/]*\.mdx|[^/]*\.md|LICENSE)$'; then
             echo "tests=tests" >> "$GITHUB_OUTPUT"
           else
             echo "tests=tests/test_guide.py" >> "$GITHUB_OUTPUT"
@@ -68,7 +69,6 @@ jobs:
       - run: |
           python3 -m venv .venv
           .venv/bin/pip install -r pylock.toml
-          .venv/bin/pip install -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
       # guide data in the background while the test files run on the runner's cores
       - env:
@@ -85,21 +85,32 @@ jobs:
           if [ "$TESTS" = tests ]; then .venv/bin/coverage report --rcfile=sim/.coveragerc || tests=$?; fi
           wait "$guide" || { cat guide.log; exit 1; }
           exit "$tests"
-      # the header's repository facts come from the GitHub API at build time
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: site/.nvmrc
+          # no npm cache: this job builds what is deployed (zizmor cache-poisoning)
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+        working-directory: site
+      # the site's script tests and types
+      - run: npm test && npm run typecheck
+        working-directory: site
+      # the navbar's repository facts come from the GitHub API at build time
       - env:
           GITHUB_TOKEN: ${{ github.token }}
-          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/next/
-        run: .venv/bin/mkdocs build --strict
+          DOCS_BASE_URL: /${{ github.event.repository.name }}/next/
+        run: npm run build -- --out-dir ../dist
+        working-directory: site
       # the Pages artifact limit is 1 GB
       - run: |
-          size=$(du -sm site | cut -f1)
+          size=$(du -sm dist | cut -f1)
           echo "site: $size MB"
           test "$size" -lt 800
       - if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: site
-          path: site
+          path: dist
           retention-days: 1
           if-no-files-found: error
   # The latest release, built from its own tag: the guide here, the configurator's print files (about 44 CPU minutes) on
@@ -124,20 +135,33 @@ jobs:
       - run: |
           python3 -m venv .venv
           .venv/bin/pip install -r pylock.toml
-          .venv/bin/pip install -r requirements-guide.txt
           .venv/bin/pip install --no-deps -e .
       - run: .venv/bin/python build.py --no-test --guide
+      # shortcut: releases up to v0.2.0 hold the MkDocs site; drop the mkdocs branch and the condition of setup-node once
+      # the latest release has site/
+      - if: hashFiles('site/package.json') != ''
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: site/.nvmrc
+          package-manager-cache: false
       - env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: .venv/bin/mkdocs build --strict
+          DOCS_BASE_URL: /${{ github.event.repository.name }}/
+        run: |
+          if [ -f site/package.json ]; then
+            cd site && npm ci --ignore-scripts && npm run build -- --out-dir ../dist
+          else
+            .venv/bin/pip install -r requirements-guide.txt
+            .venv/bin/mkdocs build --strict -d dist
+          fi
       - run: |
-          size=$(du -sm site | cut -f1)
+          size=$(du -sm dist | cut -f1)
           echo "site: $size MB"
           test "$size" -lt 800
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: site-stable
-          path: site
+          path: dist
           retention-days: 1
           if-no-files-found: error
   stable-configurator:

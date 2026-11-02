@@ -7,7 +7,7 @@ Run in the dev container from the project root:
     .venv/bin/python build.py --variants   # also build/variants/<split>/: body and plate for each body split, with assembly
     .venv/bin/python build.py --plates     # also build/plates/<set>/: plate, exit insert, drop tube and its chain parts per plate
     .venv/bin/python build.py --configurator  # also build/configurator/: print files by content hash and manifest.json for the configurator (variants.py)
-    .venv/bin/python build.py --guide      # also the build guide data and assembly for mkdocs build (mkdocs.yml)
+    .venv/bin/python build.py --guide      # also the build guide data, pages and assembly for the site (site/)
 
 build/<name>.stl and .step are in the modelled orientation, build/print/<name>.stl as the part goes on the bed.
 """
@@ -15,6 +15,7 @@ build/<name>.stl and .step are in the modelled orientation, build/print/<name>.s
 import argparse  # noqa: I001
 import importlib
 import pkgutil
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -78,7 +79,7 @@ def main() -> int:
     parser.add_argument("--variants", action="store_true", help="also build body and plate for each body split to build/variants/")
     parser.add_argument("--plates", action="store_true", help="also build each plate set to build/plates/")
     parser.add_argument("--configurator", action="store_true", help="also write every option combination's print files and manifest.json to build/configurator/")
-    parser.add_argument("--guide", action="store_true", help="also write build/guide/buildguide.json and guide/generated/ for mkdocs build")
+    parser.add_argument("--guide", action="store_true", help="also write build/guide/buildguide.json, site/docs/_generated/ and site/static/generated/ for the site")
     args = parser.parse_args()
     print(f"{build_all()} parts in {BUILD}")
     if args.assembly:
@@ -104,17 +105,28 @@ def main() -> int:
 
         from feeder import guide  # noqa: PLC0415
 
-        build_assembly(CFG, ROOT / "guide" / "generated" / "assembly", f"Body {CFG.body.split.replace('_', ' ')}, default configuration")
+        # the files the pages link to (static/), the partials they import (docs/_generated/), the BuildGuide data.
+        # The assembly is exported to build/ and copied, so its three.js cache (build/guide/.three) stays out of the site.
+        assembly = BUILD / "guide" / "assembly"
+        build_assembly(CFG, assembly, f"Body {CFG.body.split.replace('_', ' ')}, default configuration")
+        shutil.copytree(assembly, ROOT / "site" / "static" / "generated" / "assembly", dirs_exist_ok=True)
         data = BUILD / "guide" / "buildguide.json"
         data.parent.mkdir(parents=True, exist_ok=True)
         data.write_text(json.dumps(guide.guide_data([name for name, _ in iter_parts(CFG)]), indent=1), encoding="utf-8")
         print(f"built {data.relative_to(ROOT)}")
-        (ROOT / "guide" / "generated" / "steps.md").write_text(guide.steps_markdown(CFG), encoding="utf-8")
-        (ROOT / "guide" / "generated" / "steps-detail.md").write_text(guide.steps_detail_markdown(CFG), encoding="utf-8")
-        (ROOT / "guide" / "generated" / "assembly-eyebrow.md").write_text(guide.assembly_eyebrow_markdown(CFG), encoding="utf-8")
-        (ROOT / "guide" / "generated" / "fasteners.md").write_text(guide.fasteners_markdown(CFG), encoding="utf-8")
-        (ROOT / "guide" / "generated" / "assembly-row.md").write_text(guide.assembly_row_markdown(CFG), encoding="utf-8")
-        (ROOT / "guide" / "generated" / "plate-groups.md").write_text(guide.plate_groups_markdown(), encoding="utf-8")
+        generated = ROOT / "site" / "docs" / "_generated"
+        generated.mkdir(parents=True, exist_ok=True)
+        for name, text in {
+            "steps.md": guide.steps_markdown(CFG),
+            "steps-detail.md": guide.steps_detail_markdown(CFG),
+            "fasteners.md": guide.fasteners_markdown(CFG),
+            "plate-groups.md": guide.plate_groups_markdown(),
+            "tilt.md": guide.design_section("tilt"),
+            "tilt-table.md": guide.design_section("tilt-table"),
+            "assembly.json": json.dumps({"steps": guide.step_count(CFG)}),
+        }.items():
+            (generated / name).write_text(text, encoding="utf-8")
+        print(f"built {generated.relative_to(ROOT)}/")
     if args.no_test:
         return 0
     return subprocess.run([sys.executable, "-m", "pytest", "-q"], cwd=ROOT).returncode  # noqa: PLW1510

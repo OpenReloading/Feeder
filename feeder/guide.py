@@ -1,6 +1,6 @@
-"""Build guide data for the BuildGuide MkDocs plugin (https://github.com/OpenReloading/BuildGuide): introduction
-BOM checklist and wiring board of the configured feeder. Printed parts and fasteners come from the part builders and the
-assembly, the other bought parts from the BOM file."""
+"""Build guide data for the BuildGuide plugin (https://github.com/OpenReloading/BuildGuide) and the generated parts of the
+guide pages (site/docs/): BOM checklist and wiring board of the configured feeder, assembly steps and fasteners. Printed
+parts and fasteners come from the part builders and the assembly, the other bought parts from the BOM file."""
 
 import re
 from pathlib import Path
@@ -10,7 +10,8 @@ from feeder.config import CFG, Config
 from feeder.wiring import WIRING_PARTS, WIRING_STEPS
 
 BOM = Path(__file__).resolve().parent.parent / "bom" / "case_feeder_9mm.md"
-CONFIGURATOR = BOM.parent.parent / "guide" / "configurator.md"
+CONFIGURATOR = BOM.parent.parent / "site" / "src" / "components" / "Configurator.tsx"
+DESIGN = BOM.parent.parent / "docs" / "design.md"
 FASTENER_PREFIX = "ISO|DIN|CNC Kitchen|Panel nut|Lock nut"  # BOM rows that the assembly places as fasteners
 FASTENER = re.compile(rf"^({FASTENER_PREFIX})[ ,]")
 LINK = re.compile(r"\[([^\]]*)\]\(([^)]*)\)")
@@ -80,14 +81,9 @@ def steps_detail_markdown(cfg: Config = CFG) -> str:
     return "".join(f"{i}. **{title}**: {text}\n" for i, (title, text) in enumerate(_viewer_steps(cfg), 1))
 
 
-def assembly_row_markdown(cfg: Config = CFG) -> str:
-    """The assembly row of the introduction's "What you get" list, with the number of assembly steps."""
-    return f"1. [Assembly](assembly.md): {len(_viewer_steps(cfg))} steps in the viewer, and the assembled feeder as STEP and 3MF.\n"
-
-
-def assembly_eyebrow_markdown(cfg: Config = CFG) -> str:
-    """The eyebrow of the assembly page with the number of assembly steps."""
-    return f'<p class="feeder-hero__eyebrow">{len(_viewer_steps(cfg))} steps</p>\n'
+def step_count(cfg: Config = CFG) -> int:
+    """The number of assembly steps in the viewer, for the introduction's "What you get" list and the assembly page."""
+    return len(_viewer_steps(cfg))
 
 
 def fasteners_markdown(cfg: Config = CFG) -> str:
@@ -105,8 +101,15 @@ def fasteners_markdown(cfg: Config = CFG) -> str:
         f"| `{host}` | {n} x {name} | {i + 1}. {steps[used[i]][0]} |\n" for (i, host, name), n in sorted(counts.items()))
 
 
+def design_section(name: str, path: Path = DESIGN) -> str:
+    """The text of docs/design.md between its `--8<-- [start:name]` and `[end:name]` markers, without the marker lines
+    of sections inside it. A missing marker raises IndexError, so the guide build fails."""
+    text = path.read_text(encoding="utf-8").split(f"<!-- --8<-- [start:{name}] -->\n", 1)[1].split(f"<!-- --8<-- [end:{name}] -->", 1)[0]
+    return "".join(line for line in text.splitlines(keepends=True) if not line.startswith("<!-- --8<-- "))
+
+
 def plate_groups_markdown(page: Path = CONFIGURATOR) -> str:
-    """The plate groups of the configurator page's plate options as a Markdown table (Group, Calibers)."""
+    """The plate groups of the configurator's plate options as a Markdown table (Group, Calibers)."""
     group = re.search(r'<optgroup label="Plate groups">(.*?)</optgroup>', page.read_text(encoding="utf-8"), re.S)
     rows = re.findall(r"<option[^>]*>([^:<]+): ([^<]+)</option>", group.group(1) if group else "")
     return "| Group | Calibers |\n|---|---|\n" + "".join(f"| {name} | {calibers.replace('&amp;', '&')} |\n" for name, calibers in rows)
@@ -119,7 +122,7 @@ def wiring_board() -> dict:
         "label": "Electronics box wiring",
         "size": [1000, 600],
         "prefix": "wire",
-        "legend": ["Red = +12 V, black = 0 V, sensor cores in their own colours", "Green = selected connection"],
+        "legend": ["Red = +12 V, black = 0 V, sensor cores in their own colours", "Yellow = selected connection"],
         "colors": {
             "RD": {"line": "#dc2626", "outline": "#7f1d1d"},
             "BK": {"line": "#1f2937", "outline": "#000000"},
@@ -129,7 +132,7 @@ def wiring_board() -> dict:
         "kinds": {
             "box": {"fill": "#f1f5f9", "stroke": "#17202a"},
             "socket": {"fill": "#1f2937", "stroke": "#1f2937"},
-            "sensor": {"fill": "#e8f5ec", "stroke": "#15803d", "pins": {"BN": "#92400e", "BU": "#2563eb", "BK": "#111827"}},
+            "sensor": {"fill": "#eef0f6", "stroke": "#555a6d", "pins": {"BN": "#92400e", "BU": "#2563eb", "BK": "#111827"}},
             "join": {"fill": "#f1f5f9", "stroke": "#64748b"},
         },
         "rules": {"perTerminal": 2, "exempt": {"kinds": ["join"]}},

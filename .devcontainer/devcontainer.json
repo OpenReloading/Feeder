@@ -4,5 +4,6 @@
   "runArgs": ["--userns=keep-id"],
   "remoteUser": "vscode",
   "updateRemoteUserUID": false,
-  "postCreateCommand": "python -m venv .venv && .venv/bin/pip install -r pylock.toml && .venv/bin/pip install --no-deps -e ."
+  "forwardPorts": [3000],
+  "postCreateCommand": "python -m venv .venv && .venv/bin/pip install -r pylock.toml && .venv/bin/pip install --no-deps -e . && cd site && npm ci --ignore-scripts"
 }

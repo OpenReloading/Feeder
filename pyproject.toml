@@ -73,4 +73,4 @@ max-statements = 50
 # "standard" is the type checker of Pyright. "recommended" adds the Unknown* and missing-annotation reports.
 typeCheckingMode = "standard"
 # Folders and files to check; the baseline lives in .basedpyright/baseline.json.
-include = ["feeder", "sim", "tests", "hooks", "build.py", "variants.py"]
+include = ["feeder", "sim", "tests", "build.py", "variants.py"]

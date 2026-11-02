@@ -5,17 +5,17 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Layout: one workbench column, viewer on top, controls and the numbered assembly sequence under it, side by side when wide */
-/* The site's tokens (guide/stylesheets/extra.css): warm page, brass accent, slate control borders */
+/* The site's tokens (site/src/css/brand.css): slate neutrals, blue accent */
 :root {
-  --page: #f2eee6; --surface: #e8e2d6; --line: #c9c0af; --ink: #1e1b17; --muted: #524b40; --accent: #7c5a10; --accent-ink: #fff8e6; --accent-2: #3b5368;
+  --page: #ffffff; --surface: #f6f8fc; --line: #dcdfe9; --ink: #1d2130; --muted: #555a6d; --accent: #1971c2; --accent-ink: #ffffff; --accent-2: #555a6d;
   --f-display: system-ui, sans-serif;
   --f-body: system-ui, sans-serif;
   --f-mono: ui-monospace, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --page: #1a1815; --surface: #23201c; --line: #3b362f; --ink: #eee8dc; --muted: #b5ada0; --accent: #d2a64a; --accent-ink: #1a1815; --accent-2: #93a9bf; color-scheme: dark } }
+  --page: #10121b; --surface: #161923; --line: #2f323f; --ink: #e9ebf1; --muted: #acb0c0; --accent: #4dabf7; --accent-ink: #10121b; --accent-2: #acb0c0; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --page: #1a1815; --surface: #23201c; --line: #3b362f; --ink: #eee8dc; --muted: #b5ada0; --accent: #d2a64a; --accent-ink: #1a1815; --accent-2: #93a9bf; color-scheme: dark }
+  --page: #10121b; --surface: #161923; --line: #2f323f; --ink: #e9ebf1; --muted: #acb0c0; --accent: #4dabf7; --accent-ink: #10121b; --accent-2: #acb0c0; color-scheme: dark }
 body { background: var(--page); color: var(--ink); font-family: var(--f-body); font-size: 16px; line-height: 1.5 }
 .wrap { max-width: 1180px; margin: 0 auto; padding-block: 24px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px }
 header { display: grid; gap: 6px }

@@ -1,11 +1,11 @@
-"""The configurator page offers exactly the options of the variant manifest, each value once."""
+"""The configurator page (its component) offers exactly the options of the variant manifest, each value once."""
 
 from html.parser import HTMLParser
 from pathlib import Path
 
 import variants
 
-PAGE = Path(__file__).parent.parent / "guide" / "configurator.md"
+PAGE = Path(__file__).parent.parent / "site" / "src" / "components" / "Configurator.tsx"
 
 
 class Selects(HTMLParser):

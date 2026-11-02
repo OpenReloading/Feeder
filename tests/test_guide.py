@@ -29,6 +29,15 @@ def test_tilt_section_markers_for_the_guide_page():
     assert text.index("Tilt choice.") < text.index("--8<-- [start:tilt-table]") < text.index("| 45 deg |") < text.index("--8<-- [end:tilt-table]") < text.index("--8<-- [end:tilt]")
 
 
+def test_design_sections_for_the_guide_pages_leave_out_the_markers():
+    tilt, table = guide.design_section("tilt"), guide.design_section("tilt-table")
+    assert tilt.startswith("Tilt choice.")
+    assert table.startswith("| Tilt | When |")
+    assert "| 45 deg |" in table
+    assert table in tilt
+    assert "--8<--" not in tilt
+
+
 def test_steps_markdown_numbers_every_assembly_step():
     lines = guide.steps_markdown().splitlines()
     assert lines and all(line.startswith(f"{i}. ") for i, line in enumerate(lines, 1))  # noqa: PT018
@@ -40,8 +49,8 @@ def test_steps_detail_markdown_gives_every_step_its_text():
     assert all(d.startswith(t.replace(". ", ". **", 1) + "**: ") and len(d) > len(t) + 6 for t, d in zip(titles, details, strict=True))
 
 
-def test_assembly_eyebrow_counts_the_steps():
-    assert f">{len(guide.steps_markdown().splitlines())} steps<" in guide.assembly_eyebrow_markdown()
+def test_step_count_is_the_number_of_listed_steps():
+    assert guide.step_count() == len(guide.steps_markdown().splitlines())
 
 
 def test_fasteners_table_has_every_fastener_of_the_assembly_in_its_step():
@@ -90,14 +99,16 @@ def test_bom_protects_the_motor_stall_current_and_every_electronics_row_has_a_so
     assert all("http" in row or "unverified" in row for row in electronics.values())
 
 
+def test_wiring_canvas_ratio_is_the_board_size():
+    css = (Path(__file__).parent.parent / "site" / "src" / "css" / "feeder.css").read_text(encoding="utf-8")
+    width, height = guide.wiring_board()["size"]
+    assert f'[data-board="wiring"] {{\n  --board-ratio: {width} / {height};' in css
+
+
 def test_wiring_page_checks_the_sensor_type_by_continuity_before_wiring():
-    page = (Path(__file__).parent.parent / "guide" / "wiring.md").read_text(encoding="utf-8")
-    assert page.index("## Check the sensor on delivery") < page.index("data-buildguide")
+    page = (Path(__file__).parent.parent / "site" / "docs" / "wiring.mdx").read_text(encoding="utf-8")
+    assert page.index("## Check the sensor on delivery") < page.index("<BuildGuide ")
     assert "continuity" in page
-
-
-def test_assembly_row_counts_the_assembly_steps():
-    assert f": {len(guide.steps_markdown().splitlines())} steps " in guide.assembly_row_markdown()
 
 
 def test_guide_steps_are_the_viewer_steps():

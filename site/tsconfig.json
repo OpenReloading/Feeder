@@ -1,0 +1,14 @@
+{
+  "extends": "@docusaurus/tsconfig",
+  "compilerOptions": {
+    "noEmit": true,
+    // @docusaurus/tsconfig still sets baseUrl, which TypeScript 6 deprecates
+    "ignoreDeprecations": "6.0",
+    // Node runs the scripts with their .mts imports as written
+    "allowImportingTsExtensions": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["docusaurus.config.ts", "sidebars.ts", "scripts", "src"]
+}

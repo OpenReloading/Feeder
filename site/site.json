@@ -1,0 +1,7 @@
+{
+  "title": "Feeder 9mm case feeder",
+  "description": "Parametric brass collator for reloading. Build guide, BOM and assembly steps generated from feeder/config.py.",
+  "url": "https://openreloading.github.io",
+  "baseUrl": "/Feeder/",
+  "repo": "OpenReloading/Feeder"
+}

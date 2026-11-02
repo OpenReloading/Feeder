@@ -1,0 +1,54 @@
+{
+  "name": "feeder-site",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve",
+    "typecheck": "tsc",
+    "test": "node --test scripts/*.test.mts"
+  },
+  "dependencies": {
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/plugin-content-docs": "3.10.2",
+    "@docusaurus/plugin-sitemap": "3.10.2",
+    "@docusaurus/theme-classic": "3.10.2",
+    "@openreloading/docusaurus-plugin-buildguide": "https://github.com/OpenReloading/BuildGuide/releases/download/docusaurus-v1.5.0/openreloading-docusaurus-plugin-buildguide-1.5.0.tgz",
+    "pagefind": "1.5.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@docusaurus/theme-common": "3.10.2",
+    "@docusaurus/tsconfig": "3.10.2",
+    "@docusaurus/types": "3.10.2",
+    "typescript": "~6.0.0"
+  },
+  "browserslist": {
+    "production": [
+      "last 2 chrome version",
+      "last 2 firefox version",
+      "last 2 safari version",
+      "last 2 edge version"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "overrides": {
+    "@docusaurus/core": {
+      "tinypool": "^2.1.2"
+    },
+    "serialize-javascript": "^7.1.3",
+    "sockjs": {
+      "uuid": "^11.1.1"
+    }
+  }
+}

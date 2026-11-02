@@ -1,0 +1,36 @@
+---
+title: Assembly
+hide_table_of_contents: true
+---
+
+import assembly from './_generated/assembly.json';
+import Fasteners from './_generated/fasteners.md';
+import StepsDetail from './_generated/steps-detail.md';
+
+<p className="feeder-hero__eyebrow">{assembly.steps} steps</p>
+
+# Assembly
+
+Each step moves its parts in first, then their screws, then their nuts. Drag to orbit, hold Ctrl or Cmd and scroll to zoom (on a phone, pinch to zoom, two fingers to pan, and the Orbit mode button for one-finger orbiting). The assembled feeder comes as STEP (labelled part tree, FreeCAD and Fusion) and 3MF.
+
+{/* the files build.py --guide writes to static/generated/assembly/: plain links, relative to this page, as they are no pages */}
+<p className="feeder-intro__actions"><a className="button button--primary" href="../generated/assembly/viewer.html">Open the viewer on its own page</a> <a className="button button--secondary" href="../generated/assembly/feeder.step">STEP part tree</a> <a className="button button--secondary" href="../generated/assembly/feeder.3mf">3MF</a></p>
+
+<div className="assembly-viewer">
+<p className="assembly-viewer__bar">Assembly viewer</p>
+<iframe src="../generated/assembly/viewer.html" title="Feeder assembly steps" style={{ width: '100%', height: '75svh', border: 0 }}></iframe>
+</div>
+
+<div className="print-only">
+
+**Steps**
+
+<StepsDetail />
+
+</div>
+
+## Fasteners
+
+The table lists the fasteners of the default configuration. The parts to buy list of the [configurator](configurator.mdx) changes with the options you pick.
+
+<Fasteners />

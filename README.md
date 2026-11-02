@@ -1,12 +1,12 @@
-<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="guide/assets/logo-dark.svg"><img src="guide/assets/logo.svg" width="320" alt="OpenReloading Feeder"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="site/static/assets/logo-dark.svg"><img src="site/static/assets/logo.svg" width="320" alt="OpenReloading Feeder"></picture></p>
 
 # Feeder
 
 [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/hUCSjDYNaa)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="guide/assets/feeder-dark.png">
-  <img src="guide/assets/feeder-light.png" alt="Render of the assembled feeder on its tilt mount" width="480">
+  <source media="(prefers-color-scheme: dark)" srcset="site/static/assets/feeder-dark.png">
+  <img src="site/static/assets/feeder-light.png" alt="Render of the assembled feeder on its tilt mount" width="480">
 </picture>
 
 A tilted plate turns under loose pistol brass, and the cases leave base down through a drop tube and a hose. Every part is generated from `feeder/config.py` with [build123d](https://github.com/gumyr/build123d) and exported as STL and STEP for your printer.

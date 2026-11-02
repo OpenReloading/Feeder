@@ -1,0 +1,862 @@
+/* Feeder layout on the brand tokens of brand.css. The home page is the doc "index": Docusaurus puts docs-doc-id-index
+   on <html>, which scopes its rules. */
+
+/* Type: system sans body (Infima's default), system mono labels, table headers and numbers; headings at weight 500 */
+.markdown :is(h1, h2, h3, h4) {
+  font-weight: 500;
+}
+
+.markdown h1,
+.markdown h1:first-child {
+  --ifm-h1-font-size: 32px;
+  letter-spacing: -0.015em;
+}
+
+.markdown table th,
+#configurator-form label,
+.markdown table[data-stack] td:not(:first-child)::before {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.markdown table th {
+  background: var(--surface);
+}
+
+/* Links in running text are underlined, so they do not rely on colour against the text around them, and get a 44 px
+   target without taller lines */
+main :is(p, li, td) > a:not(.button) {
+  text-decoration: underline;
+}
+
+.markdown a:not([class]) {
+  padding-block: 11px;
+}
+
+/* Focus on every link, button and control */
+:is(a, button, select, input, summary, label, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Interactive elements are at least 44 px high: the page list, the menu buttons, the footer links, the skip link */
+.menu__link,
+.navbar__brand,
+.footer__link-item,
+a[href="#__docusaurus_skipToContent_fallback"] {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.navbar .clean-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Prose lines of about 75 characters; tables, admonitions and components keep the full width */
+.markdown > :is(p, ul, ol) {
+  max-width: 62ch;
+}
+
+/* Inline code wraps at the <wbr> after a dot (scripts/table-layout.mts), never inside a name; 16 px on phones */
+.markdown code {
+  font-size: max(0.85em, 12px);
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+@media screen and (max-width: 820px) {
+  .markdown code {
+    font-size: max(0.85em, 16px);
+  }
+}
+
+/* Header on the page colour with a line under it; the wordmark of the scheme names the site */
+.navbar {
+  border-bottom: 1px solid var(--line);
+  --ifm-navbar-item-padding-vertical: 9px;
+}
+
+.navbar__logo {
+  height: 36px;
+}
+
+/* Band of hairlines under the header, decoration only; --band: none on :root switches it off */
+.main-wrapper::before {
+  content: "";
+  display: var(--band, block);
+  height: 14px;
+  border-bottom: 1px solid var(--line);
+  background: repeating-linear-gradient(transparent 0 6px, var(--line) 6px 7px);
+}
+
+/* The page list (sidebars.ts) in muted text; the current page in ink on the active fill (the link colour on it is
+   under 4.5:1 in the light scheme), marked by an accent bar */
+.menu {
+  --ifm-menu-color: var(--muted);
+  --ifm-menu-color-active: var(--ink);
+  font-size: 15px;
+}
+
+.menu__link--active {
+  box-shadow: inset 3px 0 var(--accent);
+  font-weight: 600;
+}
+
+/* The repository link (src/components/RepoWidget.tsx) is an outlined button: icon, name, release, stars and forks.
+   The widget is a navbar item: Infima hides those below 997 px, where the menu shows it */
+@media (min-width: 997px) {
+  .navbar__items .repo-widget {
+    display: flex;
+    min-height: 44px;
+  }
+}
+
+.repo-widget {
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  max-width: 15rem;
+  padding: 4px 12px;
+  border: 1px solid var(--control-line);
+  border-radius: 8px;
+  color: var(--ink);
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.repo-widget:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+  text-decoration: none;
+}
+
+.navbar-sidebar .repo-widget {
+  margin: 8px 12px;
+}
+
+.repo-widget svg {
+  display: block;
+  fill: currentColor;
+}
+
+.repo-widget__icon svg {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.repo-widget__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.repo-widget__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: var(--ifm-font-weight-semibold);
+}
+
+.repo-widget__facts {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.repo-widget__facts li {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.repo-widget__facts svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+/* spoken label of a fact: the icon is hidden from assistive technology, the count alone says nothing */
+.repo-widget__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Search (src/theme/SearchBar.tsx): Pagefind's button and field 44 px high (its own rules outrank any selector, its
+   variables do not); the button on --surface like a field */
+:is(pagefind-modal-trigger, pagefind-modal) {
+  --pf-input-height: 44px;
+  --pf-border-radius: 10px;
+}
+
+pagefind-modal-trigger {
+  --pf-background: var(--surface);
+}
+
+/* Footer: a line above, monospace text; the links underlined, 44 px high and 16 px apart */
+.footer {
+  border-top: 1px solid var(--line);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 16px;
+  margin-bottom: 0;
+  text-align: left;
+}
+
+.footer__link-item {
+  display: inline-flex;
+  text-decoration: underline;
+}
+
+.footer__link-separator,
+.footer__link-item svg {
+  display: none;
+}
+
+/* Previous and next */
+.pagination-nav__link {
+  border-color: var(--line);
+}
+
+.pagination-nav__link:hover {
+  border-color: var(--accent);
+}
+
+/* Buttons: blue primary, slate-bordered secondary */
+.markdown .button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  border: 1px solid var(--control-line);
+  background: transparent;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.markdown .button:is(:hover, :focus-visible) {
+  border-color: var(--accent);
+  background: transparent;
+  color: var(--accent);
+}
+
+.markdown .button--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 1px 2px rgb(16 18 27 / 12%), 0 4px 12px rgb(25 113 194 / 20%);
+  color: var(--on-accent);
+}
+
+.markdown .button--primary:is(:hover, :focus-visible) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--page);
+}
+
+.markdown .button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Warnings are the untested-design notice: amber box, the title as a label chip, no icon */
+.theme-admonition-warning {
+  --ifm-alert-background-color: var(--warn-fill);
+  --ifm-alert-background-color-highlight: var(--surface-alt);
+  --ifm-alert-border-color: var(--warn-border);
+  --ifm-alert-foreground-color: var(--warn-body);
+  border: 1px solid var(--warn-border);
+  box-shadow: none;
+}
+
+.theme-admonition-warning > :first-child {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background-color: var(--warn-text);
+  color: var(--page);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.theme-admonition-warning > :first-child > span {
+  display: none;
+}
+
+/* BuildGuide components: the caution fill brand.css does not map, controls 44 px high, labels at 12 px or more,
+   monospace table heads and quantities, fields at 16 px (phone browsers zoom into smaller ones) */
+html[data-theme] .ag-guide {
+  --ag-caution-bg: var(--warn-fill);
+}
+
+html[data-theme] .ag-guide .ag-primary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--on-accent);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+html[data-theme] .ag-guide :is(
+  .ag-search input,
+  .ag-board-toolbar select,
+  .ag-board-controls button,
+  .ag-quiet,
+  .ag-have,
+  .ag-verify,
+  .ag-wire-row > button
+) {
+  min-height: 44px;
+}
+
+html[data-theme] .ag-guide .ag-bom-table th {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+html[data-theme] .ag-guide .ag-qty {
+  font-family: var(--ifm-font-family-monospace);
+}
+
+html[data-theme] .ag-guide :is(
+  .ag-source-link,
+  .ag-result-count,
+  .ag-status,
+  .ag-wire-row span,
+  .ag-wire-navigation span,
+  .ag-connection-detail small,
+  .ag-board-toolbar label,
+  .ag-board-legend span,
+  button small
+) {
+  font-size: 12px;
+}
+
+html[data-theme] .ag-guide .ag-source-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* The checkbox beside a connection: a 44 px high target */
+html[data-theme] .ag-guide .ag-wire-row > input[type="checkbox"] {
+  align-self: stretch;
+  min-height: 44px;
+  margin-block: 0;
+}
+
+html[data-theme] .ag-guide :is(.ag-search input, .ag-board-toolbar select) {
+  font-size: 16px;
+}
+
+@media screen and (max-width: 820px) {
+  html[data-theme] .ag-guide :is(.ag-head p, .ag-bom-table td, .ag-bom-table strong, .ag-step-note) {
+    font-size: 16px;
+  }
+}
+
+/* Boards: the canvas is as tall as the drawing at its width, so no empty bands remain above and below it (the ratio is
+   the board size of feeder/guide.py wiring_board, checked by tests/test_guide.py; the page wraps the board in a div with
+   data-board). Fullscreen keeps BuildGuide's flex height. */
+[data-board="wiring"] {
+  --board-ratio: 1000 / 600;
+}
+
+html[data-theme] .ag-guide:not(.ag-expanded) .ag-board-canvas {
+  height: auto;
+  aspect-ratio: var(--board-ratio);
+}
+
+/* Whole pixels: at a fractional height a zoomed board that a pinch or the zoom buttons left at its bottom edge keeps the
+   next swipe instead of handing it to the page */
+@supports (height: round(down, 1cqw, 1px)) {
+  html[data-theme] .ag-guide:not(.ag-expanded) .ag-full-board {
+    container-type: inline-size;
+  }
+
+  html[data-theme] .ag-guide:not(.ag-expanded) .ag-board-canvas {
+    aspect-ratio: auto;
+    height: round(down, 100cqw / (var(--board-ratio)), 1px);
+  }
+}
+
+/* BOM rows: less padding when the component is narrow, the spec column keeps its share */
+@container (max-width: 600px) {
+  html[data-theme] .ag-guide .ag-bom-table :is(th, td) {
+    padding: 8px 10px;
+  }
+
+  html[data-theme] .ag-guide .ag-part-cell {
+    min-width: 0;
+    gap: 8px;
+  }
+}
+
+/* Tables with long cells (data-stack, set by scripts/table-layout.mts) show one block per row on a phone */
+@media screen and (max-width: 600px) {
+  .markdown table[data-stack] {
+    display: block;
+    width: 100%;
+    overflow: visible;
+    border: 0;
+  }
+
+  .markdown table[data-stack] thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .markdown table[data-stack] :is(tbody, tr, td) {
+    display: block;
+  }
+
+  .markdown table[data-stack] tr {
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: none;
+  }
+
+  .markdown table[data-stack] td {
+    min-width: 0;
+    padding: 10px 14px;
+    border: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .markdown table[data-stack] td:first-child {
+    border-top: 0;
+    background: var(--surface);
+    font-weight: 600;
+  }
+
+  .markdown table[data-stack] td:not(:first-child)::before {
+    content: attr(data-label);
+    display: block;
+  }
+}
+
+/* Page intro of the configurator and assembly pages: eyebrow, title, lead */
+.markdown > .feeder-hero__eyebrow {
+  text-transform: uppercase;
+}
+
+.feeder-hero__eyebrow + header > h1 {
+  margin: 0.3em 0;
+  font-size: 44px;
+  line-height: 1.1;
+}
+
+.feeder-hero__eyebrow + header + p {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+/* Configurator: the form left and the results right above 900 px */
+.configurator {
+  display: grid;
+  gap: 40px;
+}
+
+@media screen and (min-width: 900px) {
+  .configurator {
+    grid-template-columns: minmax(300px, 1fr) minmax(0, 1.4fr);
+    align-items: start;
+  }
+}
+
+/* A fieldset is as wide as its longest option unless told otherwise, so the pickers shrink to the column */
+#configurator-form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* One block per option: label, select, hint */
+#configurator-form p {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+#configurator-form label {
+  display: block;
+  margin-bottom: 8px;
+}
+
+#configurator-form select {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--control-line);
+  border-radius: 0;
+  background: var(--page);
+  color: var(--ink);
+  /* 16 px (phone browsers zoom into smaller fields), scales with the visitor's text size */
+  font: inherit;
+  font-family: var(--ifm-font-family-base);
+  font-size: 1rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+#configurator-form select:hover {
+  border-color: var(--accent);
+}
+
+/* Links in the hints and the parts to buy: a 44 px target without taller lines */
+#configurator-result td a,
+#configurator-form a {
+  padding-block: 13px;
+}
+
+#configurator-result h2:first-child {
+  margin-top: 0;
+}
+
+#configurator-result :is(table, tr, th, td) {
+  border: 0;
+  background: none;
+}
+
+#configurator-result th {
+  padding: 14px;
+  border-bottom: 1px solid var(--control-line);
+  text-align: left;
+}
+
+#configurator-result td {
+  padding: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.configurator__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.configurator__actions span {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Part names wrap after an underscore (<wbr> from configurator-browser.js), inside a part only when it is still too long */
+#configurator-parts td:first-child {
+  overflow-wrap: anywhere;
+}
+
+/* Render on the home page: only the image of the colour mode, marked by GitHub's #gh-light-mode-only and
+   #gh-dark-mode-only at the end of its address */
+html[data-theme="light"] img[src$="#gh-dark-mode-only"],
+html[data-theme="dark"] img[src$="#gh-light-mode-only"] {
+  display: none;
+}
+
+.markdown img[src*="/feeder-light"],
+.markdown img[src*="/feeder-dark"] {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* Home page hero: text and drawing side by side when the content column is 760 px wide or more */
+.docs-doc-id-index .markdown {
+  container-type: inline-size;
+}
+
+.feeder-hero {
+  display: grid;
+  gap: 48px;
+  padding-top: 32px;
+  margin-bottom: 32px;
+}
+
+@container (min-width: 760px) {
+  .feeder-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+.feeder-hero__eyebrow {
+  margin: 0;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+.feeder-hero h1 {
+  margin: 0.4em 0;
+  font-size: 54px;
+  line-height: 1.08;
+}
+
+.feeder-hero__lead {
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.feeder-hero__actions,
+.feeder-intro__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.feeder-intro__actions {
+  margin-top: 24px;
+}
+
+.feeder-hero__figure {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-align: left;
+  container-type: inline-size;
+}
+
+/* Hairline fill behind the drawing */
+.feeder-hero__figure::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background: repeating-linear-gradient(transparent 0 6px, var(--line) 6px 7px);
+}
+
+.feeder-hero__figure > * {
+  position: relative;
+}
+
+.feeder-hero__drawing {
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.feeder-hero__drawing * {
+  vector-effect: non-scaling-stroke;
+}
+
+.feeder-hero__optional {
+  stroke-dasharray: 5 4;
+}
+
+.feeder-hero__cases {
+  stroke: var(--accent);
+}
+
+.feeder-hero__labels path {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.feeder-hero__labels text,
+ul.feeder-hero__parts,
+.feeder-hero__figure figcaption {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 17 drawing units: at least 12 px while the names are shown (drawing 352 px wide or more, see the container query) */
+.feeder-hero__labels text {
+  fill: var(--muted);
+  stroke: none;
+  font-size: 17px;
+}
+
+.feeder-hero__figure figcaption {
+  margin: 12px 0 0;
+  text-align: left;
+}
+
+ul.feeder-hero__parts {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .feeder-hero h1 {
+    font-size: 34px;
+  }
+}
+
+/* Narrow drawing (a phone): the drawing keeps the numbers, the names move into a two-column list */
+@container (max-width: 351px) {
+  .feeder-hero__name {
+    display: none;
+  }
+
+  /* 22 drawing units: at least 12 px down to a 264 px drawing */
+  .feeder-hero__labels text {
+    font-size: 22px;
+  }
+
+  ul.feeder-hero__parts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 16px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  ul.feeder-hero__parts li {
+    margin: 0;
+  }
+}
+
+/* Home page sections below the hero */
+.feeder-intro h2 {
+  margin: 0 0 24px;
+  padding-top: 72px;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.feeder-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.feeder-card {
+  padding: 24px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.feeder-card > :last-child {
+  margin-bottom: 0;
+}
+
+.feeder-card__label {
+  margin: 0 0 8px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--link);
+}
+
+/* Numbered rows between hairlines, two columns above 820 px */
+.feeder-rows ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: row;
+}
+
+.feeder-rows li {
+  margin: 0;
+  padding: 16px 0 16px 40px;
+  border-top: 1px solid var(--line);
+  counter-increment: row;
+  break-inside: avoid;
+}
+
+.feeder-rows li::before {
+  content: counter(row, decimal-leading-zero);
+  float: left;
+  margin-left: -40px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--muted);
+}
+
+@media screen and (min-width: 820px) {
+  .feeder-rows ol {
+    columns: 2;
+    column-gap: 32px;
+  }
+}
+
+/* The intro shows Tilt, When and the capacity; the link length stays on the tilt page */
+.feeder-tilt :is(th, td):nth-child(4) {
+  display: none;
+}
+
+/* Assembly viewer: a hairline frame with a label bar above the iframe */
+.assembly-viewer {
+  margin-top: 24px;
+  margin-bottom: 24px;
+  border: 1px solid var(--line);
+}
+
+.assembly-viewer__bar {
+  margin: 0;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.assembly-viewer iframe {
+  display: block;
+}
+
+/* The assembly page prints its step list in place of the viewer */
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block;
+  }
+
+  .assembly-viewer,
+  .main-wrapper::before {
+    display: none;
+  }
+}

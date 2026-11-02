@@ -22,6 +22,16 @@ updates:
       - dependency-name: mpmath
       - dependency-name: marshmallow
       - dependency-name: webcolors
+  # the guide site (site/package-lock.json); the BuildGuide plugin is a release file URL, updated by hand
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      npm:
+        update-types: [minor, patch]
   - package-ecosystem: docker
     directory: /.devcontainer
     schedule:
