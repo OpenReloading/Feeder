@@ -1,6 +1,7 @@
 """CLI: `run` one point, `sweep` a grid into build/sim/sweep.csv, `plot` it to PNG, `calibrate` against hardware.
 
-- sweep appends rows and skips points already in the CSV, so a stopped sweep resumes.
+- sweep appends rows and skips points already in the CSV, so a stopped sweep resumes. It refuses a CSV with rows of
+  another MuJoCo version (column `mujoco`): solver changes between versions move the results.
 - calibrate reads a CSV of measured points (tilt, rpm, cases_per_h, base_down_share), runs each at every mu and
   com_ratio of the grid and writes the error per pair, best first. Set the best pair in `config.py`.
 """
@@ -14,12 +15,14 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
+import mujoco
+
 from feeder.config import CFG
 from sim.run import run
 
 OUT = Path(__file__).parent.parent / "build" / "sim"
-KEYS = ("plate", "case", "tilt", "rpm", "cases", "com_ratio", "mu", "seed", "start")
-TEXT = ("plate", "case", "start")
+KEYS = ("plate", "case", "tilt", "rpm", "cases", "com_ratio", "mu", "seed", "start", "mujoco")
+TEXT = ("plate", "case", "start", "mujoco")
 
 
 def _floats(s: str) -> list[float]:
@@ -33,7 +36,11 @@ def _done(path: Path) -> set[tuple]:
         rows = csv.DictReader(f)
         if not set(KEYS) <= set(rows.fieldnames or ()):
             raise SystemExit(f"{path} has other columns (older model): pass a new --out")
-        return {tuple(r[k] if k in TEXT else float(r[k]) for k in KEYS) for r in rows}
+        done = {tuple(r[k] if k in TEXT else float(r[k]) for k in KEYS) for r in rows}
+    other = sorted({str(k[-1]) for k in done} - {mujoco.__version__})
+    if other:  # before hours of computing, and `plot` draws one line per tilt
+        raise SystemExit(f"{path} has rows of MuJoCo {', '.join(other)} (installed: {mujoco.__version__}): pass a new --out")
+    return done
 
 
 def sweep(a) -> None:
@@ -43,7 +50,7 @@ def sweep(a) -> None:
     todo: list[dict[str, Any]] = [dict(plate=pl, case=a.case or None, tilt=t, rpm=r, n_cases=a.cases, revs=a.revs, com_ratio=c, mu=m, seed=s, start=st)  # noqa: C408
             for pl, t, r, c, m, s, st in itertools.product(a.plate.split(","), _floats(a.tilt), _floats(a.rpm), _floats(a.com), _floats(a.mu),
                                                            range(1, a.seeds + 1), a.start.split(","))
-            if (pl, a.case, t, r, a.cases, c, m, s, st) not in done]
+            if (pl, a.case, t, r, a.cases, c, m, s, st, mujoco.__version__) not in done]
     print(f"{len(todo)} points to run, {len(done)} done", flush=True)
     # submit `run` itself: under forkserver and spawn a function defined in `__main__` is not importable in the worker
     with ProcessPoolExecutor(max_workers=min(a.workers, 6)) as ex:  # each worker holds a 250 case pile; the host has about 10 GB free
