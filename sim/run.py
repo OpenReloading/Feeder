@@ -220,5 +220,5 @@ def run(tilt: float, rpm: float, n_cases: int = 250, revs: float = 3.0, cfg: Con
         torque_mean=round(float(tq.mean()), 3), torque_p95=round(float(np.percentile(tq, 95)), 3), torque_max=round(float(tq.max()), 3),
         slip_share=round(float(np.mean(tq > slip)), 4), speed_ratio=round(float(np.mean(speed)) / w, 3) if speed else 0.0,
         deepest_mm=round(deepest, 2), deepest_pair=deepest_pair, deep_share=round(deep_checks / max(1, len(torque)), 4),
-        lost_at=" ".join(lost_at), spilled_at=" ".join(spilled_at[:50]), rtf=round(total / wall, 3),
+        lost_at=" ".join(lost_at), spilled_at=" ".join(spilled_at[:50]), rtf=round(total / wall, 3), mujoco=mujoco.__version__,
     )
