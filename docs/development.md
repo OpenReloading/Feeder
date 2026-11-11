@@ -17,6 +17,10 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 | `.venv/bin/python -m pytest -q` | tests only. `-n 4 --dist loadfile` runs the test files on 4 cores |
 | `.venv/bin/python -m pytest -q -n 4 --dist loadfile --cov`, then `.venv/bin/coverage report --rcfile=sim/.coveragerc` | tests with a coverage summary and the floors (after the test run, `.venv/bin/coverage xml -o coverage.xml --rcfile=/dev/null` writes the report SonarCloud reads to `coverage.xml` at the root: without the settings of `pyproject.toml` it holds `feeder` and `sim` with paths from the root): `feeder` in `[tool.coverage.report]` of `pyproject.toml` (pytest fails below it), `sim` in `sim/.coveragerc` (the second command). CI (`pages.yml`) runs both on the whole suite. Raise a floor when coverage rises, keep it a little below the measured value. Not measured: `sim/__main__.py` (CLI of the hours-long sweeps). `feeder/export.py` (assembly viewer export) runs only in `build.py --assembly`, so its tests-only coverage is low |
 
+## Dependencies
+
+`requirements.txt` holds every pin of the environment and is the file Dependabot updates. `pylock.toml` is what the dev container and CI install: the same pins with the wheels and hashes for x86_64 Linux and CPython 3.14. After a change of `requirements.txt`, on the host or in the container, run `python3 tools/lock.py`. It needs [uv](https://docs.astral.sh/uv/) 0.10 or newer on the PATH (in the container: `pipx install uv`) and writes the same file on any host. When a bump brings in a new dependency, the script locks it and the test names it: pin it in `requirements.txt` and run the script again. `tests/test_lock.py` fails while `pylock.toml` or a pin repeated in `pyproject.toml` or `docs/environment.md` differs from `requirements.txt`.
+
 ## Build guide site
 
 The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenReloading/BuildGuide) plugin (`mkdocs.yml`, pages in `guide/`): introduction and BOM checklist from `feeder/guide.py`, the assembly viewer, tilt and capacity from `docs/design.md`. Nothing generated is committed. In the container:

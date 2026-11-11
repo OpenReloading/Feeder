@@ -1,5 +1,5 @@
 # Pins of the dev container environment (Python 3.14, pip freeze), the input of pylock.toml and the file Dependabot updates.
-# After a change run `pip lock -r requirements.txt -o pylock.toml`. Top-level pins are in pyproject.toml.
+# After a change run `python3 tools/lock.py`. Top-level pins are in pyproject.toml.
 absl-py==2.5.1
 anytree==2.13.0
 asttokens==3.0.2
