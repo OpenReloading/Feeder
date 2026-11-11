@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: weekly
     cooldown:
-      default-days: 7
+      default-days: 3
     groups:
       actions:
         patterns: ['*']
@@ -14,7 +14,7 @@ updates:
     schedule:
       interval: weekly
     cooldown:
-      default-days: 7
+      default-days: 3
     groups:
       pip:
         update-types: [minor, patch]
@@ -27,4 +27,7 @@ updates:
     schedule:
       interval: weekly
     cooldown:
-      default-days: 7
+      default-days: 3
+    ignore:  # Python 3.15 waits for bd_warehouse (Requires-Python <3.15); remove with the move to 3.15
+      - dependency-name: devcontainers/python
+        update-types: ['version-update:semver-minor']
