@@ -15,8 +15,8 @@ ROOT = Path(__file__).parent.parent
 # the oldest glibc that has a wheel of every pin (cadquery-ocp-novtk needs 2.28); the container has 2.36
 PLATFORM = "x86_64-manylinux_2_28"
 PYTHON = "3.14"
-# these environment variables add indexes to, or override, --default-index and --no-config
-UNSET = ("UV_INDEX", "UV_INDEX_URL", "UV_DEFAULT_INDEX", "UV_EXTRA_INDEX_URL", "UV_FIND_LINKS", "UV_CONFIG_FILE")
+# uv reads its options from UV_* variables too (indexes, overrides, exclusions): only these host settings reach it
+KEEP = ("UV_CACHE_DIR", "UV_NATIVE_TLS", "UV_HTTP_TIMEOUT")
 
 
 def main() -> int:
@@ -30,7 +30,7 @@ def main() -> int:
     command += ["--upgrade"]
     # the same file on any host: no uv configuration files, the index named
     command += ["--no-config", "--default-index", "https://pypi.org/simple"]
-    env = {k: v for k, v in os.environ.items() if k not in UNSET}
+    env = {k: v for k, v in os.environ.items() if not k.startswith("UV_") or k in KEEP}
     # uv also prints the lock: only its messages (a yanked pin) are shown
     return subprocess.call([*command, "--custom-compile-command", "python3 tools/lock.py"], cwd=ROOT, stdout=subprocess.DEVNULL, env=env)
 
