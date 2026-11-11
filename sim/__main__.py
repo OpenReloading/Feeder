@@ -1,7 +1,7 @@
 """CLI: `run` one point, `sweep` a grid into build/sim/sweep.csv, `plot` it to PNG, `calibrate` against hardware.
 
-- sweep appends rows and skips points already in the CSV, so a stopped sweep resumes. A point counts as done only for
-  the installed MuJoCo version (column `mujoco`): solver changes between versions move the results.
+- sweep appends rows and skips points already in the CSV, so a stopped sweep resumes. It refuses a CSV with rows of
+  another MuJoCo version (column `mujoco`): solver changes between versions move the results.
 - calibrate reads a CSV of measured points (tilt, rpm, cases_per_h, base_down_share), runs each at every mu and
   com_ratio of the grid and writes the error per pair, best first. Set the best pair in `config.py`.
 """
@@ -36,7 +36,11 @@ def _done(path: Path) -> set[tuple]:
         rows = csv.DictReader(f)
         if not set(KEYS) <= set(rows.fieldnames or ()):
             raise SystemExit(f"{path} has other columns (older model): pass a new --out")
-        return {tuple(r[k] if k in TEXT else float(r[k]) for k in KEYS) for r in rows}
+        done = {tuple(r[k] if k in TEXT else float(r[k]) for k in KEYS) for r in rows}
+    other = sorted({str(k[-1]) for k in done} - {mujoco.__version__})
+    if other:  # before hours of computing, and `plot` draws one line per tilt
+        raise SystemExit(f"{path} has rows of MuJoCo {', '.join(other)} (installed: {mujoco.__version__}): pass a new --out")
+    return done
 
 
 def sweep(a) -> None:
@@ -73,9 +77,6 @@ def plot(a) -> None:
 
     with open(a.csv) as f:  # noqa: PTH123
         rows = [r for r in csv.DictReader(f) if r["valid"] == "True"]  # a lost or spilled case is a model fault
-    versions = sorted({r.get("mujoco") or "unknown" for r in rows})  # a CSV from before the column has none
-    if len(versions) > 1:
-        raise SystemExit(f"{a.csv} holds rows of MuJoCo {', '.join(versions)}: one line per tilt would mix them, sweep into a new --out")
     fig, ax = plt.subplots(1, 3, figsize=(15, 4.5))
     for tilt in sorted({float(r["tilt"]) for r in rows}):
         rs = sorted((r for r in rows if float(r["tilt"]) == tilt), key=lambda r: float(r["rpm"]))

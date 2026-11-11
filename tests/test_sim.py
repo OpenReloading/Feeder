@@ -129,8 +129,8 @@ def test_cli_sweep_runs_a_point_in_worker_processes(tmp_path):
     assert len(out.read_text().splitlines()) == 2  # header and the one point
     out.write_text(out.read_text().replace(mujoco.__version__, "0.0.0"))  # the same point, done on another MuJoCo version
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)  # noqa: PLW1510
-    assert r.returncode == 0, r.stderr[-800:]
-    assert len(out.read_text().splitlines()) == 3  # so it runs again on the installed one
+    assert r.returncode != 0 and "0.0.0" in r.stderr  # noqa: PT018
+    assert len(out.read_text().splitlines()) == 2  # nothing appended to the other version's rows
 
 
 def _wiper_geom(cfg):
