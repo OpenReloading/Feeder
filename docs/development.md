@@ -19,7 +19,7 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 
 ## Dependencies
 
-`requirements.txt` holds every pin of the environment and is the file Dependabot updates. `pylock.toml` is what the dev container and CI install: the same pins with the wheels and hashes for x86_64 Linux and CPython 3.14. After a change of `requirements.txt`, on the host or in the container, run `python3 tools/lock.py`. It needs [uv](https://docs.astral.sh/uv/) on the PATH (in the container: `pipx install uv`) and writes the same file on any host. `tests/test_lock.py` fails while `pylock.toml` or a pin repeated in `pyproject.toml` or `docs/environment.md` differs from `requirements.txt`.
+`requirements.txt` holds every pin of the environment and is the file Dependabot updates. `pylock.toml` is what the dev container and CI install: the same pins with the wheels and hashes for x86_64 Linux and CPython 3.14. After a change of `requirements.txt`, on the host or in the container, run `python3 tools/lock.py`. It needs [uv](https://docs.astral.sh/uv/) 0.10 or newer on the PATH (in the container: `pipx install uv`) and writes the same file on any host. When a bump brings in a new dependency, the script locks it and the test names it: pin it in `requirements.txt` and run the script again. `tests/test_lock.py` fails while `pylock.toml` or a pin repeated in `pyproject.toml` or `docs/environment.md` differs from `requirements.txt`.
 
 ## Build guide site
 
