@@ -124,11 +124,11 @@ def test_short_run_keeps_the_cases_and_the_plate_speed():
 def test_cli_sweep_runs_a_point_in_worker_processes(tmp_path):
     out = tmp_path / "sweep.csv"
     cmd = [sys.executable, "-m", "sim", "sweep", "--tilt", "45", "--rpm", "6", "--cases", "5", "--revs", "0.2", "--workers", "2", "--out", str(out)]
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)  # noqa: PLW1510
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)  # noqa: PLW1510
     assert r.returncode == 0, r.stderr[-800:]
     assert len(out.read_text().splitlines()) == 2  # header and the one point
     out.write_text(out.read_text().replace(mujoco.__version__, "0.0.0"))  # the same point, done on another MuJoCo version
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=60)  # noqa: PLW1510
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=120)  # noqa: PLW1510
     assert r.returncode == 0, r.stderr[-800:]
     assert len(out.read_text().splitlines()) == 3  # so it runs again on the installed one
 

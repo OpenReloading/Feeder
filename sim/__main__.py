@@ -73,6 +73,9 @@ def plot(a) -> None:
 
     with open(a.csv) as f:  # noqa: PTH123
         rows = [r for r in csv.DictReader(f) if r["valid"] == "True"]  # a lost or spilled case is a model fault
+    versions = sorted({r.get("mujoco") or "unknown" for r in rows})  # a CSV from before the column has none
+    if len(versions) > 1:
+        raise SystemExit(f"{a.csv} holds rows of MuJoCo {', '.join(versions)}: one line per tilt would mix them, sweep into a new --out")
     fig, ax = plt.subplots(1, 3, figsize=(15, 4.5))
     for tilt in sorted({float(r["tilt"]) for r in rows}):
         rs = sorted((r for r in rows if float(r["tilt"]) == tilt), key=lambda r: float(r["rpm"]))
