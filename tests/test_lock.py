@@ -1,6 +1,7 @@
 """pylock.toml (what the environment installs) holds exactly the pins of requirements.txt (what Dependabot updates), and
 the top-level pins repeated in pyproject.toml and docs/environment.md are the same versions."""
 
+import itertools
 import re
 import tomllib
 from pathlib import Path
@@ -33,7 +34,11 @@ def test_repeated_pins_match_requirements():
     project = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]
     repeated = [pin.split("==") for pin in project["dependencies"]]
     repeated += [pin.split("==") for extra in project["optional-dependencies"].values() for pin in extra]
-    # rows `| name (note) | version |` of the package table; none once the table is gone
-    rows = re.findall(r"^\| ([\w.-]+)(?: \(.*\))? \| (\d\S*) \|$", (ROOT / "docs/environment.md").read_text(), re.M)
+    # every row of the package table `| name (note) | version |`, none once the table is gone
+    lines = [line.strip() for line in (ROOT / "docs/environment.md").read_text().splitlines()]
+    table = lines[lines.index("| Package | Version |") + 2:] if "| Package | Version |" in lines else []
+    cells = [[c.strip().strip("`") for c in line.strip("|").split("|")] for line in itertools.takewhile(lambda s: s.startswith("|"), table)]
+    assert all(len(c) == 2 for c in cells), "docs/environment.md: a package row needs exactly two cells"
+    rows = [(re.sub(r" \(.*\)$", "", name), version) for name, version in cells]
     pins = _pins()
     assert [(name, version) for name, version in [*repeated, *rows] if pins.get(_name(name)) != version] == []

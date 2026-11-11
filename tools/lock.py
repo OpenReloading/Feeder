@@ -5,6 +5,7 @@ host or in the container (uv is not part of the locked environment: in the conta
     python3 tools/lock.py
 """
 
+import os
 import shutil
 import subprocess
 import sys
@@ -14,6 +15,8 @@ ROOT = Path(__file__).parent.parent
 # the oldest glibc that has a wheel of every pin (cadquery-ocp-novtk needs 2.28); the container has 2.36
 PLATFORM = "x86_64-manylinux_2_28"
 PYTHON = "3.14"
+# uv lets these environment variables override --default-index and --no-config
+UNSET = ("UV_INDEX", "UV_INDEX_URL", "UV_DEFAULT_INDEX", "UV_EXTRA_INDEX_URL", "UV_FIND_LINKS", "UV_CONFIG_FILE")
 
 
 def main() -> int:
@@ -27,8 +30,9 @@ def main() -> int:
     command += ["--upgrade"]
     # the same file on any host: no uv configuration files, the index named
     command += ["--no-config", "--default-index", "https://pypi.org/simple"]
+    env = {k: v for k, v in os.environ.items() if k not in UNSET}
     # uv also prints the lock: only its messages (a yanked pin) are shown
-    return subprocess.call([*command, "--custom-compile-command", "python3 tools/lock.py"], cwd=ROOT, stdout=subprocess.DEVNULL)
+    return subprocess.call([*command, "--custom-compile-command", "python3 tools/lock.py"], cwd=ROOT, stdout=subprocess.DEVNULL, env=env)
 
 
 if __name__ == "__main__":
