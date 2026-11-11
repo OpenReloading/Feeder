@@ -21,13 +21,14 @@ def main() -> int:
     if uv is None:
         sys.exit("uv is not on the PATH: https://docs.astral.sh/uv/getting-started/installation/")
     # --no-build: a pin without a wheel for PLATFORM stops the run, no source distribution gets locked
-    command = [uv, "pip", "compile", "requirements.txt", "--output-file", "pylock.toml", "--no-build", "--quiet"]
+    command = [uv, "pip", "compile", "requirements.txt", "--output-file", "pylock.toml", "--no-build"]
     command += ["--python-platform", PLATFORM, "--python-version", PYTHON]
     # --upgrade: the existing pylock.toml is not read, so a broken one (merge conflict) does not stop the run
     command += ["--upgrade"]
-    # the same file on any host: no uv settings of the user, the index named
+    # the same file on any host: no uv configuration files, the index named
     command += ["--no-config", "--default-index", "https://pypi.org/simple"]
-    return subprocess.call([*command, "--custom-compile-command", "python3 tools/lock.py"], cwd=ROOT)
+    # uv also prints the lock: only its messages (a yanked pin) are shown
+    return subprocess.call([*command, "--custom-compile-command", "python3 tools/lock.py"], cwd=ROOT, stdout=subprocess.DEVNULL)
 
 
 if __name__ == "__main__":

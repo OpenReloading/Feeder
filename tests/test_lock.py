@@ -22,10 +22,11 @@ def test_lock_matches_requirements_pins():
     locked = {_name(p["name"]): p["version"] for p in lock["packages"]}
     assert locked == _pins(), "regenerate: python3 tools/lock.py (a package only in the lock is a new dependency: pin it in requirements.txt)"
     # wheels only, hashed and from PyPI: an older uv also locks source distributions, an index set in the environment its own URLs
-    assert all(
-        "sdist" not in p and p["wheels"] and all(w["hashes"] and w["url"].startswith("https://files.pythonhosted.org/") for w in p["wheels"])
-        for p in lock["packages"]
-    )
+    other = [
+        p["name"] for p in lock["packages"]
+        if "sdist" in p or not p.get("wheels") or not all(w["hashes"] and w["url"].startswith("https://files.pythonhosted.org/") for w in p["wheels"])
+    ]
+    assert other == [], "regenerate with uv 0.10 or newer and no other index in the environment: python3 tools/lock.py"
 
 
 def test_repeated_pins_match_requirements():
