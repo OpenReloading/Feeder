@@ -36,14 +36,14 @@ sha256 = "9da13157f5b28becde0bd374fc677dcd3c290614264eff096f167c469cd9f933"
 
 [[packages]]
 name = "bd-materials"
-version = "0.2.4"
+version = "0.2.5"
 
 [[packages.wheels]]
-name = "bd_materials-0.2.4-py3-none-any.whl"
-url = "https://files.pythonhosted.org/packages/d3/fb/ea1f307dfcecb7a5e842d48031086dac70633fe61de0c0fb53ee6c8d7d35/bd_materials-0.2.4-py3-none-any.whl"
+name = "bd_materials-0.2.5-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/2a/61/4f22974be46a3d16b11422db01422eddd020e52ee7ab42902add3f8c9c0a/bd_materials-0.2.5-py3-none-any.whl"
 
 [packages.wheels.hashes]
-sha256 = "27a43ba75e4eb115c03b0a3ce188ee8482228d019965d2e7d892ff9c0ad38742"
+sha256 = "a08fa367c460ed7bfedaf8bdf57c91d93ef87dd5e3b66dc5e4a6771668d168e0"
 
 [[packages]]
 name = "bd-warehouse"
@@ -69,14 +69,14 @@ sha256 = "177f114e5f0514054189134346d386c7004048f8e58430b9b84b74a04fbc94fe"
 
 [[packages]]
 name = "cachetools"
-version = "7.2.4"
+version = "7.2.7"
 
 [[packages.wheels]]
-name = "cachetools-7.2.4-py3-none-any.whl"
-url = "https://files.pythonhosted.org/packages/5a/4c/694f7d44f2399b3901232d6ded1c88442a02fc8141936396d9289d951848/cachetools-7.2.4-py3-none-any.whl"
+name = "cachetools-7.2.7-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/dc/68/211287b89b122a6842b3f078ffecc5a2abd3c0e4362748586f765e2fb3c5/cachetools-7.2.7-py3-none-any.whl"
 
 [packages.wheels.hashes]
-sha256 = "4cfbebf3eec4040d2073b19c460511ad47eef7b852dbf9a0d385099b4dafa31e"
+sha256 = "88e6b53373a96786d20894fed9ce623ae5b73cbc07421b7a73098db088be69ae"
 
 [[packages]]
 name = "cadquery-ocp-novtk"
@@ -102,14 +102,14 @@ sha256 = "98c71bb60cfb651afe179b134ab88580fd75384fce0cc6d633f727002cd18abd"
 
 [[packages]]
 name = "certifi"
-version = "2026.10.19"
+version = "2026.10.23"
 
 [[packages.wheels]]
-name = "certifi-2026.10.19-py3-none-any.whl"
-url = "https://files.pythonhosted.org/packages/c4/51/29046e48f693c54e5b7412216d447a1d8362c9653148d98c02cdf65fa733/certifi-2026.10.19-py3-none-any.whl"
+name = "certifi-2026.10.23-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/32/d1/a3652fe2c19134d0d15922177821d863cbd7e842d53a21bbe7e8e3a1b5ac/certifi-2026.10.23-py3-none-any.whl"
 
 [packages.wheels.hashes]
-sha256 = "42d35340cc5b9ba78e818ddbff0c5b1c2b779de448a340fd1b989f5fa8670e1b"
+sha256 = "e9b54de76e530bb6cf0ccd036787103acb58fd42ba930ea8bf948ddbaa2f61d1"
 
 [[packages]]
 name = "charset-normalizer"
@@ -245,14 +245,14 @@ sha256 = "5f6836308248ffaae7a8519a002cef569b9005c0a6361650db8ece144fb2ed0c"
 
 [[packages]]
 name = "fonttools"
-version = "4.67.0"
+version = "4.68.0"
 
 [[packages.wheels]]
-name = "fonttools-4.67.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
-url = "https://files.pythonhosted.org/packages/79/fe/fef04b2cc2930edba11095f9e9b5c2797f8594fc54316195cc39d3c3bc63/fonttools-4.67.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
+name = "fonttools-4.68.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
+url = "https://files.pythonhosted.org/packages/b7/67/e9f2eb2aed41d4ed251a3c6f66e104685f0a03d8ded7ed87f1f0fc63898c/fonttools-4.68.0-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
 
 [packages.wheels.hashes]
-sha256 = "916836845e4b1c1447bb61390ffb3cb5f2940fd9f5d6de4685539a81806c7764"
+sha256 = "cbb63b26d33acc3eb61f544c22a0cadbe01682fc064b266bb0e33fa66cea853f"
 
 [[packages]]
 name = "fsspec"
@@ -432,14 +432,14 @@ sha256 = "a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c"
 
 [[packages]]
 name = "mujoco"
-version = "3.16.0"
+version = "3.17.0"
 
 [[packages.wheels]]
-name = "mujoco-3.16.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
-url = "https://files.pythonhosted.org/packages/8f/b3/4ce31cf2ab6d2550010d0998e111b54ea401cc6b16376815dcdda72fc4e1/mujoco-3.16.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+name = "mujoco-3.17.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+url = "https://files.pythonhosted.org/packages/ec/0d/f6c069c841b4514948f2d958551e0ae0a63ed8236b626bd8fe6fee1c9a87/mujoco-3.17.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
 
 [packages.wheels.hashes]
-sha256 = "fd5e9bafa8076998205632dfae019a761ff3c989fe59c53a5346ed8d75891df7"
+sha256 = "54e49ea1b8866f594502ff7c168bfbc2b951904d66eb3f927de8f51f2c288713"
 
 [[packages]]
 name = "mypy-extensions"
@@ -454,14 +454,14 @@ sha256 = "1be4cccdb0f2482337c4743e60421de3a356cd97508abadd57d47403e94f5505"
 
 [[packages]]
 name = "narwhals"
-version = "2.27.1"
+version = "2.28.0"
 
 [[packages.wheels]]
-name = "narwhals-2.27.1-py3-none-any.whl"
-url = "https://files.pythonhosted.org/packages/d1/89/5d4c86da1130d9059681e5b6cd7645df5c10279a6a079c5c37dcb2cc6f3f/narwhals-2.27.1-py3-none-any.whl"
+name = "narwhals-2.28.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/cf/82/8ef9c7e0f50493307a49c09cfa7f00c5a778b6d1921f7b2dabe1d3a5809e/narwhals-2.28.0-py3-none-any.whl"
 
 [packages.wheels.hashes]
-sha256 = "d057df13f5852b8e157596e82eb5e955fad267425df5e420e0ee9863da483b31"
+sha256 = "1f69d6385ec30e2fa6e1fdeb37c562ecabd0f713f6f3e3b58a668c5c9df9567f"
 
 [[packages]]
 name = "networkx"
@@ -608,14 +608,14 @@ sha256 = "e91c2b1cbeae768c98752e67e717e283d68dae45717b41f2d91eaee648e37b7d"
 
 [[packages]]
 name = "platformdirs"
-version = "4.13.5"
+version = "4.14.0"
 
 [[packages.wheels]]
-name = "platformdirs-4.13.5-py3-none-any.whl"
-url = "https://files.pythonhosted.org/packages/6c/8a/1d8cb3842909dc193a73835adedf412e32e18f8ffd59f43983949622fe6f/platformdirs-4.13.5-py3-none-any.whl"
+name = "platformdirs-4.14.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/69/2b/887969ef4bb53e0cb271dc7c3f4a73d50c5d58bb88aeaae311e3340cd57e/platformdirs-4.14.0-py3-none-any.whl"
 
 [packages.wheels.hashes]
-sha256 = "53d3ec4280b815c1e0b02edad7f9ee8fda1ba9c0865dd9c2e6e63849ce82fc1e"
+sha256 = "1dadfc59a8a5d7565b3d9270ae8fa71c065595352c4277b41c11ee6c222c4b91"
 
 [[packages]]
 name = "pluggy"
@@ -718,14 +718,14 @@ sha256 = "ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4"
 
 [[packages]]
 name = "pytest"
-version = "9.1.1"
+version = "9.2.0"
 
 [[packages.wheels]]
-name = "pytest-9.1.1-py3-none-any.whl"
-url = "https://files.pythonhosted.org/packages/24/25/1de2678b631f5a49215c6c96fff41ba892b0a34df68d6d80292b1b48aa7f/pytest-9.1.1-py3-none-any.whl"
+name = "pytest-9.2.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/51/39/1f5d8c8877a0fa327db959c19341d4be61660de1ab6b7391f9eb805bcd67/pytest-9.2.0-py3-none-any.whl"
 
 [packages.wheels.hashes]
-sha256 = "37a86b45efb9a47a61a36449063e8e18d0cab3161329fc099eb21783169c4f0c"
+sha256 = "07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588"
 
 [[packages]]
 name = "pytest-cov"
@@ -938,14 +938,14 @@ sha256 = "aa0903c3708b4e2b496f06d490cae72c6ff6274b00d1edce420fcfa3b2b76682"
 
 [[packages]]
 name = "trimesh"
-version = "5.1.1"
+version = "5.2.0"
 
 [[packages.wheels]]
-name = "trimesh-5.1.1-py3-none-any.whl"
-url = "https://files.pythonhosted.org/packages/8f/f6/fb68b8c08f864ecee8f7f7ee2f1203ed5cba2335215de69e4f621eb47db5/trimesh-5.1.1-py3-none-any.whl"
+name = "trimesh-5.2.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/51/14/78624d9c89bab76c2a2e1e839c7641fa686828c2c1c8fb64aedf3b371a5d/trimesh-5.2.0-py3-none-any.whl"
 
 [packages.wheels.hashes]
-sha256 = "c5be85a3e31e9ff749f9b0aecc204e37a2cf7cca4e92cd066bb5f3d3c1127765"
+sha256 = "04db2c7ec62afdd7763fb04c82bb5f257ddd984993a19ee83697f475fc58fd29"
 
 [[packages]]
 name = "typing-extensions"
@@ -993,14 +993,14 @@ sha256 = "0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"
 
 [[packages]]
 name = "wcwidth"
-version = "0.9.3"
+version = "0.9.4"
 
 [[packages.wheels]]
-name = "wcwidth-0.9.3-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
-url = "https://files.pythonhosted.org/packages/b8/d6/48dad66d577417ef8594000506fa8619d45d7282e20b4cdc916fcc68f95a/wcwidth-0.9.3-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
+name = "wcwidth-0.9.4-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
+url = "https://files.pythonhosted.org/packages/fa/e8/0485850748dfdba9443f4151c7b2442cfa4987ba6cd871038eb5d6b8eca9/wcwidth-0.9.4-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl"
 
 [packages.wheels.hashes]
-sha256 = "9ab8bfee107e08de09e15f9f6afb9fe0f64c8d64fd296d0d8557bafe71ea3f93"
+sha256 = "b185c8b927b23af2721be1783499d1cfa5c028b098b0858951b4ae224477f1c2"
 
 [[packages]]
 name = "webcolors"
