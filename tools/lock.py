@@ -15,7 +15,7 @@ ROOT = Path(__file__).parent.parent
 # the oldest glibc that has a wheel of every pin (cadquery-ocp-novtk needs 2.28); the container has 2.36
 PLATFORM = "x86_64-manylinux_2_28"
 PYTHON = "3.14"
-# uv lets these environment variables override --default-index and --no-config
+# these environment variables add indexes to, or override, --default-index and --no-config
 UNSET = ("UV_INDEX", "UV_INDEX_URL", "UV_DEFAULT_INDEX", "UV_EXTRA_INDEX_URL", "UV_FIND_LINKS", "UV_CONFIG_FILE")
 
 

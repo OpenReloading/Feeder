@@ -27,7 +27,7 @@ def test_lock_matches_requirements_pins():
         p["name"] for p in lock["packages"]
         if "sdist" in p or not p.get("wheels") or not all(w["hashes"] and w["url"].startswith("https://files.pythonhosted.org/") for w in p["wheels"])
     ]
-    assert other == [], "regenerate with uv 0.10 or newer and no other index in the environment: python3 tools/lock.py"
+    assert other == [], "regenerate with uv 0.10 or newer: python3 tools/lock.py"
 
 
 def test_repeated_pins_match_requirements():
@@ -36,7 +36,8 @@ def test_repeated_pins_match_requirements():
     repeated += [pin.split("==") for extra in project["optional-dependencies"].values() for pin in extra]
     # every row of the package table `| name (note) | version |`, none once the table is gone
     lines = [line.strip() for line in (ROOT / "docs/environment.md").read_text().splitlines()]
-    table = lines[lines.index("| Package | Version |") + 2:] if "| Package | Version |" in lines else []
+    header = next((i for i, s in enumerate(lines) if s.replace(" ", "").startswith("|Package|Version|")), None)
+    table = [] if header is None else lines[header + 2:]
     cells = [[c.strip().strip("`") for c in line.strip("|").split("|")] for line in itertools.takewhile(lambda s: s.startswith("|"), table)]
     assert all(len(c) == 2 for c in cells), "docs/environment.md: a package row needs exactly two cells"
     rows = [(re.sub(r" \(.*\)$", "", name), version) for name, version in cells]
