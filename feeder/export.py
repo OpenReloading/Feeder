@@ -41,6 +41,7 @@ def _steps(cfg: Config) -> list[tuple[str, str]]:
         "one_piece": ("Body on the motor", "Heat-set inserts into the bottom plane first. Countersunk screws from inside the cup, through the floor into the gearbox face."),
     }[split]
     spring_len = sc.spring_working_length(cfg)
+    gap_lo, gap_hi = layout.plate_gap_limits(cfg)
     return [
         ("Motor", "Worm gear motor 5840-31ZY with its boss and 8 mm D shaft, drawn as an envelope."),
         body_step,
@@ -48,7 +49,7 @@ def _steps(cfg: Config) -> list[tuple[str, str]]:
         ("Exit insert and gate", "Exit insert from above into its shaft, its ledge in the deck recess: drop opening, funnel and spigot. Gate into the band gap, its ends behind the band ends. To swap the insert: cap, plate and gate off, drop tube twisted off the spigot, lift it out."),
         ("Metal hub with the hub gauge", "Lay the gauge on the cup floor around the shaft, handle away from the set screws. Push the Pololu 2693 hub down onto it, tighten its 2 set screws on the D flat, slide the gauge out by its handle away from the shaft and lift it out."),
         ("Carrier on the hub flange", "Heat-set insert into the carrier top first. Screws into every other hub hole."),
-        ("Drive ring", "Onto the carrier cone. It stays on the clutch when plates change."),
+        ("Drive ring and plate gap trial fit", f"Onto the carrier cone. It stays on the clutch when plates change. Trial fit before the disc goes in: drop the case plate onto the ring flange, press it down at the hub and slide feeler gauges from a notch under the plate beside it, at four notches a quarter turn apart. Every reading must be {gap_lo:.2f} to {gap_hi:.2f} mm. If one is outside, add {cfg.track.gap:.2f} less the mean of the four readings to `clutch.gauge_trim`, print the hub gauge again, take ring and carrier off and set the hub again with the new gauge. Readings that differ by more than {gap_hi - gap_lo:.2f} mm do not trim out: see troubleshooting, plate drags on the deck. Lift the plate off."),
         (f"Pressure disc and {n} springs", f"Disc keyed to the carrier hex, bearing on the ring floor inside the ring. Gutekunst VD-127E-01 springs in the disc pockets, free length {cfg.spring.free_length} mm."),
         ("Knob and its screw", f"Tighten once at assembly until the knob sits on the carrier top: springs at {spring_len:.1f} mm, clamp {sc.clamp_force(n, cfg):.1f} N. Plate changes never touch it."),
         ("Case plate", f"{layout.plate_r(cfg) * 2:.1f} mm, {layout.pocket_count(cfg)} notches, closed by the band. Drops over the ring hex onto the flange; lift it by the key ring."),

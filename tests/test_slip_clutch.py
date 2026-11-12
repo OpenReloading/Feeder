@@ -63,6 +63,20 @@ def test_hub_gauge_carries_the_hub_fits_the_cup_and_slides_out_from_under_it():
             assert (common.volume if common.solids() else 0.0) < 1e-3, loc
 
 
+@pytest.mark.parametrize("trim", [-0.4, 0.3])
+def test_gauge_trim_changes_the_fork_and_leaves_the_deck(trim):
+    cfg = replace(CFG, clutch=replace(C, gauge_trim=trim))
+    column = Pos(-MH.boss_d / 4, MH.boss_d / 2, 0) * Cylinder(0.5, 10)  # through the fork beside the shaft slot
+    fork = (sc.hub_gauge(cfg) & column).bounding_box().size.Z
+    assert fork == pytest.approx(C.floor_gap + trim)
+    assert layout.levels(cfg).deck_top == layout.levels().deck_top
+
+
+def test_gauge_trim_keeps_the_hub_off_the_floor():
+    with pytest.raises(ValueError, match="gauge_trim"):
+        sc.gauge_t(replace(CFG, clutch=replace(C, gauge_trim=FIT - C.floor_gap - 0.01)))
+
+
 def test_countersunk_motor_screws_fit_the_floor():
     head = fasteners.countersunk_screw(M.mount_screw_size, fasteners.countersunk_screw_lengths(M.mount_screw_size)[0]).screw_data
     assert CFG.body.floor_t - head["k"] >= CFG.print.min_wall

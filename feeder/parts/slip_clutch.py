@@ -311,21 +311,31 @@ def gauge_slide(cfg: Config = CFG) -> float:
     return mh.boss_d / 2 + 1 + mh.flange_d / 2 + cfg.print.fit
 
 
+def gauge_t(cfg: Config = CFG) -> float:
+    """Hub gauge fork thickness: the floor gap plus `gauge_trim`, which sets the plate higher or lower over the deck."""
+    c = cfg.clutch
+    t = c.floor_gap + c.gauge_trim
+    if t < cfg.print.fit:
+        raise ValueError(f"clutch.gauge_trim {c.gauge_trim} leaves the hub {t:.2f} mm above the floor, under print.fit")
+    return t
+
+
 @per_config
 def hub_gauge(cfg: Config = CFG) -> Part:
-    """Fork as thick as the floor gap under the hub boss, open toward -x around the shaft, a handle up past the deck
+    """Fork `gauge_t` thick (the floor gap, trimmed) under the hub boss, open toward -x around the shaft, a handle up past the deck
     beside the hub flange, `gauge_grip` above the plate bottom. Lay it on the cup floor, push the hub down onto it, tighten the set screws, slide it out
     along +x by `gauge_slide` and lift it out: the plate then sits at its design height above the track.
     Body frame, z = 0 on the cup floor. Prints fork down."""
     c, m, mh, f = cfg.clutch, cfg.motor, cfg.metal_hub, cfg.print.fit
     reach, w, t = mh.boss_d / 2 + 1, mh.boss_d + 4, 2 * cfg.print.min_wall
     x_h = mh.flange_d / 2 + 1  # handle face beside the flange
-    body = Pos((x_h + t - reach) / 2, 0) * Box(x_h + t + reach, w, c.floor_gap, align=BOTTOM)
+    fork = gauge_t(cfg)
+    body = Pos((x_h + t - reach) / 2, 0) * Box(x_h + t + reach, w, fork, align=BOTTOM)
     zc = levels(cfg)
     body += Pos(x_h + t / 2, 0) * Box(t, w, zc.plate_bottom - zc.floor_top + c.gauge_grip, align=BOTTOM)
     slot = m.shaft_d + 2 * f
-    body -= Pos(-reach / 2, 0) * Box(reach, slot, c.floor_gap, align=BOTTOM)
-    return body - Cylinder(slot / 2, c.floor_gap, align=BOTTOM)
+    body -= Pos(-reach / 2, 0) * Box(reach, slot, fork, align=BOTTOM)
+    return body - Cylinder(slot / 2, fork, align=BOTTOM)
 
 
 PARTS = {

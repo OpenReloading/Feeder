@@ -607,7 +607,7 @@
                 "code": "reportReturnType",
                 "range": {
                     "startColumn": 11,
-                    "endColumn": 63,
+                    "endColumn": 56,
                     "lineCount": 1
                 }
             }
