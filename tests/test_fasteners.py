@@ -9,7 +9,8 @@ from build123d import Pos
 from test_body import CONFIGS
 
 from feeder import assembly, export, guide
-from feeder.config import CFG, GENERIC_8MM_FLANGE
+from feeder.config import CFG, GENERIC_8MM_FLANGE, Insert
+from feeder.lib import fasteners
 from feeder.parts import layout
 
 GAP = 0.5  # mm, as in test_body: hole clearances and fits
@@ -120,3 +121,15 @@ def test_viewer_matrices_place_fasteners_like_the_cad():
                 q = (loc * Pos(*p)).position
                 got = [sum(m[c * 4 + r] * v for c, v in enumerate((*p, 1))) for r in range(3)]
                 assert got == pytest.approx((q.X, q.Y, q.Z), abs=1e-4), f.name
+
+
+def test_hole_tools_size_from_the_config_they_are_given():
+    cfg = replace(CFG, fasteners=replace(CFG.fasteners, head_fit=0.5, inserts={**CFG.fasteners.inserts, "M3": Insert(length=6.7, od=5.0, hole_d=4.4, min_wall=1.6)}))
+    hole = fasteners.insert_hole("M3", cfg).bounding_box().size
+    assert (hole.X, hole.Z) == pytest.approx((4.4, 7.7))  # noqa: SIM300
+    assert fasteners.socket_head_counterbore("M3", 10, 3, cfg).bounding_box().size.X == pytest.approx(6.68)  # bd_warehouse ISO 4762 M3 head 5.68 plus 2 x 0.5  # noqa: SIM300
+
+
+def test_motor_can_follows_its_offset():
+    higher = replace(CFG, motor=replace(CFG.motor, can_offset=CFG.motor.can_offset + 4))
+    assert assembly.motor_envelope(higher).bounding_box().max.Z - assembly.motor_envelope(CFG).bounding_box().max.Z == pytest.approx(4)  # noqa: SIM300

@@ -70,7 +70,7 @@ The knob screw is tightened once at assembly, until the knob sits on the clutch.
 
 Plate change, no tools: twist the cap off, lift the plate off the ring hex, drop the next plate on, twist the cap on firmly by hand. It holds the plate down against the brass on the low side (`slip_clutch.cap_clamp_force`).
 
-The thread hand follows `case_plate.direction`, so brass drag tightens the cap. A plate turned the other way (a short unjam move, a motor wired the other way) drags it toward loosening, held by thread friction alone. At the hand-tight clamp, 250 cases (1 kg) and the flattest tilt (38 deg) the cap holds 0.16 Nm against at most 0.10 Nm of drag, margin 1.59 against the required 1.25 (estimates, `slip_clutch.cap_holding_torque`, `layout.cap_drag_torque`, `cap.mu_low`), on every plate set. The margin is static, so the length of a reverse does not matter, the fill does: it is gone at 1.27 kg of brass at that tilt. Twist the cap on firmly by hand before a reverse, and do not fill beyond 250 cases. No positive lock is fitted: it would add a part for a case that does not occur within the limits.
+The thread hand follows `case_plate.direction`, so brass drag tightens the cap. A plate turned the other way (a short unjam move, a motor wired the other way) drags it toward loosening, held by thread friction alone. At the hand-tight clamp, 250 cases (1 kg) and the flattest tilt (38 deg) the cap holds 0.16 Nm against at most 0.10 Nm of drag, margin 1.59 against the required 1.25 (estimates, `slip_clutch.cap_holding_torque`, `layout.cap_drag_torque`, `cap.mu_low`), on every plate set. The margin is static, so the length of a reverse does not matter, the fill does: it is gone at 1.27 kg of brass at that tilt. Twist the cap on firmly by hand before a reverse, and do not fill beyond 1 kg of brass. No positive lock is fitted: it would add a part for a case that does not occur within the limits.
 
 ## Plate sets
 
@@ -83,6 +83,8 @@ One body and band take every plate: the exit shaft in the core holds any set's e
 | `small_pistol` | case | base down | 9mm Makarov, 9mm Luger, .45 GAP, 9x21 | 7.22 | 14.94 | 29 | 255 | 12.54 |
 | `large_pistol` | case | base down | .40 S&W, .357 SIG, .45 ACP, .38 Super, 7.62x25, 10mm Auto | 8.60 | 15.19 | 29 | 200 | 12.79 |
 | `revolver` | case | base down | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 127 | 13.66 |
+
+Capacity is the room in the bowl, not the fill: fill at most 1 kg of brass on any plate set (about 250 9mm cases), because the clutch, cap and mount checks assume no more.
 
 A group plate gives its smallest case up to 2.3 mm more play than a one-case plate, so more cases may go in upside down (untested). A one-case plate (any key of `calibers.table`) is the tight option. Capacity counts the group's largest case. Rifle cases and bullets need another exit and are not built.
 
@@ -107,7 +109,7 @@ Parts chain on the drop tube instead of more openings in the bowl: one drop open
 
 ## Hose and sensor
 
-- Lay the hose downhill all the way to the press, with no loops or rising sections. A 9mm case (21.6 mm diagonal) cannot turn over in the 14 mm hose or the 10.9 mm bore.
+- Lay the hose downhill all the way to the press, with no loops or rising sections, and tie it to the stand: the bayonet lugs are 1.2 mm high and carry the drop tube, the sensor and the hose. A 9mm case (21.6 mm diagonal) cannot turn over in the 14 mm hose or the 10.9 mm bore.
 - The sensor sees the case through the 1.0 mm `drop_tube.window_t` wall. With a brass correction factor of 0.3 to 0.5 the LJ18A3-8 switches at 1.9 to 3.2 mm (estimate). A case lies 1.45 to 1.90 mm from the sensor face. Test with real cases before printing more. If it misses cases, set `window_t` to 0.6 or use a longer-range M18 sensor.
 - Each falling case passes the sensor in about 0.1 s. Use an off-delay timer relay (BOM) so the motor stops only on a full tube, not on each case. Start with an OP of 0.5 s: longer than one passing case, shorter than the free drop path above the sensor takes to fill at the case rate. The sensor sits 76.2 mm below the deck for every plate set, 4.0 case lengths of 9mm, and the 9mm plate passes up to 3.7 pockets per second at 6.5 rpm, so a 2 s delay lets cases stand in the funnel and jam under the plate.
 
@@ -119,7 +121,7 @@ Two links on the same pins (`mount.link_a`, `mount.link_b`). The link gets 1.1 t
 
 | Link | Parts | Tilt |
 |---|---|---|
-| adjustable | `mount_rod_end_adjust` on pin A, `mount_rod_end_fixed` on pin B, M6 threaded rod. Fixed end: captive nut in the outer face, jam nut in the window. Adjust end: a nut each side of its wall. To change the tilt, loosen the two adjust end nuts, run them along the rod, tighten them against the wall | 40 to 60 deg, stepless (`mount.tilt_range`) |
+| adjustable | `mount_rod_end_adjust` on pin A, `mount_rod_end_fixed` on pin B, M6 threaded rod. Fixed end: captive nut in the outer face, jam nut in the window. Adjust end: a nut each side of its wall, the inner one in the window, the outer one between the rod ends. To change the tilt, loosen the inner nut, move the body with the outer nut, tighten the inner nut against the wall | 40 to 60 deg, stepless (`mount.tilt_range`) |
 | fixed | `mount_link_45`, `mount_link_50`, `mount_link_55`, one printed bar per angle (`mount.fixed_tilts`). Swap the bar to change the tilt. `mount.link` set to one of these angles builds the assembly with that bar, without rod ends, rod and rod nuts, at that tilt | the angle in its name |
 
 <!-- --8<-- [start:tilt] -->
@@ -135,14 +137,16 @@ Tilt choice. The best angle for 9mm on this feeder is UNTESTED. Start at 45 and 
 | 60 deg | last resort, extender needed for the design fill | 193 / 793 | 73.8 mm |
 <!-- --8<-- [end:tilt-table] -->
 
-Capacity: cases under a level brass surface as high as the lowest rim point allows (the wall top, or the extender top over its arc), loose packing 0.55 of the case envelope (`layout.capacity`, estimate; the volume the leaning extender takes, 3 to 7 %, is not subtracted). Fill at most 250 9mm cases (1 kg, `case_plate.fill_cases`, `case_plate.drag_mass`) at any tilt: the clutch, cap and mount load checks assume no more. The wall alone holds 250 up to 55 deg, the low side limits it. The extender raises that limit by 60 mm and keeps 250 cases in at 60 deg with room to spare, it is not for a larger fill.
+Capacity: cases under a level brass surface as high as the lowest rim point allows (the wall top, or the extender top over its arc), loose packing 0.55 of the case envelope (`layout.capacity`, estimate; the volume the leaning extender takes, 3 to 7 %, is not subtracted). Fill at most 1 kg of brass (about 250 9mm cases, `case_plate.fill_cases`, `case_plate.drag_mass`) on any plate set and at any tilt: the clutch, cap and mount load checks assume no more. The wall alone holds 250 up to 55 deg, the low side limits it. The extender raises that limit by 60 mm and keeps 250 cases in at 60 deg with room to spare, it is not for a larger fill.
+
+To change the tilt, switch POWER off and empty the bowl first: the weight of the body turns it steeper at every tilt, so a free pivot lets it drop. Fixed link: take the nuts off both link pins while the link still carries the body. Then hold the body by its rim, pull both pins, fit the other bar and both pins, let go, and fit the nuts. Adjustable link: the outer nut of the adjust end (between the two rod ends) carries the load. Loosen the inner nut in the window, move the body with the outer nut, then tighten the inner nut against the wall.
 <!-- --8<-- [end:tilt] -->
 
 | Part | Hardware |
 |---|---|
 | `mount_yoke` | 4 x ISO 4762 M5 x 12 into the body's CNC Kitchen M5 x 9.5 inserts |
 | `mount_clamp` | 2 x ISO 4762 M5 x 35 on 2 x ISO 7089 M5 washers, 2 x ISO 4032 M5 nuts |
-| pivot (both parts) | ISO 4017 M10 x 55, 2 x ISO 7089 M10 washers (same sizes as DIN 125 A), DIN 985 M10 nut |
+| pivot (both parts) | ISO 4014 M10 x 60 (plain shank through the tongue), 2 x ISO 7089 M10 washers (same sizes as DIN 125 A), DIN 985 M10 nut |
 | link pins A and B | 2 x ISO 4762 M6 x 45, 4 x ISO 7089 M6 washers, 2 x DIN 985 M6 nuts |
 | adjustable link | DIN 976-1 M6 threaded rod cut to 60 mm, 4 x ISO 4032 M6 nuts |
 
