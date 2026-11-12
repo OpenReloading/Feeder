@@ -24,4 +24,4 @@ PyYAML==6.0.3
 pyyaml_env_tag==1.1
 referencing==0.37.0
 rpds-py==2026.9.1
-watchdog==6.0.0
+watchdog==7.1.0
