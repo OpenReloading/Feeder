@@ -666,7 +666,6 @@ html .md-footer-meta.md-typeset .md-social__link {
 }
 
 .md-typeset .feeder-hero__figure {
-  position: relative;
   width: 100%;
   max-width: 520px;
   margin: 0;
@@ -677,24 +676,13 @@ html .md-footer-meta.md-typeset .md-social__link {
   container-type: inline-size;
 }
 
-/* Hairline fill behind the drawing */
-.md-typeset .feeder-hero__figure::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  opacity: 0.45;
-  background: repeating-linear-gradient(transparent 0 6px, var(--line) 6px 7px);
-}
-
-.md-typeset .feeder-hero__figure > * {
-  position: relative;
-}
-
+/* Side view from feeder/side_view.py, in mm: outlines, cut faces filled, numbers on leaders */
 .feeder-hero__drawing {
   display: block;
   width: 100%;
   height: auto;
   fill: none;
+  fill-rule: evenodd;
   stroke: var(--accent-2);
   stroke-width: 1.5;
   stroke-linejoin: round;
@@ -704,17 +692,41 @@ html .md-footer-meta.md-typeset .md-social__link {
   vector-effect: non-scaling-stroke;
 }
 
-.feeder-hero__optional {
-  stroke-dasharray: 5 4;
+/* Outline of what lies behind the cut */
+.feeder-hero__behind {
+  fill: var(--accent-2);
+  fill-opacity: 0.1;
+  stroke-width: 1;
 }
 
-.feeder-hero__cases {
+/* Parts drawn whole, in front of what they cover */
+.feeder-hero__whole {
+  fill: var(--surface);
+}
+
+.feeder-hero__cut {
+  fill: var(--accent-2);
+  stroke-width: 1;
+}
+
+.feeder-hero__plate {
+  fill: var(--accent);
   stroke: var(--accent);
+}
+
+.feeder-hero__optional {
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
 }
 
 .feeder-hero__labels path {
   stroke: var(--muted);
   stroke-width: 1;
+}
+
+.feeder-hero__labels circle {
+  fill: var(--muted);
+  stroke: none;
 }
 
 .feeder-hero__labels text,
@@ -725,11 +737,12 @@ html .md-footer-meta.md-typeset .md-social__link {
   color: var(--muted);
 }
 
-/* 17 drawing units: at least 12 px while the names are shown (drawing 352 px wide or more, see the container query) */
+/* 15 of the drawing's 377 mm: at least 12 px down to a 302 px drawing (324 px on a 390 px phone) */
 .feeder-hero__labels text {
   fill: var(--muted);
   stroke: none;
-  font-size: 17px;
+  font-size: 15px;
+  text-anchor: middle;
 }
 
 .md-typeset .feeder-hero__figure figcaption {
@@ -740,7 +753,16 @@ html .md-footer-meta.md-typeset .md-social__link {
 }
 
 .md-typeset ul.feeder-hero__parts {
-  display: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.md-typeset ul.feeder-hero__parts li {
+  margin: 0;
 }
 
 @media screen and (max-width: 600px) {
@@ -749,28 +771,14 @@ html .md-footer-meta.md-typeset .md-social__link {
   }
 }
 
-/* Narrow drawing (a phone): the drawing keeps the numbers, the names move into a two-column list */
-@container (max-width: 351px) {
-  .feeder-hero__name {
-    display: none;
-  }
-
-  /* 22 drawing units: at least 12 px down to a 264 px drawing */
+/* Narrower drawing: 19 mm keeps the numbers at 12 px down to 239 px (254 px on a 320 px phone), the names take one column */
+@container (max-width: 301px) {
   .feeder-hero__labels text {
-    font-size: 22px;
+    font-size: 19px;
   }
 
   .md-typeset ul.feeder-hero__parts {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 16px;
-    margin: 12px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .md-typeset ul.feeder-hero__parts li {
-    margin: 0;
+    grid-template-columns: 1fr;
   }
 }
 
