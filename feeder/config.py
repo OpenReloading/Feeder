@@ -68,6 +68,7 @@ class Motor:
     shaft_from_end: float = 20.0  # shaft axis from the gearbox free end, Probots gives 20.5
     can_d: float = 36.0  # NFP gives 31, a Probots drawing 36: the larger one for clearance
     can_l: float = 72.5  # 57 can plus 15.5 covered encoder
+    can_offset: float = 8.5  # can axis above the gearbox face, seller drawings, unverified
     angle: float = 180.0  # deg about the shaft: direction the can points, 0 = +x
 
 
@@ -192,7 +193,7 @@ class Body:
     extender_lean: float = 25.0  # deg from vertical toward the bowl axis above the full wall top, so a case thrown up falls back in: 20 to 30 deg, 25 prints without support turned on its slanted flat top (test_body) and puts the top edge 28 mm inside the wall
     extender_lap: float = 15.0  # extender sleeve down over the outside of the wall top
     extender_wall_screws: int = 4  # over the arc: ISO 10642 M3 from inside the bowl through wall and sleeve into an ISO 4032 nut captive in a rib on the sleeve
-    can_relief: float = 10.0  # flat top of the can tunnel above the bottom plane, the can rises up to 8.5 (seller drawings)
+    can_relief: float = 10.0  # flat top of the can tunnel above the bottom plane, the can rises up to `motor.can_offset`
 
 
 @dataclass(frozen=True)

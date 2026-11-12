@@ -8,6 +8,7 @@ the pivot. The tilt link runs between its pins at the tilt.
 
 import math
 from dataclasses import dataclass
+from typing import Literal
 
 from build123d import Box, Cone, Cylinder, Part, Plane, Pos, Rot
 
@@ -40,12 +41,11 @@ class Placed:
 
 
 def motor_envelope(cfg: Config = CFG) -> Part:
-    """Gearbox under the cup floor, can toward `motor.angle`, can axis up to 8.5 above the gearbox face
-    (seller drawings, unverified)."""
+    """Gearbox under the cup floor, can toward `motor.angle`, can axis `motor.can_offset` above the gearbox face."""
     m = cfg.motor
     z0 = layout.levels(cfg).bottom
     gb = Pos(m.gearbox_l / 2 - m.shaft_from_end, 0, z0) * Box(m.gearbox_l, m.gearbox_w, m.gearbox_t, align=fasteners.DOWN)
-    can = Pos(m.gearbox_l - m.shaft_from_end, 0, z0 + 8.5 - m.can_d / 2) * Rot(Y=90) * Cylinder(m.can_d / 2, m.can_l, align=B)
+    can = Pos(m.gearbox_l - m.shaft_from_end, 0, z0 + m.can_offset - m.can_d / 2) * Rot(Y=90) * Cylinder(m.can_d / 2, m.can_l, align=B)
     return Rot(Z=m.angle) * (gb + can)
 
 
@@ -183,8 +183,8 @@ def _socket_screw(size: str, length: float) -> Part:
     return Cylinder(h["dk"] / 2, h["k"], align=B) + _shank(size, length)
 
 
-def _hex_screw(size: str, length: float) -> Part:
-    h = fasteners.hex_screw(size, length).screw_data
+def _hex_screw(size: str, length: float, fastener_type: Literal["iso4014", "iso4017"] = "iso4017") -> Part:
+    h = fasteners.hex_screw(size, length, fastener_type).screw_data
     return hex_prism(h["s"], h["k"]) + _shank(size, length)
 
 
@@ -230,7 +230,7 @@ def _pin_stack(size: str, length: float, face: float, nut_af: float, nut_h: floa
     """Bolt along x through ears whose outer faces are at +-`face`, head at -x, washer on both sides and a DIN 985
     nut: (name, kind, shape, location about the pin centre, seq)."""
     wh = fasteners.washer_data(size)["h"]
-    bolt = (f"ISO 4017 {size} x {length:g}", "screw", _hex_screw(size, length)) if head == "hex" else (f"ISO 4762 {size} x {length:g}", "screw", _socket_screw(size, length))
+    bolt = (f"ISO 4014 {size} x {length:g}", "screw", _hex_screw(size, length, "iso4014")) if head == "hex" else (f"ISO 4762 {size} x {length:g}", "screw", _socket_screw(size, length))
     washer = (f"ISO 7089 {size} washer", "washer", _washer(size))
     return [
         (*bolt, Pos(-face - wh, 0, 0) * Rot(Y=-90), 1),

@@ -259,7 +259,7 @@ def _upper(cfg: Config) -> Part:
     body = Cylinder(base_r, z.base_top, align=BOTTOM)
     body += Pos(0, 0, z.base_top) * Cone(base_r, male_cone_r(z.cone_top, cfg), z.cone_top - z.base_top, align=BOTTOM)
     body += Pos(0, 0, z.cone_top) * hex_prism(c.key_af, z.top - z.cone_top)
-    body -= Pos(0, 0, z.top) * fasteners.insert_hole(c.knob_screw_size)
+    body -= Pos(0, 0, z.top) * fasteners.insert_hole(c.knob_screw_size, cfg)
     return body
 
 
@@ -272,7 +272,7 @@ def carrier(cfg: Config = CFG) -> Part:
     # every other hub hole, starting at 0 deg where a hex corner lies, so the counterbores cut corners, not flats
     for p in _around(mh.screws, mh.hole_pcd / 2):
         body -= p * Pos(0, 0, z.base_top) * fasteners.clearance_hole(mh.hole_size, z.base_top)
-        body -= p * Pos(0, 0, z.top) * fasteners.socket_head_counterbore(mh.hole_size, mh.screw_length, z.top - z.base_top)
+        body -= p * Pos(0, 0, z.top) * fasteners.socket_head_counterbore(mh.hole_size, mh.screw_length, z.top - z.base_top, cfg)
     if z.shaft_tip > 0:
         body -= Cylinder(mh.bore_d / 2 + cfg.print.fit, z.shaft_tip + c.shaft_tip_gap, align=BOTTOM)
     return body
@@ -299,7 +299,7 @@ def knob(cfg: Config = CFG) -> Part:
     for p in _around(c.knob_grip_count, c.knob_d / 2):
         body -= p * Cylinder(c.knob_grip_d / 2, c.knob_t, align=BOTTOM)
     body -= Pos(0, 0, c.knob_t) * fasteners.clearance_hole(c.knob_screw_size, c.knob_t)
-    body -= Pos(0, 0, c.knob_t) * fasteners.hex_head_pocket(c.knob_screw_size, c.knob_screw_length)
+    body -= Pos(0, 0, c.knob_t) * fasteners.hex_head_pocket(c.knob_screw_size, c.knob_screw_length, cfg)
     for p in _around(c.spring_pockets, c.spring_pcd / 2):
         body -= p * Cylinder(_pocket_r(cfg), c.spring_pocket_depth_knob, align=BOTTOM)
     return body

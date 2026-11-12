@@ -354,11 +354,11 @@ def core(cfg: Config = CFG) -> Part:
     mins = cfg.fasteners.inserts[mt.bolt_size]
     for x, y in mount_bolts(cfg):
         body += Pos(x, y, z.bottom) * Cylinder(mins.od / 2 + mins.min_wall, h_under, align=BOTTOM)
-        body -= Pos(x, y, z.bottom) * Rot(X=180) * fasteners.insert_hole(mt.bolt_size)
+        body -= Pos(x, y, z.bottom) * Rot(X=180) * fasteners.insert_hole(mt.bolt_size, cfg)
     # motor: boss and shaft through the floor, countersunk screws from the cup
     body -= Pos(0, 0, z.bottom) * Cylinder(m.boss_d / 2 + f, b.floor_t, align=BOTTOM)
     for x, y in layout.motor_screws(cfg):
-        body -= Pos(x, y, z.floor_top) * fasteners.countersink(m.mount_screw_size, m.mount_screw_length, b.floor_t)
+        body -= Pos(x, y, z.floor_top) * fasteners.countersink(m.mount_screw_size, m.mount_screw_length, b.floor_t, cfg)
     body += _exit_sleeve(cfg)
     body += Rot(Z=m.angle) * _can_block(cfg)
     body -= Rot(Z=m.angle) * can_tunnel(cfg)
