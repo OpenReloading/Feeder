@@ -94,14 +94,28 @@ def test_drop_tube_passes_every_case(plate_set, core):
     s, parts = plate_set
     assert _volume(parts["tube"] & parts["insert"]) < EPS
     assert _volume(parts["tube"] & core) < EPS
-    hose = s.drop_tube.hose_id
-    for c in layout.calibers(s):
-        assert hose > c.rim_d + 0.4  # the case runs down the hose
-        assert math.hypot(c.rim_d, c.case_length) > hose  # and cannot turn over in it
     k = dt.dims(s)
     assert k.tip - k.sensor_z >= layout.caliber(s).case_length + s.drop_tube.sensor_margin  # sensor clears the last case
     slab = Pos(0, 0, 5) * Box(80, 80, 0.2)
     assert (parts["tube"] & dt.placement(s) * slab).volume > 0
+
+
+@pytest.mark.parametrize("name", [*CFG.calibers.groups, *CFG.calibers.table])
+def test_every_plate_takes_a_hose_its_cases_run_in_on_a_barb_that_holds(name):
+    s = replace(CFG, case_plate=replace(CFG.case_plate, caliber=name))
+    inner, outer = dt.hose(s)
+    assert (inner, outer) in s.drop_tube.hoses
+    for c in layout.calibers(s):
+        assert inner >= c.rim_d + 2.0  # the case runs down the hose
+        assert math.hypot(c.rim_d, c.case_length) > inner  # and cannot turn over in it
+    k = dt.dims(s)
+    assert k.r_barb - k.r_bore >= MW
+
+
+def test_a_plate_with_no_fitting_hose_is_refused():
+    s = replace(CFG, case_plate=replace(CFG.case_plate, caliber="revolver"), drop_tube=replace(CFG.drop_tube, hoses=((16.0, 20.0),)))
+    with pytest.raises(ValueError, match="revolver"):
+        dt.hose(s)
 
 
 @pytest.mark.parametrize("s", SETS, ids=IDS)

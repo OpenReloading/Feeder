@@ -70,7 +70,7 @@ def test_walls_hold_everywhere(parts):
     assert K.r_tube - K.r_bore >= MW
     assert K.r_barb - K.r_bore >= MW
     assert CFG.drop_tube.barb_ridges * CFG.drop_tube.barb_ridge_pitch <= CFG.drop_tube.barb_len
-    assert K.r_barb == pytest.approx((CFG.drop_tube.hose_id + CFG.drop_tube.barb_grip) / 2)
+    assert K.r_barb == pytest.approx((dt.hose()[0] + CFG.drop_tube.barb_grip) / 2)
     assert parts["drop_hose_adapter"].bounding_box().max.Z == pytest.approx(K.socket_top + CFG.drop_tube.barb_len)  # noqa: SIM300
 
 

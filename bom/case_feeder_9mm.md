@@ -82,7 +82,7 @@ Other calibers: plate, exit insert, drop tube and its chain parts come per plate
 |---|---|---|---|
 | Inductive sensor LJ18A3-8-Z/AX, M18x1, NPN NC, 6 to 36 V (unverified) | 1 | drop tube, tube-full | body (65 mm long) and lock nuts unverified (24 AF x 4) |
 | Lock nut M18 x 1 | 2 | sensor in the drop tube | one each side of the printed plate, supplied with the sensor. 24 AF x 4 unverified |
-| Clear PVC hose 14 mm ID x 18 mm OD | length to the press | hose adapter barb | unverified |
+| Clear PVC hose 15 mm ID x 19 mm OD | length to the press | hose adapter barb | for the 9mm plate; each plate set takes its own size (`drop_tube.hose`, table in the guide and in `docs/design.md`). Sizes from one maker's range (Tricoflex Cristal), another maker's hose of the same inner and outer diameter fits. Grip on the barb unverified |
 
 ## Electronics
 

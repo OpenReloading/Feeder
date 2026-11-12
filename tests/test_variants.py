@@ -36,7 +36,7 @@ def test_manifest_covers_every_combination(built):
     for choice in combinations(SMALL):
         parts, bom = resolve(manifest, choice)
         assert set(parts) == set(printed_parts(config(choice))), choice
-        assert bom, choice
+        assert [r["part"] for r in bom if r["part"].startswith("Clear PVC hose")] == ["Clear PVC hose 15 mm ID x 19 mm OD"], choice
 
 
 def test_every_referenced_file_exists_and_is_named_by_its_content(built):

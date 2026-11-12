@@ -53,6 +53,19 @@ class Dims:
     roof_z: float  # top of the groove at its outer wall
 
 
+def hose(cfg: Config = CFG) -> tuple[float, float]:
+    """(inner, outer diameter) of the plate set's hose: the smallest of `drop_tube.hoses` whose inner diameter is at
+    least the largest rim plus `hose_play` and under every case's diagonal (no case turns over in it), and whose barb
+    keeps `print.min_wall` round the tube bore."""
+    d, cases = cfg.drop_tube, layout.calibers(cfg)
+    r_bore = body.bore_d(cfg) / 2 + cfg.print.fit
+    for inner, outer in sorted(d.hoses):
+        if (inner >= max(c.rim_d for c in cases) + d.hose_play and inner < min(math.hypot(c.rim_d, c.case_length) for c in cases)
+                and (inner + d.barb_grip) / 2 - r_bore >= cfg.print.min_wall):
+            return inner, outer
+    raise ValueError(f"plate set {cfg.case_plate.caliber!r}: no size in drop_tube.hoses fits, add one")
+
+
 def dims(cfg: Config = CFG) -> Dims:
     e, d, f = cfg.exit, cfg.drop_tube, cfg.print.fit
     r_spigot = body.bore_d(cfg) / 2 + e.wall
@@ -77,7 +90,7 @@ def dims(cfg: Config = CFG) -> Dims:
         socket_top=socket_top,
         r_bore=r_bore,
         r_tube=r_bore + e.wall,
-        r_barb=(d.hose_id + d.barb_grip) / 2,
+        r_barb=(hose(cfg)[0] + d.barb_grip) / 2,
         window_x=window_x,
         slot_h=slot_h,
         plate_x=plate_x,
