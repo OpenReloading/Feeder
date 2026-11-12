@@ -1,6 +1,7 @@
 """Build guide data: the BOM checklist carries every BOM row and the configured parts."""
 
 import re
+from dataclasses import replace
 from pathlib import Path
 
 import build
@@ -110,3 +111,9 @@ def test_plate_groups_table_has_each_group_of_the_configurator_options():
     rows = guide.plate_groups_markdown().splitlines()[2:]
     assert [r.split(" | ")[0].strip("| ") for r in rows] == [g.replace("_", " ") for g in guide.CFG.calibers.groups]
     assert sum(r.count(",") + 1 for r in rows) == len(guide.CFG.calibers.table)
+    assert [r.split(" | ")[2].strip("| ") for r in rows] == ["15 mm ID x 19 mm OD", "16 mm ID x 20 mm OD", "16 mm ID x 20 mm OD", "19 mm ID x 24 mm OD"]
+
+
+def test_bom_hose_follows_the_plate_set():
+    revolver = replace(CFG, case_plate=replace(CFG.case_plate, caliber="revolver"))
+    assert "Clear PVC hose 19 mm ID x 24 mm OD" in [i["part"] for i in guide.bom_items([], revolver)]

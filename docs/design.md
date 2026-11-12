@@ -49,7 +49,7 @@ Full hardware list for the default 9mm case feeder: `bom/case_feeder_9mm.md`.
 | `body_exit_insert` | none. Wear part: drop opening, funnel (30 deg lean toward the bowl centre) and spigot with the 2 bayonet lugs of the drop tube in a block that fills a vertical shaft through the core, so it drops in from above. Its 3 mm ledge rests in a 2 mm deck recess round the shaft, the gate and the plate keep it down. Prints top down |
 | `body_exit_insert_blank` | none. Optional: closes the exit, the insert's block and ledge with no opening, funnel or spigot (a second exit position, if one is ever added, not in the default assembly). Prints top down |
 | `drop_tube` | Bayonet socket over the exit spigot, no screw: two lugs on the spigot (wide on the sensor side, narrow opposite) enter slots from the mouth, turn 60 deg along a groove and drop 1 mm into a notch at the stop (clockwise seen from below). Window, nut slot and plate for an M18x1 inductive sensor (LJ18A3-8-Z/AX default) with 2 M18x1 lock nuts (24 AF x 4, unverified, measure on delivery); the assembly draws the sensor (65 mm, unverified) between them. The lower end is the exit spigot's form (male, `drop_tube.male`): the next part chains on it. The bore only steps outward along the path. Prints socket down, no supports (brim advised). No spring outlet |
-| `drop_hose_adapter` | none. Ends the chain: the same socket and bayonet as the drop tube, barb for a clear PVC hose, 14 mm ID x 18 mm OD (unverified), the tube bore through it. Prints socket down, no supports |
+| `drop_hose_adapter` | none. Ends the chain: the same socket and bayonet as the drop tube, barb for the plate set's clear PVC hose (`drop_tube.hose`, Plate sets), the tube bore through it. Prints socket down, no supports |
 | `drop_spacer` | none. Optional: socket, 30 mm of straight tube (`drop_chain.spacer_len`) and the male form, the bore of the drop tube |
 | `drop_angled` | none. Optional: socket, a 30 deg bend sideways to the lugs, away from the body (`drop_chain.angle`), 25 mm legs (`drop_chain.leg_len`) and the male form. Prints socket down, the lugs still print without supports at the bend |
 | `electronics_box`, `electronics_box_left`, `electronics_lid` | Upright box beside the stand tube, 10 mm below the tilt clamp, its front with the controls toward the user and clear of the drop path: right of the tube, or left as the mirror image, 96 x 54 x 120 mm inside (wide x deep x tall). Its own slit clamp holds the tube (2 x ISO 4762 M5 x 35 on ISO 7089 washers into ISO 4032 nuts) and stands off the side wall, joined to it by a web in front of the screws. DROK timer relay module on 4 standoffs on the back wall. PWM knob, toggle switch and DC jack in a column in the lid, GX12 motor (2-pin) and sensor (3-pin) sockets one above the other low in the side face, in front of the relay because their bodies and solder cups reach 30 mm into the box (unverified), each with a free run of 30 mm behind it for a service loop and a tie pad on the wall for its wires. A cradle for the fuse holder and two for the splice connectors stand on the back wall, open toward the lid, each with a cable-tie tunnel (3.5 x 1.5 mm) under it. The lid has the pin map engraved in its outer face, read from the wiring data: right of the column SPEED, POWER and 12V IN with TIP +, left of it SENSOR 1 BN, 2 BU, 3 BK and MOTOR 1 +, 2 -. Box and lid have a 1.5 mm chamfer on the outside edges. The assembly shows the bought electronics as envelopes with their nuts, no wires: M18 sensor with 2 lock nuts, relay and PWM controller modules, switch, jack, knob and both GX12 sockets with a panel nut each; their sizes are seller values, unverified. The lid comes off forward: 4 x ISO 4762 M3 x 8 into CNC Kitchen M3 x 5.7 inserts in the corner posts. Panel hole sizes and relay hole spacing are seller values, unverified. The box prints on its back wall, the lid flat |
@@ -76,15 +76,17 @@ The thread hand follows `case_plate.direction`, so brass drag tightens the cap. 
 
 One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert and drop tube (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, twist the drop tube off the spigot, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI). The exit opening is not adjustable: each plate set has its own exit insert, a slide would add a part and a lock for no gain.
 
-| Set (`case_plate.caliber`) | Item | Orient | Cases | Plate height | Pocket | Pockets | 45 deg capacity | Drop bore |
-|---|---|---|---|---|---|---|---|---|
-| `9mm_luger` (default, one case) | case | base down | 9mm Luger | 7.09 | 12.96 | 34 | 406 | 10.56 |
-| `pocket_pistol` | case | base down | .25 ACP, .32 ACP, .380 ACP | 6.06 | 12.53 | 36 | 499 | 10.13 |
-| `small_pistol` | case | base down | 9mm Makarov, 9mm Luger, .45 GAP, 9x21 | 7.22 | 14.94 | 29 | 255 | 12.54 |
-| `large_pistol` | case | base down | .40 S&W, .357 SIG, .45 ACP, .38 Super, 7.62x25, 10mm Auto | 8.60 | 15.19 | 29 | 200 | 12.79 |
-| `revolver` | case | base down | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 127 | 13.66 |
+| Set (`case_plate.caliber`) | Item | Orient | Cases | Plate height | Pocket | Pockets | 45 deg capacity | Drop bore | Hose ID x OD |
+|---|---|---|---|---|---|---|---|---|---|
+| `9mm_luger` (default, one case) | case | base down | 9mm Luger | 7.09 | 12.96 | 34 | 406 | 10.56 | 15 x 19 |
+| `pocket_pistol` | case | base down | .25 ACP, .32 ACP, .380 ACP | 6.06 | 12.53 | 36 | 499 | 10.13 | 15 x 19 |
+| `small_pistol` | case | base down | 9mm Makarov, 9mm Luger, .45 GAP, 9x21 | 7.22 | 14.94 | 29 | 255 | 12.54 | 16 x 20 |
+| `large_pistol` | case | base down | .40 S&W, .357 SIG, .45 ACP, .38 Super, 7.62x25, 10mm Auto | 8.60 | 15.19 | 29 | 200 | 12.79 | 16 x 20 |
+| `revolver` | case | base down | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 127 | 13.66 | 19 x 24 |
 
 A group plate gives its smallest case up to 2.3 mm more play than a one-case plate, so more cases may go in upside down (untested). A one-case plate (any key of `calibers.table`) is the tight option. Capacity counts the group's largest case. Rifle cases and bullets need another exit and are not built.
+
+Hose: each set takes the smallest size of `drop_tube.hoses` (clear PVC, Tricoflex Cristal range) whose inner diameter is at least the largest rim plus 2 mm (`hose_play`) and under the diagonal of every case, so no case turns over in it, and whose barb keeps `print.min_wall` round the tube bore. A set with no such size raises an error.
 
 What a set delivers is `case_plate.item` (`case`, later `bullet`) and `case_plate.orient` (`base_down`: mouth up at the exit). The plate, the exit insert and the tilt preset are selected from them, and only the pairs in `case_plate.tilts` are built (`case`/`base_down` at 45 deg): any other pair raises an error that names them. Orientation stays a property of the pocket and ridge geometry and the tilt, there is no flip module.
 
@@ -107,7 +109,7 @@ Parts chain on the drop tube instead of more openings in the bowl: one drop open
 
 ## Hose and sensor
 
-- Lay the hose downhill all the way to the press, with no loops or rising sections. A 9mm case (21.6 mm diagonal) cannot turn over in the 14 mm hose or the 10.9 mm bore.
+- Lay the hose downhill all the way to the press, with no loops or rising sections. A 9mm case (21.6 mm diagonal) cannot turn over in the 15 mm hose or the 10.9 mm bore.
 - The sensor sees the case through the 1.0 mm `drop_tube.window_t` wall. With a brass correction factor of 0.3 to 0.5 the LJ18A3-8 switches at 1.9 to 3.2 mm (estimate). A case lies 1.45 to 1.90 mm from the sensor face. Test with real cases before printing more. If it misses cases, set `window_t` to 0.6 or use a longer-range M18 sensor.
 - Each falling case passes the sensor in about 0.1 s. Use an off-delay timer relay (BOM) so the motor stops only on a full tube, not on each case.
 

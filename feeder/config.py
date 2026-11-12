@@ -488,8 +488,10 @@ class DropTube:
     sensor_margin: float = 10.0  # sensor axis above the outlet end by one case length plus this
     boss_wall: float = 3.2  # legs beside the nut slot
     plate_t: float = 4.0  # printed plate between the two lock nuts
-    hose_id: float = 14.0  # clear PVC hose 14 x 18 mm, unverified, owner buys, a 9mm case (21.6 diagonal) cannot turn in it
-    hose_od: float = 18.0
+    # Clear PVC hose (inner, outer diameter), Tricoflex Cristal sizes of 2 to 2.5 mm wall (Industrial Catalogue 2023, page 24,
+    # https://www.tricoflex.com/wp-content/uploads/2021/06/ci-2023-uk.pdf). Each plate set takes the smallest that `drop_tube.hose` allows
+    hoses: tuple = ((10.0, 14.0), (12.0, 16.0), (15.0, 19.0), (16.0, 20.0), (19.0, 24.0))
+    hose_play: float = 2.0  # hose inner diameter over the largest rim of the set
     barb_grip: float = 0.8  # barb diameter over the hose inner diameter
     barb_ridge_h: float = 0.4  # radial, 45 deg back face prints without support
     barb_ridge_pitch: float = 5.0
