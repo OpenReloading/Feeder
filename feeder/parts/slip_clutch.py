@@ -317,6 +317,9 @@ def gauge_t(cfg: Config = CFG) -> float:
     t = c.floor_gap + c.gauge_trim
     if t < cfg.print.fit:
         raise ValueError(f"clutch.gauge_trim {c.gauge_trim} leaves the hub {t:.2f} mm above the floor, under print.fit")
+    # a lower hub pushes the shaft deeper into the carrier bore, whose depth stays
+    if levels(cfg).shaft_tip > 0 and -c.gauge_trim > c.shaft_tip_gap - cfg.print.fit:
+        raise ValueError(f"clutch.gauge_trim {c.gauge_trim} is limited by the carrier bore: the shaft tip ends under print.fit from its end")
     return t
 
 
