@@ -142,6 +142,13 @@ def seat_drop(cfg: Config = CFG) -> float:
     return cfg.print.fit / math.tan(math.radians(cfg.drive_ring.cone_half_angle))
 
 
+def plate_gap_limits(cfg: Config = CFG) -> tuple[float, float]:
+    """Smallest and largest feeler gauge reading under the plate at a notch, ring pressed onto its cone: half the plate
+    flatness clear of the deck and of the thinnest rim of the plate set, for the plate between the notches."""
+    half_flat = cfg.case_plate.flatness / 2
+    return half_flat, caliber(cfg).rim_t_min - half_flat
+
+
 @dataclass(frozen=True)
 class Levels:
     bottom: float  # flat bottom plane of the body: cup floor bottom, rib and skirt ends
