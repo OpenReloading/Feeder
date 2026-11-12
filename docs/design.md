@@ -107,7 +107,7 @@ Parts chain on the drop tube instead of more openings in the bowl: one drop open
 
 ## Hose and sensor
 
-- Lay the hose downhill all the way to the press, with no loops or rising sections. A 9mm case (21.6 mm diagonal) cannot turn over in the 14 mm hose or the 10.9 mm bore.
+- Lay the hose downhill all the way to the press, with no loops or rising sections, and tie it to the stand: the bayonet lugs are 1.2 mm high and carry the drop tube, the sensor and the hose. A 9mm case (21.6 mm diagonal) cannot turn over in the 14 mm hose or the 10.9 mm bore.
 - The sensor sees the case through the 1.0 mm `drop_tube.window_t` wall. With a brass correction factor of 0.3 to 0.5 the LJ18A3-8 switches at 1.9 to 3.2 mm (estimate). A case lies 1.45 to 1.90 mm from the sensor face. Test with real cases before printing more. If it misses cases, set `window_t` to 0.6 or use a longer-range M18 sensor.
 - Each falling case passes the sensor in about 0.1 s. Use an off-delay timer relay (BOM) so the motor stops only on a full tube, not on each case.
 
@@ -142,7 +142,7 @@ Capacity: cases under a level brass surface as high as the lowest rim point allo
 |---|---|
 | `mount_yoke` | 4 x ISO 4762 M5 x 12 into the body's CNC Kitchen M5 x 9.5 inserts |
 | `mount_clamp` | 2 x ISO 4762 M5 x 35 on 2 x ISO 7089 M5 washers, 2 x ISO 4032 M5 nuts |
-| pivot (both parts) | ISO 4017 M10 x 55, 2 x ISO 7089 M10 washers (same sizes as DIN 125 A), DIN 985 M10 nut |
+| pivot (both parts) | ISO 4014 M10 x 60 (plain shank through the tongue), 2 x ISO 7089 M10 washers (same sizes as DIN 125 A), DIN 985 M10 nut |
 | link pins A and B | 2 x ISO 4762 M6 x 45, 4 x ISO 7089 M6 washers, 2 x DIN 985 M6 nuts |
 | adjustable link | DIN 976-1 M6 threaded rod cut to 60 mm, 4 x ISO 4032 M6 nuts |
 

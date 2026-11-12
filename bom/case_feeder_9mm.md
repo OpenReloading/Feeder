@@ -69,7 +69,7 @@ Other calibers: plate, exit insert, drop tube and its chain parts come per plate
 | ISO 4762 M5 x 35 | 2 | tube clamp | |
 | ISO 7089 M5 washer | 2 | tube clamp, under the screw heads | spreads the clamp load on the plastic |
 | ISO 4032 M5 nut | 2 | tube clamp | |
-| ISO 4017 M10 x 55 | 1 | pivot | |
+| ISO 4014 M10 x 60 | 1 | pivot | plain shank under the tongue, partly threaded |
 | ISO 7089 M10 washer | 2 | pivot | |
 | DIN 985 M10 nylon lock nut | 1 | pivot, sets the pivot friction | |
 | Tube 25 mm, round or square | 1 | stand | length to the bench, `mount.tube_shape` |
