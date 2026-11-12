@@ -446,6 +446,7 @@ class Clutch:
     clamp_margin: float = 0.4  # male cone ends this far below the ring floor top
     carrier_base_t: float = 4.0  # carrier base on the metal hub, clamped by the hub screws
     gauge_grip: float = 15.0  # hub height gauge: handle top above the plate bottom (deck height), to grip it
+    gauge_trim: float = 0.0  # hub gauge fork over `floor_gap`: the plate runs this much higher above the deck, the deck stays. Set from the plate gap trial fit (assembly step of the drive ring, `layout.plate_gap_limits`)
     key_af: float = 20.0  # hex that keys the pressure disc
     key_h: float = 11.5  # above the ring floor top
     disc_d: float = 50.0
