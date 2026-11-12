@@ -9,7 +9,7 @@ hide:
 
 # Configurator
 
-Pick the options of your feeder. The page lists the parts to print and the parts to buy for that choice. Print files are not published until a first feeder is built and tested: build them yourself with `build.py --configurator` (see docs/development.md in the repository), and this page packs them into one zip.
+Pick the options of your feeder. Print files are not published until a first feeder is built and tested. The page lists the parts to print and the parts to buy for that choice, and packs the print files into one zip, only on a site you build yourself after `build.py --configurator` (see docs/development.md in the repository).
 </div>
 
 !!! warning "Untested design"

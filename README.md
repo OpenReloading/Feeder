@@ -26,7 +26,7 @@ devcontainer exec --docker-path podman --workspace-folder . .venv/bin/python bui
 
 The first command creates the container. The second writes every part to `build/<name>.stl` and `.step`, and to `build/print/` in print orientation.
 
-Print files are not published until a first feeder is built and tested, so this build is the way to get them. The [configurator](https://openreloading.github.io/Feeder/configurator/) lists the parts for your options.
+Print files are not published until a first feeder is built and tested, so this build is the way to get them. The [configurator](https://openreloading.github.io/Feeder/configurator/) shows the options. It lists parts and packs print files only on a site you build yourself after `build.py --configurator` ([docs/development.md](docs/development.md)).
 
 ## Next
 

@@ -121,7 +121,7 @@ Two links on the same pins (`mount.link_a`, `mount.link_b`). The link gets 1.1 t
 
 | Link | Parts | Tilt |
 |---|---|---|
-| adjustable | `mount_rod_end_adjust` on pin A, `mount_rod_end_fixed` on pin B, M6 threaded rod. Fixed end: captive nut in the outer face, jam nut in the window. Adjust end: a nut each side of its wall. To change the tilt, loosen the two adjust end nuts, run them along the rod, tighten them against the wall | 40 to 60 deg, stepless (`mount.tilt_range`) |
+| adjustable | `mount_rod_end_adjust` on pin A, `mount_rod_end_fixed` on pin B, M6 threaded rod. Fixed end: captive nut in the outer face, jam nut in the window. Adjust end: a nut each side of its wall, the inner one in the window, the outer one between the rod ends. To change the tilt, loosen the inner nut, move the body with the outer nut, tighten the inner nut against the wall | 40 to 60 deg, stepless (`mount.tilt_range`) |
 | fixed | `mount_link_45`, `mount_link_50`, `mount_link_55`, one printed bar per angle (`mount.fixed_tilts`). Swap the bar to change the tilt. `mount.link` set to one of these angles builds the assembly with that bar, without rod ends, rod and rod nuts, at that tilt | the angle in its name |
 
 <!-- --8<-- [start:tilt] -->
@@ -139,7 +139,7 @@ Tilt choice. The best angle for 9mm on this feeder is UNTESTED. Start at 45 and 
 
 Capacity: cases under a level brass surface as high as the lowest rim point allows (the wall top, or the extender top over its arc), loose packing 0.55 of the case envelope (`layout.capacity`, estimate; the volume the leaning extender takes, 3 to 7 %, is not subtracted). Fill at most 1 kg of brass (about 250 9mm cases, `case_plate.fill_cases`, `case_plate.drag_mass`) on any plate set and at any tilt: the clutch, cap and mount load checks assume no more. The wall alone holds 250 up to 55 deg, the low side limits it. The extender raises that limit by 60 mm and keeps 250 cases in at 60 deg with room to spare, it is not for a larger fill.
 
-To change the tilt, switch POWER off and empty the bowl first: the weight of the body turns it steeper at every tilt, so a free pivot lets it drop. Fixed link: hold the body by its rim, pull one link pin, swap the bar, refit the pin, then let go. Adjustable link: the outer nut of the adjust end (between the two rod ends) carries the load. Loosen the inner nut in the window, move the body with the outer nut, then tighten the inner nut against the wall.
+To change the tilt, switch POWER off and empty the bowl first: the weight of the body turns it steeper at every tilt, so a free pivot lets it drop. Fixed link: take the nuts off both link pins while the link still carries the body. Then hold the body by its rim, pull both pins, fit the other bar and both pins, let go, and fit the nuts. Adjustable link: the outer nut of the adjust end (between the two rod ends) carries the load. Loosen the inner nut in the window, move the body with the outer nut, then tighten the inner nut against the wall.
 <!-- --8<-- [end:tilt] -->
 
 | Part | Hardware |

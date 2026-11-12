@@ -86,7 +86,7 @@ The plate pockets take base-down cases. Mouth-down cases sit high and fall back 
 
 <div class="feeder-rows" markdown>
 
-1. [Configurator](configurator.md): it lists the parts for your options. Print files are not published until a first feeder is built and tested: build them with `build.py`.
+1. [Configurator](configurator.md): it shows the options. It lists parts and packs print files only on a site you build yourself after `build.py --configurator` (docs/development.md in the repository). Print files are not published until a first feeder is built and tested.
 1. [BOM](bom.md): tick the parts off.
 --8<-- "guide/generated/assembly-row.md"
 1. [Wiring](wiring.md) of the electronics box.
