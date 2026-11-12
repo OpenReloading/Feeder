@@ -8,7 +8,7 @@ title: Wiring
 
     Seller listings disagree on the sensor output type (NPN normally closed in one, PNP normally open in another). Check the sensor as below before you wire it, and the relay module's mounting holes against `electronics.relay_holes`.
 
-The 12 V supply feeds the PWM controller, the timer relay and the sensor through the switch, a 1 A time-lag fuse and a series diode that blocks a reversed supply. A second diode across the motor line, after the relay contact, clamps the kick when the contact opens. The motor runs through the relay contact (module mode P8, held while the sensor output is low), so it stops when brass stays in front of the sensor for longer than the relay delay, or when the sensor loses power or a wire breaks.
+The 12 V supply feeds the PWM controller, the timer relay and the sensor through the switch, a time-lag fuse (1 A for the 1240 winding, 3.15 A for the 1280 winding, see the parts list) and a series diode that blocks a reversed supply. A second diode across the motor line, after the relay contact, clamps the kick when the contact opens. The motor runs through the relay contact (module mode P8, held while the sensor output is low), so it stops when brass stays in front of the sensor for longer than the relay delay, or when the sensor loses power or a wire breaks.
 
 ## Check the sensor on delivery
 

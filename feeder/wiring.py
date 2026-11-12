@@ -17,7 +17,7 @@ WIRING_PARTS = {
     "X1": _part("socket", "X1 motor socket", "", (810, 220), (120, 60), top=["P1", "P2"], bottom=["S1", "S2"]),
     "Q1": _part("box", "Q1 power switch", "front face", (70, 220), (100, 60), right=["COM", "ON"]),
     "J1": _part("box", "J1 12 V in", "DC jack, centre pin +, front face", (70, 440), (100, 70), right=["+", "-"]),
-    "F1": _part("box", "F1 fuse", "1 A time-lag, inline holder", (200, 330), (90, 50), left=["1"], right=["2"]),
+    "F1": _part("box", "F1 fuse", "1 A time-lag (1240); 3.15 A for 1280, see BOM", (200, 330), (90, 50), left=["1"], right=["2"]),
     "D1": _part("box", "D1 reverse polarity diode", "Schottky, series", (330, 330), (110, 50), left=["A"], right=["K"]),
     "D2": _part("box", "D2 flyback diode", "across the motor line, after the relay", (810, 420), (110, 50), top=["K", "A"]),
     "XP": _part("join", "XP +12 V", "", (230, 240), (150, 30), bottom=["1", "2", "3", "4"]),
