@@ -13,7 +13,7 @@ A tilted plate turns under loose pistol brass, and the cases leave base down thr
 
 Status: early development. No feeder has been built from these files yet, so parts are UNTESTED until printed.
 
-For reloaders who 3D print their own tools and can buy a gear motor, an M18 inductive sensor and metric DIN/ISO hardware. The default feeder holds up to 250 9mm cases and prints on a 256 mm bed. Plates for 18 pistol and revolver calibers fit the same body. Press adapters for the hose are not built yet ([#7](https://github.com/OpenReloading/Feeder/issues/7)).
+For reloaders who 3D print their own tools and can buy a gear motor, an M18 inductive sensor and metric DIN/ISO hardware. The default feeder holds up to 1 kg of brass (about 250 9mm cases) and prints on a 256 mm bed. Plates for 18 pistol and revolver calibers fit the same body. Press adapters for the hose are not built yet ([#7](https://github.com/OpenReloading/Feeder/issues/7)).
 
 ## Try it
 
@@ -26,11 +26,11 @@ devcontainer exec --docker-path podman --workspace-folder . .venv/bin/python bui
 
 The first command creates the container. The second writes every part to `build/<name>.stl` and `.step`, and to `build/print/` in print orientation.
 
-To skip the build, use the [configurator](https://openreloading.github.io/Feeder/configurator/): it lists the parts for your options and zips the print files in your browser.
+Print files are not published until a first feeder is built and tested, so this build is the way to get them. The [configurator](https://openreloading.github.io/Feeder/configurator/) lists the parts for your options.
 
 ## Next
 
-- [Build guide](https://openreloading.github.io/Feeder/): BOM, assembly steps, wiring, tilt and troubleshooting.
+- [Build guide](https://openreloading.github.io/Feeder/): BOM, assembly steps, wiring, safety and first run, tilt and troubleshooting.
 - [docs/development.md](docs/development.md): all build flags, the guide site, tests and the simulation.
 - [docs/design.md](docs/design.md): every option in `feeder/config.py`, the parts with their hardware, plate sets and the tilt mount.
 - [Issues](https://github.com/OpenReloading/Feeder/issues): [#3](https://github.com/OpenReloading/Feeder/issues/3) lists what a first print has to test.

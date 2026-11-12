@@ -65,12 +65,12 @@ hide:
 <div class="feeder-card" markdown>
 <p class="feeder-card__label">WHAT IT IS</p>
 
-Brass goes into the bowl in any orientation, up to 250 9mm cases. An inductive sensor stops the motor when the tube is full.
+Brass goes into the bowl in any orientation, up to 1 kg (about 250 9mm cases). An inductive sensor stops the motor when the tube is full.
 </div>
 <div class="feeder-card" markdown>
 <p class="feeder-card__label">WHO IT IS FOR</p>
 
-For reloaders who 3D print their own tools and can buy a gear motor, an M18 inductive sensor and metric DIN/ISO hardware. The default feeder holds up to 250 9mm cases and prints on a 256 mm bed.
+For reloaders who 3D print their own tools and can buy a gear motor, an M18 inductive sensor and metric DIN/ISO hardware. The default feeder holds up to 1 kg of brass (about 250 9mm cases) and prints on a 256 mm bed.
 </div>
 <div class="feeder-card" markdown>
 <p class="feeder-card__label">HOW IT WORKS</p>
@@ -86,10 +86,11 @@ The plate pockets take base-down cases. Mouth-down cases sit high and fall back 
 
 <div class="feeder-rows" markdown>
 
-1. [Configurator](configurator.md): it lists the parts for your options and zips the print files in your browser.
+1. [Configurator](configurator.md): it lists the parts for your options. Print files are not published until a first feeder is built and tested: build them with `build.py`.
 1. [BOM](bom.md): tick the parts off.
 --8<-- "guide/generated/assembly-row.md"
 1. [Wiring](wiring.md) of the electronics box.
+1. [Safety and first run](safety.md): how to stop it, what goes into the bowl, the stop test before each session and the first-run checks.
 1. [Tilt and capacity](tilt.md) lists when to go steeper and the capacity per angle.
 1. [Troubleshooting](troubleshooting.md) lists symptoms, causes and the config value or part to change.
 
@@ -109,7 +110,7 @@ Plates for 18 pistol and revolver calibers fit the same body. Pick one in the [c
 
 </div>
 
-Fill at most 250 9mm cases.
+Fill at most 1 kg of brass (about 250 9mm cases) on any plate set.
 
 ## How to start
 
@@ -132,7 +133,7 @@ Print the parts, then follow the [assembly steps](assembly.md).
 <div class="feeder-card" markdown>
 <p class="feeder-card__label">04</p>
 
-Set the [tilt](tilt.md) last, and look at [troubleshooting](troubleshooting.md) when it does not work.
+Read [safety and first run](safety.md) before the first power-up, set the [tilt](tilt.md) last, and look at [troubleshooting](troubleshooting.md) when it does not work.
 </div>
 </div>
 
