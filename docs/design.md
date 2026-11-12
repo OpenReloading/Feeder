@@ -36,7 +36,7 @@ Full hardware list for the default 9mm case feeder: `bom/case_feeder_9mm.md`.
 | Part | Hardware |
 |---|---|
 | `slip_clutch_carrier_metal_hub` | Pololu 2693 hub with its 2 M3 set screws, 3 x ISO 4762 M3 x 10, CNC Kitchen M5 x 9.5 insert. `GENERIC_8MM_FLANGE`: 2 x ISO 4762 M3 x 12 with ISO 4032 M3 nuts |
-| `slip_clutch_hub_gauge` | none. Fork as thick as the floor gap under the hub boss, with a handle up past the deck: lay it on the cup floor around the shaft, push the hub down onto it, tighten the hub set screws, slide it out by the handle (away from the shaft, about 21 mm) and lift it out. The plate then sits at its design height above the track. Prints fork down |
+| `slip_clutch_hub_gauge` | none. Fork as thick as the floor gap under the hub boss (plus `clutch.gauge_trim` from the plate gap trial fit), with a handle up past the deck: lay it on the cup floor around the shaft, push the hub down onto it, tighten the hub set screws, slide it out by the handle (away from the shaft, about 21 mm) and lift it out. The plate then sits at its design height above the track. Prints fork down |
 | `slip_clutch_drive_ring` | none. Sits on the clutch cone with disc, springs and knob inside and stays there when plates are changed. Reprint it when the cone or floor wears. Prints flange down |
 | `slip_clutch_cap` | none. Twists onto the ring thread by hand (right-hand for the default counter-clockwise plate) and clamps the plate. Prints top down |
 | `slip_clutch_disc` | 6 Gutekunst VD-127E-01 springs |
