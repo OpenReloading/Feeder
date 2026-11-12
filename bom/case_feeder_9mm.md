@@ -72,7 +72,9 @@ Other calibers: plate, exit insert, drop tube and its chain parts come per plate
 | ISO 4014 M10 x 60 | 1 | pivot | plain shank under the tongue, partly threaded |
 | ISO 7089 M10 washer | 2 | pivot | |
 | DIN 985 M10 nylon lock nut | 1 | pivot, sets the pivot friction | |
-| Tube 25 mm, round or square | 1 | stand | length to the bench, `mount.tube_shape` |
+| Tube 25 mm, round or square | 1 | stand | length to the bench, at least 169 mm above the base so the electronics box clears it (assembly step), `mount.tube_shape` |
+| Floor flange for a 25 mm tube, round or square to match the tube, steel, with a set screw | 1 | stand base, screwed to the bench | or a bench clamp with a 25 mm tube socket. It must hold the tipping load: about 2 Nm from the weight (3.35 kg, `mount.body_mass`, center of mass 28 to 58 mm off the tube axis from 40 to 60 deg) plus 0.05 Nm per mm from the base up to the bowl rim from a 50 N push at the rim (`mount.push`), so about 25 Nm with the shortest tube (estimate). Socket size, hole pattern and rating from the listing, unverified |
+| Screws for the floor flange | to its holes | flange to the bench | to suit the bench, not needed with a bench clamp |
 
 ## Drop tube and sensor
 
