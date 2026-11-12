@@ -41,10 +41,26 @@ def check_orientation(cfg: Config = CFG) -> None:
         raise ValueError(f"plate set {cp.caliber!r}: item/orient {cp.item}/{cp.orient} is not supported, supported: {ok}")
 
 
+def tip_tilt(com_ratio: float, cfg: Config = CFG) -> float:
+    """Tilt, deg, above which a mouth-down case of every caliber of the set tips out of its pocket at the high side,
+    where the inner pocket wall is downhill. Statics: an upright case on the deck leans on that wall's top edge, which
+    the pickup channel or the top chamfer lowers, center of mass `com_ratio` of the case length from the base."""
+    cp, z, r = cfg.case_plate, levels(cfg), pocket_d(cfg) / 2
+    channel = cp.channel_depth * max(0.0, 1 - r / cp.channel_len) if cp.channel_len else 0.0
+    edge = z.plate_top - max(channel, cp.top_chamfer) - z.deck_top
+    return max(math.degrees(math.atan2(c.rim_d / 2, (1 - com_ratio) * c.case_length - edge)) for c in calibers(cfg))
+
+
 def tilt(cfg: Config = CFG) -> float:
-    """Tilt preset of the plate set's item and orientation, deg from horizontal."""
+    """Start tilt of the plate set, deg from horizontal: the flattest fixed link angle (`mount.fixed_tilts`) at or
+    above the item and orientation's preset that tips mouth-down cases out at the high end of the center of mass estimate."""
     check_orientation(cfg)
-    return cfg.case_plate.tilts[cfg.case_plate.item, cfg.case_plate.orient]
+    cp = cfg.case_plate
+    preset, tip = cp.tilts[cp.item, cp.orient], tip_tilt(cp.com_range[1], cfg)
+    ok = [t for t in sorted(cfg.mount.fixed_tilts) if t >= preset and t > tip]
+    if not ok:
+        raise ValueError(f"plate set {cp.caliber!r}: mouth-down cases tip out only above {tip:.1f} deg, steeper than every fixed link {cfg.mount.fixed_tilts}")
+    return ok[0]
 
 
 def bed_d(cfg: Config = CFG) -> float:

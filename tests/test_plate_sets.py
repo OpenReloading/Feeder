@@ -62,7 +62,30 @@ def test_group_plate_height_and_pockets_suit_every_case(plate_set):
 def test_set_declares_a_supported_item_and_orientation(plate_set):
     s, _ = plate_set
     assert (s.case_plate.item, s.case_plate.orient) in s.case_plate.tilts
-    assert layout.tilt(s) == s.case_plate.tilts[s.case_plate.item, s.case_plate.orient]
+
+
+# deg above which mouth-down cases tip out at center of mass 0.36 and 0.39 of the length, and the start tilt
+TIP_START = {
+    "9mm_luger": (40.5, 43.4, 45.0),
+    "pocket_pistol": (40.0, 43.0, 45.0),
+    "small_pistol": (46.1, 49.2, 50.0),  # .45 GAP
+    "large_pistol": (42.8, 46.2, 50.0),  # .40 S&W
+    "revolver": (39.3, 42.7, 45.0),
+}
+
+
+@pytest.mark.parametrize("s", SETS, ids=IDS)
+def test_start_tilt_tips_out_every_mouth_down_case_of_the_set(s):
+    low, high, start = TIP_START[s.case_plate.caliber]
+    assert layout.tip_tilt(0.36, s) == pytest.approx(low, abs=0.06)
+    assert layout.tip_tilt(0.39, s) == pytest.approx(high, abs=0.06)
+    assert layout.tilt(s) == start
+
+
+def test_start_tilt_steeper_than_every_fixed_link_names_the_tip_tilt():
+    small = next(s for s in SETS if s.case_plate.caliber == "small_pistol")
+    with pytest.raises(ValueError, match=r"49\.2 deg"):
+        layout.tilt(replace(small, mount=replace(small.mount, fixed_tilts=(45.0,))))
 
 
 @pytest.mark.parametrize("s", SETS, ids=IDS)

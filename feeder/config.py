@@ -156,7 +156,8 @@ class CasePlate:
     fill_cases: int = 250  # design fill, about drag_mass of 9mm
     packing: float = 0.55  # loose cases over their envelope volume, low estimate (random cylinders about 0.55 to 0.65, unverified)
     drag_mu: float = 0.3  # brass on printed plastic, estimate
-    tilts: dict = field(default_factory=lambda: {("case", "base_down"): 45.0})  # (item, orient) the set delivers: deg from horizontal, start value, tune on hardware. The supported combinations
+    tilts: dict = field(default_factory=lambda: {("case", "base_down"): 45.0})  # (item, orient) the set delivers: deg from horizontal, the flattest start tilt (`layout.tilt` goes steeper where mouth-down cases need it), tune on hardware. The supported combinations
+    com_range: tuple = (0.33, 0.39)  # case center of mass height over case length from the base, low and high estimate (`sim.com_ratio` between): the start tilt tips mouth-down cases out at the high end
     direction: int = 1  # +1 counter-clockwise seen from above, -1 clockwise
 
 
