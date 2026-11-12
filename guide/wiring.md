@@ -34,7 +34,7 @@ Turn the knob to the lowest setting, plug in the motor and the sensor, keep meta
 
 ## Motor noise on the sensor line
 
-Keep the sensor cable apart from the motor cable down the stand, or cross it at right angles, and use a round two-core motor cable (BOM). At the first run with a full tube, hold each knob position for a minute: the relay must stay off. If it chatters, solder a 0.1 µF ceramic capacitor across the motor terminals ([Pololu on motor noise](https://www.pololu.com/docs/0J15/9)). Fit it only if the test shows the fault.
+Keep the sensor cable apart from the motor cable down the stand, or cross it at right angles, and use a round two-core motor cable (BOM). At the first run, at each knob position: let the motor run with the sensor clear, then hold steel to the sensor face (or let the tube fill). The motor must stop after the relay delay and stay stopped for a minute. If the relay chatters, or the motor fails to stop at some knob positions only, solder a 0.1 µF ceramic capacitor across the motor terminals ([Pololu on motor noise](https://www.pololu.com/docs/0J15/9)). Fit it only if the test shows the fault.
 
 The lid has the plug pin map and the polarity of the supply jack engraved in its outer face, from the same data as the board below: check a plug against it before you close the box.
 
