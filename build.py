@@ -102,7 +102,7 @@ def main() -> int:
     if args.guide:
         import json  # noqa: PLC0415
 
-        from feeder import guide  # noqa: PLC0415
+        from feeder import guide, side_view  # noqa: PLC0415
 
         build_assembly(CFG, ROOT / "guide" / "generated" / "assembly", f"Body {CFG.body.split.replace('_', ' ')}, default configuration")
         data = BUILD / "guide" / "buildguide.json"
@@ -115,6 +115,7 @@ def main() -> int:
         (ROOT / "guide" / "generated" / "fasteners.md").write_text(guide.fasteners_markdown(CFG), encoding="utf-8")
         (ROOT / "guide" / "generated" / "assembly-row.md").write_text(guide.assembly_row_markdown(CFG), encoding="utf-8")
         (ROOT / "guide" / "generated" / "plate-groups.md").write_text(guide.plate_groups_markdown(), encoding="utf-8")
+        (ROOT / "guide" / "generated" / "side-view.md").write_text(side_view.side_view_html(CFG), encoding="utf-8")
     if args.no_test:
         return 0
     return subprocess.run([sys.executable, "-m", "pytest", "-q"], cwd=ROOT).returncode  # noqa: PLW1510

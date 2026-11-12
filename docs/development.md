@@ -23,7 +23,7 @@ Run in the container (prefix `devcontainer exec --docker-path podman --workspace
 
 ## Build guide site
 
-The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenReloading/BuildGuide) plugin (`mkdocs.yml`, pages in `guide/`): introduction and BOM checklist from `feeder/guide.py`, the assembly viewer, tilt and capacity from `docs/design.md`. Nothing generated is committed. In the container:
+The build guide is a MkDocs site with the [BuildGuide](https://github.com/OpenReloading/BuildGuide) plugin (`mkdocs.yml`, pages in `guide/`): introduction and BOM checklist from `feeder/guide.py`, the introduction's side view from `feeder/side_view.py` (a cut through the assembly), the assembly viewer, tilt and capacity from `docs/design.md`. Nothing generated is committed. In the container:
 
 ```
 .venv/bin/pip install -r requirements-guide.txt

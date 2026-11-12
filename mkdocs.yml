@@ -12,6 +12,7 @@ exclude_docs: |   # snippets of index.md and assembly.md
   generated/plate-groups.md
   generated/assembly-eyebrow.md
   generated/fasteners.md
+  generated/side-view.md
 
 theme:
   name: material
