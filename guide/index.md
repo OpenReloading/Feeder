@@ -67,7 +67,7 @@ Plates for 18 pistol and revolver calibers fit the same body. Pick one in the [c
 
 --8<-- "guide/generated/plate-groups.md"
 
-## Start at 45 degrees
+## Start at 45 degrees for 9mm
 
 <div class="feeder-tilt" markdown>
 

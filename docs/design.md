@@ -76,19 +76,21 @@ The thread hand follows `case_plate.direction`, so brass drag tightens the cap. 
 
 One body and band take every plate: the exit shaft in the core holds any set's exit insert, the wall and band suit the longest case. A plate change for another caliber group swaps the plate, exit insert and drop tube (`build.py --plates`). No tools: twist the cap off, lift the plate and the gate out, twist the drop tube off the spigot, lift the insert out. Set `case_plate.caliber` to a group or to one case of `calibers.table` (C.I.P. sheet values, rimmed rim thickness from SAAMI). The exit opening is not adjustable: each plate set has its own exit insert, a slide would add a part and a lock for no gain.
 
-| Set (`case_plate.caliber`) | Item | Orient | Cases | Plate height | Pocket | Pockets | 45 deg capacity | Drop bore |
-|---|---|---|---|---|---|---|---|---|
-| `9mm_luger` (default, one case) | case | base down | 9mm Luger | 7.09 | 12.96 | 34 | 406 | 10.56 |
-| `pocket_pistol` | case | base down | .25 ACP, .32 ACP, .380 ACP | 6.06 | 12.53 | 36 | 499 | 10.13 |
-| `small_pistol` | case | base down | 9mm Makarov, 9mm Luger, .45 GAP, 9x21 | 7.22 | 14.94 | 29 | 255 | 12.54 |
-| `large_pistol` | case | base down | .40 S&W, .357 SIG, .45 ACP, .38 Super, 7.62x25, 10mm Auto | 8.60 | 15.19 | 29 | 200 | 12.79 |
-| `revolver` | case | base down | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 127 | 13.66 |
+| Set (`case_plate.caliber`) | Item | Orient | Cases | Plate height | Pocket | Pockets | Start tilt | 45 deg capacity | Drop bore |
+|---|---|---|---|---|---|---|---|---|---|
+| `9mm_luger` (default, one case) | case | base down | 9mm Luger | 7.09 | 12.96 | 34 | 45 | 406 | 10.56 |
+| `pocket_pistol` | case | base down | .25 ACP, .32 ACP, .380 ACP | 6.06 | 12.53 | 36 | 45 | 499 | 10.13 |
+| `small_pistol` | case | base down | 9mm Makarov, 9mm Luger, .45 GAP, 9x21 | 7.22 | 14.94 | 29 | 50 | 255 | 12.54 |
+| `large_pistol` | case | base down | .40 S&W, .357 SIG, .45 ACP, .38 Super, 7.62x25, 10mm Auto | 8.60 | 15.19 | 29 | 50 | 200 | 12.79 |
+| `revolver` | case | base down | .38 Special, .357 Magnum, .44 Special, .44 Magnum, .45 Colt | 11.46 | 16.06 | 27 | 45 | 127 | 13.66 |
 
 Capacity is the room in the bowl, not the fill: fill at most 1 kg of brass on any plate set (about 250 9mm cases), because the clutch, cap and mount checks assume no more.
 
 A group plate gives its smallest case up to 2.3 mm more play than a one-case plate, so more cases may go in upside down (untested). A one-case plate (any key of `calibers.table`) is the tight option. Capacity counts the group's largest case. Rifle cases and bullets need another exit and are not built.
 
-What a set delivers is `case_plate.item` (`case`, later `bullet`) and `case_plate.orient` (`base_down`: mouth up at the exit). The plate, the exit insert and the tilt preset are selected from them, and only the pairs in `case_plate.tilts` are built (`case`/`base_down` at 45 deg): any other pair raises an error that names them. Orientation stays a property of the pocket and ridge geometry and the tilt, there is no flip module.
+What a set delivers is `case_plate.item` (`case`, later `bullet`) and `case_plate.orient` (`base_down`: mouth up at the exit). The plate, the exit insert and the tilt preset are selected from them, and only the pairs in `case_plate.tilts` are built (`case`/`base_down`, start tilt 45 deg or steeper): any other pair raises an error that names them. Orientation stays a property of the pocket and ridge geometry and the tilt, there is no flip module.
+
+Start tilt (`layout.tilt`): the flattest fixed link angle, from the 45 deg preset of the item and orientation up, at which a mouth-down case of every caliber of the set tips out of its pocket at the high side and falls back. Statics only (`layout.tip_tilt`): an upright case on the deck leans on the top edge of the inner pocket wall, which the pickup channel lowers by about 1.1 mm, with the center of mass at 0.39 of the case length from the base, the high end of the estimate (`case_plate.com_range`, 0.33 to 0.39). Wide short cases need the most: .45 GAP tips out above 49.2 deg on the `small_pistol` plate, .40 S&W above 46.2 deg on `large_pistol`, 9mm Luger above 43.4 deg on its own plate (46.1, 42.8 and 40.5 deg at 0.36). Of the one-case plates, `45_gap` (48.8 deg) and `45_acp` (45.1 deg) start at 50 deg, every other one at 45. At 50 deg the wall alone holds 204 cases on `small_pistol` and 160 on `large_pistol`. Estimate: the simulation and the bench decide.
 
 ## Drop tube attachment
 
@@ -125,7 +127,7 @@ Two links on the same pins (`mount.link_a`, `mount.link_b`). The link gets 1.1 t
 | fixed | `mount_link_45`, `mount_link_50`, `mount_link_55`, one printed bar per angle (`mount.fixed_tilts`). Swap the bar to change the tilt. `mount.link` set to one of these angles builds the assembly with that bar, without rod ends, rod and rod nuts, at that tilt | the angle in its name |
 
 <!-- --8<-- [start:tilt] -->
-Tilt choice. The best angle for 9mm on this feeder is UNTESTED. Start at 45 and go steeper only for the reason in the table:
+Tilt choice. The best angle on this feeder is UNTESTED. Start at the plate set's start tilt: 50 deg for `small_pistol`, `large_pistol` and the one-case plates `45_gap` and `45_acp`, whose wide short cases tip out mouth down only above about 45 to 49 deg (estimate), 45 deg for every other set. Go steeper only for the reason in the table:
 
 <!-- --8<-- [start:tilt-table] -->
 | Tilt | When | 9mm capacity, wall / with extender | Link pin to pin |
