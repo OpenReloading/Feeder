@@ -21,7 +21,7 @@ Python packages (top-level pins in `pyproject.toml`, full lock in `pylock.toml`)
 | rtree | 1.4.1 |
 | numpy | 2.5.4 |
 | scipy | 1.18.1 |
-| pandas | 3.1.0 |
+| pandas | 3.1.1 |
 | matplotlib | 3.11.2 |
 | pytest | 9.2.0 |
 | pytest-xdist | 3.8.0 |
