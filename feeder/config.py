@@ -46,7 +46,7 @@ class Fasteners:
 class Motor:
     """5840-31ZY worm gear motor. NFP 5840-31ZY-EN and Daiwei 634JSX-31ZY drawings
     (https://microdcmotors.com/product/12v-24v-high-torque-low-speed-dc-motor-with-encoder-self-locking-model-nfp-5840-31zy-en,
-    https://www.daiweimotor.com/pro_detail/20.html). Owner caliper check pending."""
+    https://www.daiweimotor.com/pro_detail/20.html). Dimensions not yet checked with calipers."""
 
     shaft_d: float = 8.0
     shaft_across_flat: float = 7.0
@@ -74,7 +74,7 @@ class Motor:
 
 @dataclass(frozen=True)
 class Printer:
-    bed_x: float = 256.0  # Bambu Lab X1, P1 and P2 class, owner default
+    bed_x: float = 256.0  # default bed of the Bambu Lab X1, P1 and P2 class
     bed_y: float = 256.0
     bed_z: float = 256.0
     margin: float = 3.0  # kept free at each bed edge for skirt and brim
@@ -157,7 +157,8 @@ class CasePlate:
     fill_cases: int = 250  # design fill, about drag_mass of 9mm
     packing: float = 0.55  # loose cases over their envelope volume, low estimate (random cylinders about 0.55 to 0.65, unverified)
     drag_mu: float = 0.3  # brass on printed plastic, estimate
-    tilts: dict = field(default_factory=lambda: {("case", "base_down"): 45.0})  # (item, orient) the set delivers: deg from horizontal, start value, tune on hardware. The supported combinations
+    tilts: dict = field(default_factory=lambda: {("case", "base_down"): 45.0})  # (item, orient) the set delivers: deg from horizontal, the flattest start tilt (`layout.tilt` goes steeper where mouth-down cases need it), tune on hardware. The supported combinations
+    com_range: tuple = (0.33, 0.39)  # case center of mass height over case length from the base, low and high estimate (`sim.com_ratio` between): the start tilt tips mouth-down cases out at the high end
     direction: int = 1  # +1 counter-clockwise seen from above, -1 clockwise
 
 
@@ -206,11 +207,11 @@ class Mount:
     bolt_size: str = "M5"
     bolt_x: float = 25.0  # bolts at +-x
     bolt_y: tuple = (-55.0, -95.0)
-    tube_shape: str = "round"  # "round" or "square" (owner: 25 mm tube)
+    tube_shape: str = "round"  # "round" or "square" (25 mm tube)
     tube_d: float = 25.0  # round diameter or square side
     body_mass: float = 3.35  # kg at the plate top for the load checks: CAD estimate up to 2.91 (fill 0.8, 0.5 kg motor, unmodelled mass, 1 kg brass) plus 0.44 for the wall extender (the open arc weighs 0.25)
     unmodelled_mass: float = 0.15  # kg screws, inserts, sensor, cables, hose end, estimate, counted at the exit side
-    tilt_range: tuple = (40.0, 60.0)  # deg from horizontal (owner), the adjustable link covers it
+    tilt_range: tuple = (40.0, 60.0)  # deg from horizontal, the adjustable link covers it
     tilt_margin: float = 2.0  # deg beyond the range that clearances still cover
     pivot_size: str = "M10"
     pivot_y: float = -38.0  # clears the gearbox half width (20) plus the ear radius
@@ -490,7 +491,7 @@ class DropTube:
     sensor_margin: float = 10.0  # sensor axis above the outlet end by one case length plus this
     boss_wall: float = 3.2  # legs beside the nut slot
     plate_t: float = 4.0  # printed plate between the two lock nuts
-    hose_id: float = 14.0  # clear PVC hose 14 x 18 mm, unverified, owner buys, a 9mm case (21.6 diagonal) cannot turn in it
+    hose_id: float = 14.0  # clear PVC hose 14 x 18 mm, unverified, to be bought, a 9mm case (21.6 diagonal) cannot turn in it
     hose_od: float = 18.0
     barb_grip: float = 0.8  # barb diameter over the hose inner diameter
     barb_ridge_h: float = 0.4  # radial, 45 deg back face prints without support

@@ -4,7 +4,7 @@ All builds and tests run in the dev container (`.devcontainer/`).
 
 | Component | Version | Source |
 |---|---|---|
-| Base image | `mcr.microsoft.com/devcontainers/python:3.14-bookworm` (digest `sha256:68aef385...a6b`) | Microsoft dev container images |
+| Base image | `mcr.microsoft.com/devcontainers/python:3.14-bookworm` (digest `sha256:94053b77...d42`) | Microsoft dev container images |
 | Python | 3.14.8 | base image |
 
 Python packages (top-level pins in `pyproject.toml`, full lock in `pylock.toml`):
