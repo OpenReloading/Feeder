@@ -94,7 +94,7 @@ Start tilt (`layout.tilt`): the flattest fixed link angle, from the 45 deg prese
 
 ## Drop tube attachment
 
-The drop tube twists onto the exit spigot, no screw and no tool (`drop_tube`, `exit.spigot_len`). Decision: a bayonet instead of a DIN 464 thumb screw on a boss.
+The drop tube twists onto the exit spigot, no screw and no tool (`drop_tube`, `exit.spigot_len`). It is a bayonet, not a DIN 464 thumb screw on a boss.
 
 - Hose pull and vibration: the tube hangs on the notch floors, so its weight and an axial hose pull load the lugs against a 45 deg floor, the strong direction. Sideways hose pull is carried by the spigot over the full socket depth. To turn the tube off, lift it 1 mm (`lock_lift`) out of the notch first, which a shaking or pulled hose does not do on its own. Strength and hold are estimates until a print is tried.
 - Sensor window: the stop at the end of the 60 deg turn fixes the tube's azimuth, with the lug-to-notch fit (`print.fit`) as the only play, at most 0.3 mm at the window (checked in `tests/test_drop_tube.py`). The wide and the narrow lug make the tube fit one way only, sensor on the +x side of the body.
