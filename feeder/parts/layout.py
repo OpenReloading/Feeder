@@ -41,10 +41,26 @@ def check_orientation(cfg: Config = CFG) -> None:
         raise ValueError(f"plate set {cp.caliber!r}: item/orient {cp.item}/{cp.orient} is not supported, supported: {ok}")
 
 
+def tip_tilt(com_ratio: float, cfg: Config = CFG) -> float:
+    """Tilt, deg, above which a mouth-down case of every caliber of the set tips out of its pocket at the high side,
+    where the inner pocket wall is downhill. Statics: an upright case on the deck leans on that wall's top edge, which
+    the pickup channel or the top chamfer lowers, center of mass `com_ratio` of the case length from the base."""
+    cp, z, r = cfg.case_plate, levels(cfg), pocket_d(cfg) / 2
+    channel = cp.channel_depth * max(0.0, 1 - r / cp.channel_len) if cp.channel_len else 0.0
+    edge = z.plate_top - max(channel, cp.top_chamfer) - z.deck_top
+    return max(math.degrees(math.atan2(c.rim_d / 2, (1 - com_ratio) * c.case_length - edge)) for c in calibers(cfg))
+
+
 def tilt(cfg: Config = CFG) -> float:
-    """Tilt preset of the plate set's item and orientation, deg from horizontal."""
+    """Start tilt of the plate set, deg from horizontal: the flattest fixed link angle (`mount.fixed_tilts`) at or
+    above the item and orientation's preset that tips mouth-down cases out at the high end of the center of mass estimate."""
     check_orientation(cfg)
-    return cfg.case_plate.tilts[cfg.case_plate.item, cfg.case_plate.orient]
+    cp = cfg.case_plate
+    preset, tip = cp.tilts[cp.item, cp.orient], tip_tilt(cp.com_range[1], cfg)
+    ok = [t for t in sorted(cfg.mount.fixed_tilts) if t >= preset and t > tip]
+    if not ok:
+        raise ValueError(f"plate set {cp.caliber!r}: mouth-down cases tip out only above {tip:.1f} deg, steeper than every fixed link {cfg.mount.fixed_tilts}")
+    return ok[0]
 
 
 def bed_d(cfg: Config = CFG) -> float:
@@ -89,18 +105,21 @@ def pocket_count(cfg: Config = CFG) -> int:
     return math.floor(2 * math.pi * pocket_circle_r(cfg) / (pocket_d(cfg) * cp.pocket_pitch))
 
 
-def plate_drag_torque(cfg: Config = CFG) -> float:
-    """Nm to turn the plate under the brass: the pile rests on the low side at about the pocket circle."""
+def plate_drag_torque(cfg: Config = CFG, angle: float | None = None) -> float:
+    """Nm to turn the plate under the brass: the pile rests on the low side at about the pocket circle.
+    `angle` is the tilt in deg, the plate set's start tilt by default."""
     cp = cfg.case_plate
-    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(tilt(cfg))) * pocket_circle_r(cfg) / 1000
+    angle = tilt(cfg) if angle is None else angle
+    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(angle)) * pocket_circle_r(cfg) / 1000
 
 
-def cap_drag_torque(cfg: Config = CFG) -> float:
+def cap_drag_torque(cfg: Config = CFG, angle: float | None = None) -> float:
     """Nm the brass turns the cap with, an upper bound: the whole design fill rests on the cap wall at its rim radius,
     as `plate_drag_torque` has it rest on the plate at the pocket circle. It loosens the cap when the plate turns
-    against the thread hand."""
+    against the thread hand. `angle` is the tilt in deg, the plate set's start tilt by default."""
     cp = cfg.case_plate
-    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(tilt(cfg))) * cfg.cap.d / 2 / 1000
+    angle = tilt(cfg) if angle is None else angle
+    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(angle)) * cfg.cap.d / 2 / 1000
 
 
 def tipping_moment(tilt: float, cfg: Config = CFG) -> float:
