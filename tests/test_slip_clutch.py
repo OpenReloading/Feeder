@@ -198,7 +198,7 @@ def test_cap_stays_on_when_the_plate_turns_in_reverse(plate_set):
     flat = CFG.mount.tilt_range[0] - CFG.mount.tilt_margin
     cp = plate_set.case_plate
     flattest = replace(plate_set, case_plate=replace(cp, tilts={(cp.item, cp.orient): flat}))
-    assert sc.cap_holding_torque(flattest) >= C.backstop_margin * layout.cap_drag_torque(flattest)
+    assert sc.cap_holding_torque(flattest) >= C.backstop_margin * layout.cap_drag_torque(flattest, angle=flat)
 
 
 def test_spring_works_between_solid_and_free_length():
@@ -212,7 +212,7 @@ def test_clutch_is_the_only_torque_limit_between_the_plate_drag_and_the_gearbox_
     assert sc.slip_torque(n, HIGH) <= M.gearbox_torque_limit
     flat = CFG.mount.tilt_range[0] - CFG.mount.tilt_margin
     flattest = replace(CFG, case_plate=replace(CFG.case_plate, tilts={(CFG.case_plate.item, CFG.case_plate.orient): flat}))
-    assert sc.slip_torque(n, LOW) >= C.backstop_margin * layout.plate_drag_torque(flattest)
+    assert sc.slip_torque(n, LOW) >= C.backstop_margin * layout.plate_drag_torque(flattest, angle=flat)
 
 
 def test_cap_thread_meshes_with_the_ring():
