@@ -217,18 +217,23 @@ wheels = [{ url = "https://files.pythonhosted.org/packages/43/e3/7d92a15f894aa0c
 
 [[packages]]
 name = "mujoco"
-version = "4.0.0"
-wheels = [{ url = "https://files.pythonhosted.org/packages/93/90/6a6b168225cb354d343e01cd272e526b6798fd957693e878a785c71a2fd2/mujoco-4.0.0-py3-none-any.whl", upload-time = 2026-11-06T15:39:14Z, size = 108599, hashes = { sha256 = "693a48af2b683c8613f750be66c69a3262014becb0f08674730c4d461a2f0a8d" } }]
+version = "4.0.1"
+wheels = [{ url = "https://files.pythonhosted.org/packages/37/50/a347e51f8a85cffcd02111165ea2b50508abeb89a30661bfe5442b1de411/mujoco-4.0.1-py3-none-any.whl", upload-time = 2026-11-11T16:25:28Z, size = 108623, hashes = { sha256 = "3a0ce4c6cd76dd599a89e60513ac1b03404642363a42267bcfd6b028cc753417" } }]
 
 [[packages]]
 name = "mujoco-core"
-version = "4.0.0"
-wheels = [{ url = "https://files.pythonhosted.org/packages/e7/48/2553a481be45f34802da24aa1f25c2f815cd28266976783585bfe4a7af63/mujoco_core-4.0.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", upload-time = 2026-11-06T15:34:32Z, size = 9687915, hashes = { sha256 = "857a287fd63c65449880dc8e1539d039461d453fa0c9716545511fa38e7749f6" } }]
+version = "4.0.1"
+wheels = [{ url = "https://files.pythonhosted.org/packages/c2/a1/52021bd39a8a471dcb197695df98ea4bc74f357e4c733cfaa0eebb76e17f/mujoco_core-4.0.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", upload-time = 2026-11-11T16:19:19Z, size = 9691364, hashes = { sha256 = "a7f604671bc606ecd4753c32adba37587dc4022735e16c75c9f4fffd3e202bf2" } }]
 
 [[packages]]
 name = "mujoco-studio"
-version = "4.0.0"
-wheels = [{ url = "https://files.pythonhosted.org/packages/01/11/6c472cc048cce0d7f2922ff8f563c48ab9a471d42233fbf6161b561c6f38/mujoco_studio-4.0.0-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", upload-time = 2026-11-06T15:37:59Z, size = 12808162, hashes = { sha256 = "b227886f55aa0d2daaed7c5ef1e8d5572c88695dddc215ede011638728f60b3a" } }]
+version = "4.0.1"
+wheels = [{ url = "https://files.pythonhosted.org/packages/8d/9f/a9530a7d499929e526086887d115844583aeb60200ff5b044afd6df59815/mujoco_studio-4.0.1-cp314-cp314-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", upload-time = 2026-11-11T16:21:26Z, size = 8746819, hashes = { sha256 = "0b61366845178e3586c397813910aca870d2a0bd873aaf886abbe5da7ecd4ad7" } }]
+
+[[packages]]
+name = "mujoco-studio-wasm"
+version = "4.0.1"
+wheels = [{ url = "https://files.pythonhosted.org/packages/b9/f7/f59dc75abfbc4f232666ada6ae3946da0af8a8bcd46f058ee063786c3681/mujoco_studio_wasm-4.0.1-py3-none-any.whl", upload-time = 2026-11-11T16:20:45Z, size = 2442076, hashes = { sha256 = "14d724721c971ec208baeb6b449797a9cd456ea0331bc8e8a8722e7823e60ccc" } }]
 
 [[packages]]
 name = "mypy-extensions"
