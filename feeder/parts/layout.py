@@ -105,18 +105,21 @@ def pocket_count(cfg: Config = CFG) -> int:
     return math.floor(2 * math.pi * pocket_circle_r(cfg) / (pocket_d(cfg) * cp.pocket_pitch))
 
 
-def plate_drag_torque(cfg: Config = CFG) -> float:
-    """Nm to turn the plate under the brass: the pile rests on the low side at about the pocket circle."""
+def plate_drag_torque(cfg: Config = CFG, angle: float | None = None) -> float:
+    """Nm to turn the plate under the brass: the pile rests on the low side at about the pocket circle.
+    `angle` is the tilt in deg, the plate set's start tilt by default."""
     cp = cfg.case_plate
-    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(tilt(cfg))) * pocket_circle_r(cfg) / 1000
+    angle = tilt(cfg) if angle is None else angle
+    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(angle)) * pocket_circle_r(cfg) / 1000
 
 
-def cap_drag_torque(cfg: Config = CFG) -> float:
+def cap_drag_torque(cfg: Config = CFG, angle: float | None = None) -> float:
     """Nm the brass turns the cap with, an upper bound: the whole design fill rests on the cap wall at its rim radius,
     as `plate_drag_torque` has it rest on the plate at the pocket circle. It loosens the cap when the plate turns
-    against the thread hand."""
+    against the thread hand. `angle` is the tilt in deg, the plate set's start tilt by default."""
     cp = cfg.case_plate
-    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(tilt(cfg))) * cfg.cap.d / 2 / 1000
+    angle = tilt(cfg) if angle is None else angle
+    return cp.drag_mu * cp.drag_mass * G * math.cos(math.radians(angle)) * cfg.cap.d / 2 / 1000
 
 
 def tipping_moment(tilt: float, cfg: Config = CFG) -> float:
