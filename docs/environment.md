@@ -4,7 +4,7 @@ All builds and tests run in the dev container (`.devcontainer/`).
 
 | Component | Version | Source |
 |---|---|---|
-| Base image | `mcr.microsoft.com/devcontainers/python:3.14-bookworm` (digest `sha256:68aef385...a6b`) | Microsoft dev container images |
+| Base image | `mcr.microsoft.com/devcontainers/python:3.14-bookworm` (digest `sha256:94053b77...d42`) | Microsoft dev container images |
 | Python | 3.14.8 | base image |
 
 Python packages (top-level pins in `pyproject.toml`, full lock in `pylock.toml`):
@@ -21,13 +21,13 @@ Python packages (top-level pins in `pyproject.toml`, full lock in `pylock.toml`)
 | rtree | 1.4.1 |
 | numpy | 2.5.4 |
 | scipy | 1.18.1 |
-| pandas | 3.1.0 |
+| pandas | 3.1.1 |
 | matplotlib | 3.11.2 |
 | pytest | 9.2.0 |
 | pytest-xdist | 3.8.0 |
 | pytest-cov | 7.1.0 |
 | ocp_vscode (optional viewer) | 4.2.0 |
-| mujoco (simulation) | 3.17.0 |
+| mujoco (simulation) | 4.0.1 |
 | coacd (simulation) | 1.0.14 |
 
 Git is used on the host.
