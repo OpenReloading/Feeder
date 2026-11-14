@@ -27,7 +27,7 @@ Python packages (top-level pins in `pyproject.toml`, full lock in `pylock.toml`)
 | pytest-xdist | 3.8.0 |
 | pytest-cov | 7.1.0 |
 | ocp_vscode (optional viewer) | 4.2.0 |
-| mujoco (simulation) | 3.17.0 |
+| mujoco (simulation) | 4.0.1 |
 | coacd (simulation) | 1.0.14 |
 
 Git is used on the host.
