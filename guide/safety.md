@@ -29,7 +29,7 @@ Switch POWER off before you reach into the bowl, clear a jam, take the cap off, 
 The stop is the only thing that ends a run on its own, and a faulty sensor or a stuck relay contact leaves the motor running with nothing to show it.
 
 1. With the hose on the press and the press not taking cases, switch POWER on and watch the first fill.
-2. When the cases stand in front of the sensor window, the plate must stop within the relay delay (OP on the timer relay, about 2 s).
+2. When the cases stand in front of the sensor window, the plate must stop within the relay delay (OP on the timer relay, 0.5 s).
 3. Take cases out at the press until the plate starts again. If it does not start with the tube empty above the sensor, treat it as a failed test.
 
 If the plate does not stop, or does not start again, switch POWER off and do not run the feeder until the cause is fixed ([troubleshooting](troubleshooting.md)).

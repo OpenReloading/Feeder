@@ -13,7 +13,7 @@ All dimensions and options are in `feeder/config.py` (frozen dataclasses, instan
 | `printer` | bed size and edge margin. The plate and band diameter follow from the bed |
 | `calibers` | rim diameter, minimum rim thickness and case length per caliber (C.I.P. TDCC) |
 | `motor` | 5840-31ZY output shaft, boss, mounting screws, gearbox and can envelope, direction of the can, mass range |
-| `case_plate` | caliber or caliber group, notches or holes, pocket clearance and pitch, plate height over case length, chamfers, pickup channels, ribs or ridges (`ribs`), pull eye, design fill, item and orientation (`item`, `orient`) with the tilt of each (`tilts`), rotation direction (the cap thread hand follows it and the wiring has one motor polarity: set it here and print the matching plate and cap, do not swap the motor leads), drag estimate |
+| `case_plate` | caliber or caliber group, notches or holes, pocket clearance and pitch, plate height over case length, chamfers, pickup channels, ribs or ridges (`ribs`), pull eye, design fill, item and orientation (`item`, `orient`) with the tilt of each (`tilts`), rotation direction (the cap thread hand follows it and the wiring has one motor polarity: set it here and print the matching plate and cap; a motor that turns the wrong way at the first power-up gets its two cores swapped at the motor terminals, never at the controller, the relay or the plugs), drag estimate |
 | `body` | split (`arcs`, `halves`, `one_piece`), floor, wall height, deck, cup, ribs, skirt, wall joint screws and keys, seam post screws, wall extender, motor can tunnel |
 | `track` | gap from plate to deck, band ring, gate setback, chamfer and lap |
 | `exit` | drop opening length over case length, funnel lean and length, bore clearance, spigot, ledge in the deck recess |
@@ -36,7 +36,7 @@ Full hardware list for the default 9mm case feeder: `bom/case_feeder_9mm.md`.
 | Part | Hardware |
 |---|---|
 | `slip_clutch_carrier_metal_hub` | Pololu 2693 hub with its 2 M3 set screws, 3 x ISO 4762 M3 x 10, CNC Kitchen M5 x 9.5 insert. `GENERIC_8MM_FLANGE`: 2 x ISO 4762 M3 x 12 with ISO 4032 M3 nuts |
-| `slip_clutch_hub_gauge` | none. Fork as thick as the floor gap under the hub boss, with a handle up past the deck: lay it on the cup floor around the shaft, push the hub down onto it, tighten the hub set screws, slide it out by the handle (away from the shaft, about 21 mm) and lift it out. The plate then sits at its design height above the track. Prints fork down |
+| `slip_clutch_hub_gauge` | none. Fork as thick as the floor gap under the hub boss (plus `clutch.gauge_trim` from the plate gap trial fit), with a handle up past the deck: lay it on the cup floor around the shaft, push the hub down onto it, tighten the hub set screws, slide it out by the handle (away from the shaft, about 21 mm) and lift it out. The plate then sits at its design height above the track. Prints fork down |
 | `slip_clutch_drive_ring` | none. Sits on the clutch cone with disc, springs and knob inside and stays there when plates are changed. Reprint it when the cone or floor wears. Prints flange down |
 | `slip_clutch_cap` | none. Twists onto the ring thread by hand (right-hand for the default counter-clockwise plate) and clamps the plate. Prints top down |
 | `slip_clutch_disc` | 6 Gutekunst VD-127E-01 springs |
@@ -113,7 +113,7 @@ Parts chain on the drop tube instead of more openings in the bowl: one drop open
 
 - Lay the hose downhill all the way to the press, with no loops or rising sections, and tie it to the stand: the bayonet lugs are 1.2 mm high and carry the drop tube, the sensor and the hose. A 9mm case (21.6 mm diagonal) cannot turn over in the 14 mm hose or the 10.9 mm bore.
 - The sensor sees the case through the 1.0 mm `drop_tube.window_t` wall. With a brass correction factor of 0.3 to 0.5 the LJ18A3-8 switches at 1.9 to 3.2 mm (estimate). A case lies 1.45 to 1.90 mm from the sensor face. Test with real cases before printing more. If it misses cases, set `window_t` to 0.6 or use a longer-range M18 sensor.
-- Each falling case passes the sensor in about 0.1 s. Use an off-delay timer relay (BOM) so the motor stops only on a full tube, not on each case.
+- Each falling case passes the sensor in about 0.1 s. Use an off-delay timer relay (BOM) so the motor stops only on a full tube, not on each case. Start with an OP of 0.5 s: longer than one passing case, shorter than the free drop path above the sensor takes to fill at the case rate. The sensor sits 76.2 mm below the deck for every plate set, 4.0 case lengths of 9mm, and the 9mm plate passes up to 3.7 pockets per second at 6.5 rpm, so a 2 s delay lets cases stand in the funnel and jam under the plate.
 
 ## Tilt mount
 
