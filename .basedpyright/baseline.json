@@ -118,22 +118,6 @@
                 }
             },
             {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 17,
-                    "endColumn": 62,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportArgumentType",
-                "range": {
-                    "startColumn": 17,
-                    "endColumn": 62,
-                    "lineCount": 1
-                }
-            },
-            {
                 "code": "reportReturnType",
                 "range": {
                     "startColumn": 11,
@@ -607,7 +591,7 @@
                 "code": "reportReturnType",
                 "range": {
                     "startColumn": 11,
-                    "endColumn": 63,
+                    "endColumn": 56,
                     "lineCount": 1
                 }
             }
