@@ -8,7 +8,7 @@
   is held both ways and cannot lift off. Adjustable: two printed rod ends on an M6 threaded rod (DIN 976-1),
   the adjust end between two nuts (stepless over `tilt_range`), the fixed end on a captive nut and a jam nut.
   Fixed: one printed link per angle in `fixed_tilts`, same pins.
-- Pivot hardware: ISO 4017 M10, 2 washers (ISO 7089, same sizes as DIN 125 A), DIN 985 nut.
+- Pivot hardware: ISO 4014 M10 (plain shank under the tongue, which turns on it), 2 washers (ISO 7089, same sizes as DIN 125 A), DIN 985 nut.
 
 Gravity turns the body toward a steeper tilt at every tilt of the range (centre of mass on the low side of the
 pivot), so the link is always in compression and the pin play sits on one side.
@@ -69,11 +69,15 @@ def tilt_span(cfg: Config = CFG) -> tuple[float, float]:
 
 
 def pivot_bolt_length(cfg: Config = CFG) -> float:
-    """ISO 4017 length: washer, ear, tongue with gaps, ear, washer, nylon nut and one pitch beyond it."""
+    """ISO 4014 length: washer, ear, tongue with gaps, ear, washer, nylon nut and one pitch beyond it, and long enough
+    that the thread starts past the tongue, which turns on the plain shank."""
     mt = cfg.mount
     h = fasteners.washer_data(mt.pivot_size)["h"]
     stack = 2 * h + 2 * mt.ear_t + ear_gap(cfg) + mt.pivot_nut_h + _pitch(mt.pivot_size, cfg)
-    return fasteners.pick_length(fasteners.hex_screw_lengths(mt.pivot_size), stack)
+    tongue_end = h + mt.ear_t + ear_gap(cfg) - 2 * cfg.print.fit  # from under the bolt head
+    lengths = fasteners.hex_screw_lengths(mt.pivot_size, "iso4014")
+    thread = fasteners.hex_screw(mt.pivot_size, lengths[0], "iso4014").thread_length
+    return fasteners.pick_length(lengths, max(stack, tongue_end + thread))
 
 
 def yoke_cb_depth(cfg: Config = CFG) -> float:
@@ -363,6 +367,9 @@ def clamp(cfg: Config = CFG) -> Part:
     # brace: a web from the block edges up the stem's x faces, below the yoke ears, against a sideways push
     web = Polygon((-w / 2, h), (w / 2, h), (mt.tongue_t / 2, brace_top(cfg)), (-mt.tongue_t / 2, brace_top(cfg)), align=None)
     body += extrude(Plane.XZ * web, tw / 2, both=True)
+    c = cfg.print.min_wall  # 45 deg chamfer where the stem meets the block across the pivot axis: no sharp inside corner, no support
+    for sy in (-1, 1):
+        body += Pos(0, sy * tw / 2, h) * extrude(Plane.YZ * Polygon((0, 0), (sy * c, 0), (0, c), align=None), w / 2, both=True)
     body -= Pos(-w, 0, zp) * teardrop(pivot_d(cfg), 2 * w)
     # fork for pin B on the -y face: 45 deg flanks above and below the pin, so the ears print upright
     yb, zb = mt.link_b[0], zp + mt.link_b[1]
@@ -391,7 +398,7 @@ def tube_clamp_cuts(h: float, cap: float, screw_z: list[float], cfg: Config = CF
     for z in screw_z:
         out += Pos(-w / 2, L["y_s"], z) * roof * teardrop(fasteners.clearance_d(mt.clamp_size), w)
         out += Pos(-w / 2, L["y_s"], z) * roof * teardrop(2 * L["cb_r"], clamp_cb_depth(cfg))
-        out += clamp_nut_pocket(z, cfg, roof if lying else Pos()) * fasteners.nut_pocket(mt.clamp_size)
+        out += clamp_nut_pocket(z, cfg, roof if lying else Pos()) * fasteners.nut_pocket(mt.clamp_size, cfg)
     return out
 
 
@@ -425,7 +432,7 @@ def _rod_end(cfg: Config, kind: str) -> Part:
     body -= Pos(0, d["window"] + d["length"] / 2, 0) * Box(window_w, d["length"], t, align=BOTTOM)
     body -= Pos(0, d["window"] + d["length"], t / 2) * Rot(Z=90) * teardrop(fasteners.clearance_d(mt.link_rod_size), d["wall"])
     if kind == "fixed":  # captive nut pocket in the outer face, a flat up: a short bridge, a corner up would leave 30 deg roof flanks
-        body -= Pos(0, d["reach"], t / 2) * Rot(X=-90) * fasteners.nut_pocket(mt.link_rod_size)
+        body -= Pos(0, d["reach"], t / 2) * Rot(X=-90) * fasteners.nut_pocket(mt.link_rod_size, cfg)
     return body
 
 
