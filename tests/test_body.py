@@ -35,6 +35,13 @@ def test_track_gap_stays_under_the_rim_thickness():
     assert highest + half_flat < CAL.rim_t_min  # no rim wedges between plate and deck
 
 
+def test_trial_fit_readings_of_the_design_gap_pass_on_every_plate_set():
+    for cfg in layout.plate_sets():
+        lo, hi = layout.plate_gap_limits(cfg)
+        assert lo <= cfg.track.gap  # the trim target, ring pressed onto its cone
+        assert cfg.track.gap + layout.seat_drop(cfg) <= hi, cfg.case_plate.caliber  # cone without clearance
+
+
 def test_exit_insert_and_wall_seams_keep_the_minimum_wall():
     length, r0, r1 = b.opening()  # noqa: RUF059
     assert layout.bowl_r() - FIT - r1 >= MW  # the opening's outer edge is an arc under the band
