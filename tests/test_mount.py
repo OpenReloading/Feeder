@@ -67,7 +67,7 @@ def test_screw_lengths_are_standard_and_engage():
     engaged = length - (MT.yoke_t - m.yoke_cb_depth())
     assert CFG.fasteners.min_engagement * fasteners.nominal_d(MT.bolt_size) <= engaged <= ins.hole_depth
     assert MT.yoke_t - m.yoke_cb_depth() >= MW  # floor under the head
-    assert m.pivot_bolt_length() in fasteners.hex_screw_lengths(MT.pivot_size)
+    assert m.pivot_bolt_length() in fasteners.hex_screw_lengths(MT.pivot_size, "iso4014")
     assert m.clamp_bolt_length() in fasteners.socket_screw_lengths(MT.clamp_size)
     assert m.link_pin_length() in fasteners.socket_screw_lengths(MT.link_pin_size)
 
@@ -224,7 +224,7 @@ def _peak_stresses(clamp):
     zp, er, et = m.clamp_pivot_z(), m.ear_r(), MT.ear_t
     ex = m.ear_gap() / 2 + et / 2
     sections = []
-    for zc in np.linspace(MT.clamp_h + 0.5, zp - m.pivot_d() / 2 - 0.5, 16):  # from the block top to the pivot hole
+    for zc in np.linspace(MT.clamp_h + CFG.print.min_wall + 0.5, zp - m.pivot_d() / 2 - 0.5, 16):  # from above the root chamfer to the pivot hole
         box = (clamp & Pos(0, 0, zc) * Box(1000, 1000, 0.1)).bounding_box()
         assert box.size.Y == pytest.approx(MT.tongue_w, abs=0.01), zc  # a full rectangle: stem and brace  # noqa: SIM300
         sections.append((zc - zp, box.size.X, box.size.Y))
@@ -382,3 +382,18 @@ def test_support_check_catches_a_fork_ear_without_its_lower_flank():
     face, tip = m.clamp_layout()["y_min"], MT.link_b[0] - m.fork_r()
     under = Pos(0, (face + tip) / 2, 0) * Box(m.link_gap() + 2 * MT.ear_t + 2, face - tip, zb, align=sc.BOTTOM)
     assert _unsupported(clamp - under) != []
+
+
+def test_tongue_stem_meets_the_block_with_a_45_deg_chamfer(parts):
+    clamp = parts["mount_clamp"]
+    for sy in (-1, 1):
+        edge = (0, sy * (MT.tongue_w / 2 + 0.4), MT.clamp_h + 0.4)
+        assert clamp.is_inside(edge)  # inside the 1.6 mm chamfer, a sharp corner leaves this point empty
+        assert not clamp.is_inside((0, sy * (MT.tongue_w / 2 + 1.0), MT.clamp_h + 1.0))  # beyond the 45 deg face
+
+
+def test_tongue_turns_on_the_plain_shank_of_the_pivot_bolt():
+    length = m.pivot_bolt_length()
+    assert length == 60  # M10 ISO 4014: thread 26 mm, so a 55 mm bolt starts its thread 3.3 mm inside the 22 mm tongue
+    tongue_end = fasteners.washer_data(MT.pivot_size)["h"] + MT.ear_t + m.ear_gap() - 2 * FIT  # from under the head
+    assert length - fasteners.hex_screw(MT.pivot_size, length, "iso4014").thread_length >= tongue_end

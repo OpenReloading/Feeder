@@ -12,6 +12,7 @@ exclude_docs: |   # snippets of index.md and assembly.md
   generated/plate-groups.md
   generated/assembly-eyebrow.md
   generated/fasteners.md
+  generated/side-view.md
 
 theme:
   name: material
@@ -70,5 +71,6 @@ nav:
   - BOM: bom.md
   - Assembly: assembly.md
   - Wiring: wiring.md
+  - Safety and first run: safety.md
   - Tilt and capacity: tilt.md
   - Troubleshooting: troubleshooting.md
