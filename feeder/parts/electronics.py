@@ -305,7 +305,7 @@ def box(cfg: Config = CFG) -> Part:
     back = o["y1"] - wt
     for x, z in lid_screws(cfg):  # corner posts from the back wall to the rim, inserts from the rim
         body += Pos(x, (o["y0"] + back) / 2, z) * Box(p, back - o["y0"], p)
-        body -= Pos(x, o["y0"], z) * Rot(X=90) * fasteners.insert_hole(e.lid_screw_size)
+        body -= Pos(x, o["y0"], z) * Rot(X=90) * fasteners.insert_hole(e.lid_screw_size, cfg)
     for x, z in relay_screws(cfg):
         body += Pos(x, back + 1, z) * Rot(X=90) * Cylinder(standoff_d(cfg) / 2, e.standoff_h + 1, align=BOTTOM)
         hole_d = cfg.fasteners.inserts[e.lid_screw_size].hole_d
