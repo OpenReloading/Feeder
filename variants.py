@@ -5,7 +5,8 @@ Run in the dev container from the project root:
     .venv/bin/python build.py --configurator --no-test    # build/configurator/<hash>.stl and manifest.json
 
 manifest.json: "options" (each option and its values), "parts" (per part name: "depends" on options and "files", the
-STL hash per key), "bom" (bought parts: "depends" and "rows" per key). `resolve` reads it for one choice of options.
+STL hash per key), "bom" (bought parts: "depends" and "rows" per key, "plate_rows" per plate set: the hose). `resolve`
+reads it for one choice of options.
 A key is the values of the options, in the order of "depends", joined by "/" (`*` for none). Part files are in the
 orientation they go on the print bed.
 """
@@ -108,13 +109,18 @@ def bom_rows(cfg: Config) -> list[dict]:
     """The bought parts for `cfg`: its fasteners from the assembly, the other parts from the BOM file. Rows of the file that
     belong to an option (the extender's fasteners, the rod of the adjustable link, the Pololu hub) follow the option."""
     rows = [r for r in guide.bom_items([], cfg)
-            if r["group"] == "Fasteners" or not guide.FASTENER.match(r["part"]) or r["part"].startswith("DIN 976-1")]
+            if (r["group"] == "Fasteners" or not guide.FASTENER.match(r["part"]) or r["part"].startswith("DIN 976-1")) and not r["part"].startswith(guide.HOSE)]
     if mount.link_angle(cfg) is not None:  # printed link: no rod
         rows = [r for r in rows if not r["part"].startswith("DIN 976-1")]
     if cfg.metal_hub == GENERIC_8MM_FLANGE:
         rows = [dict(r, part="Generic 8 mm aluminium flange coupling, 4 clearance holes", spec="nuts under the flange. Unverified, measure on delivery")
                 if r["part"].startswith("Pololu 2693") else r for r in rows]
     return rows
+
+
+def plate_rows(cfg: Config) -> list[dict]:
+    """The bought parts that follow the plate set of `cfg`: the hose."""
+    return [r for r in guide.bom_items([], cfg) if r["part"].startswith(guide.HOSE)]
 
 
 def _export(name: str, builder, cfg: Config, out: Path) -> str:
@@ -137,7 +143,8 @@ def build_configurator(out: Path = build.BUILD / "configurator", options: dict =
         parts[name] = {"depends": list(deps), "files": files}
         print(f"built {name}: {len(files)} keys, {len(set(files.values()))} files")
     bom = {key(BOM_DEPENDS, c): bom_rows(config(c)) for c in {key(BOM_DEPENDS, c): c for c in combinations(options)}.values()}
-    manifest = {"options": {k: list(v) for k, v in options.items()}, "parts": parts, "bom": {"depends": list(BOM_DEPENDS), "rows": bom}}
+    plates = {p: plate_rows(config({**combinations(options)[0], "plate": p})) for p in options["plate"]}
+    manifest = {"options": {k: list(v) for k, v in options.items()}, "parts": parts, "bom": {"depends": list(BOM_DEPENDS), "rows": bom, "plate_rows": plates}}
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1), encoding="utf-8")
     return manifest
 
@@ -149,4 +156,4 @@ def resolve(manifest: dict, choice: dict) -> tuple[dict, list[dict]]:
         k = key(tuple(p["depends"]), choice)
         if k in p["files"]:
             parts[name] = p["files"][k]
-    return parts, manifest["bom"]["rows"][key(tuple(manifest["bom"]["depends"]), choice)]
+    return parts, manifest["bom"]["rows"][key(tuple(manifest["bom"]["depends"]), choice)] + manifest["bom"]["plate_rows"][choice["plate"]]

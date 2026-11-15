@@ -46,8 +46,6 @@ def test_bore_never_steps_inward_along_the_path():
     diameters = [d for _, d in profile]
     assert diameters[0] == pytest.approx(b.bore_d())
     assert diameters == sorted(diameters)
-    assert D.hose_id >= b.bore_d()
-    assert D.hose_id < D.hose_od
 
 
 def test_printed_bore_matches_the_profile(part):

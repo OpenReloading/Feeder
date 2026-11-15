@@ -3,10 +3,12 @@ BOM checklist and wiring board of the configured feeder. Printed parts and faste
 assembly, the other bought parts from the BOM file."""
 
 import re
+from dataclasses import replace
 from pathlib import Path
 
 from feeder import assembly, export
 from feeder.config import CFG, Config
+from feeder.parts import drop_tube
 from feeder.wiring import WIRING_PARTS, WIRING_STEPS
 
 BOM = Path(__file__).resolve().parent.parent / "bom" / "case_feeder_9mm.md"
@@ -14,6 +16,7 @@ CONFIGURATOR = BOM.parent.parent / "guide" / "configurator.md"
 FASTENER_PREFIX = "ISO|DIN|CNC Kitchen|Panel nut|Lock nut"  # BOM rows that the assembly places as fasteners
 FASTENER = re.compile(rf"^({FASTENER_PREFIX})[ ,]")
 LINK = re.compile(r"\[([^\]]*)\]\(([^)]*)\)")
+HOSE = "Clear PVC hose"  # the BOM row whose size follows the plate set
 
 
 def _plain(cell: str) -> str:
@@ -31,6 +34,11 @@ def bom_rows(path: Path = BOM) -> list[tuple[str, list[str]]]:
             if cells[0] not in ("Item", "Part"):
                 out.append((section, cells))
     return out
+
+
+def hose_part(cfg: Config = CFG) -> str:
+    inner, outer = drop_tube.hose(cfg)
+    return f"{HOSE} {inner:g} mm ID x {outer:g} mm OD"
 
 
 def _qty(cell: str) -> int | str:
@@ -54,7 +62,8 @@ def bom_items(printed: list[str], cfg: Config = CFG, path: Path = BOM) -> list[d
         if section == "Printed parts" or cells[0] in counts:
             continue
         link = LINK.search("|".join(cells))
-        item = dict(group=section, part=_plain(cells[0]), spec=". ".join(_plain(c) for c in cells[2:] if _plain(c)), qty=_qty(cells[1]))  # noqa: C408
+        part = hose_part(cfg) if _plain(cells[0]).startswith(HOSE) else _plain(cells[0])
+        item = dict(group=section, part=part, spec=". ".join(_plain(c) for c in cells[2:] if _plain(c)), qty=_qty(cells[1]))  # noqa: C408
         items.append(item | ({"link": link.group(2)} if link else {}))
     ids: dict = {}
     for item in items:
@@ -105,11 +114,17 @@ def fasteners_markdown(cfg: Config = CFG) -> str:
         f"| `{host}` | {n} x {name} | {i + 1}. {steps[used[i]][0]} |\n" for (i, host, name), n in sorted(counts.items()))
 
 
-def plate_groups_markdown(page: Path = CONFIGURATOR) -> str:
-    """The plate groups of the configurator page's plate options as a Markdown table (Group, Calibers)."""
+def plate_groups_markdown(page: Path = CONFIGURATOR, cfg: Config = CFG) -> str:
+    """The plate groups of the configurator page's plate options as a Markdown table (Group, Calibers, Hose)."""
     group = re.search(r'<optgroup label="Plate groups">(.*?)</optgroup>', page.read_text(encoding="utf-8"), re.S)
-    rows = re.findall(r"<option[^>]*>([^:<]+): ([^<]+)</option>", group.group(1) if group else "")
-    return "| Group | Calibers |\n|---|---|\n" + "".join(f"| {name} | {calibers.replace('&amp;', '&')} |\n" for name, calibers in rows)
+    rows = re.findall(r'<option value="([^"]+)"[^>]*>([^:<]+): ([^<]+)</option>', group.group(1) if group else "")
+
+    def hose(key: str) -> str:
+        inner, outer = drop_tube.hose(replace(cfg, case_plate=replace(cfg.case_plate, caliber=key)))
+        return f"{inner:g} mm ID x {outer:g} mm OD"
+
+    return "| Group | Calibers | Hose |\n|---|---|---|\n" + "".join(
+        f"| {name} | {calibers.replace('&amp;', '&')} | {hose(key)} |\n" for key, name, calibers in rows)
 
 
 def wiring_board() -> dict:

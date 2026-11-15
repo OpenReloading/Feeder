@@ -18,7 +18,8 @@
       const hash = p.files[key(p.depends, c)];
       if (hash) parts[name] = hash;
     }
-    return { parts, bom: manifest.bom.rows[key(manifest.bom.depends, c)] };
+    const rows = manifest.bom.rows[key(manifest.bom.depends, c)];
+    return { parts, bom: rows && [...rows, ...(manifest.bom.plate_rows[c.plate] || [])] };
   }
 
   const sizes = new Map();
