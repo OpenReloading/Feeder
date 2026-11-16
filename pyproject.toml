@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "feeder-metric"
 version = "0.3.0"
 description = "Parametric brass and bullet collator for reloading, built in build123d"
-license = "MIT"
+license = "ISC"
 requires-python = ">=3.11,<3.15"
 # Exact pins; pylock.toml holds the full lock including transitive packages.
 dependencies = [

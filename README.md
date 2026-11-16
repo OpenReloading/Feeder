@@ -1,4 +1,4 @@
-<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="guide/assets/logo-dark.svg"><img src="guide/assets/logo.svg" width="320" alt="OpenReloading Feeder"></picture></p>
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="guide/assets/logo-dark.svg"><img src="guide/assets/logo.svg" width="320" alt="RangeFoundry Feeder"></picture></p>
 
 # Feeder
 
@@ -35,4 +35,4 @@ Print files are not published until a first feeder is built and tested, so this 
 - [docs/design.md](docs/design.md): every option in `feeder/config.py`, the parts with their hardware, plate sets and the tilt mount.
 - [Issues](https://github.com/OpenReloading/Feeder/issues): [#3](https://github.com/OpenReloading/Feeder/issues/3) lists what a first print has to test.
 
-MIT license, see `LICENSE`.
+ISC license, see `LICENSE`.
