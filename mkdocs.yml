@@ -3,7 +3,7 @@ site_url: !ENV [SITE_URL, 'https://openreloading.github.io/Feeder/']
 site_description: Parametric brass collator for reloading. Build guide, BOM and assembly steps generated from feeder/config.py.
 repo_url: https://github.com/OpenReloading/Feeder
 repo_name: OpenReloading/Feeder
-copyright: <a href="https://github.com/OpenReloading/Feeder/blob/main/LICENSE">MIT licence</a>
+copyright: <a href="https://github.com/OpenReloading/Feeder/blob/main/LICENSE">ISC licence</a>
 docs_dir: guide
 exclude_docs: |   # snippets of index.md and assembly.md
   generated/steps.md
