@@ -6,7 +6,7 @@ asttokens==3.0.2
 bd_materials==0.2.6
 bd_warehouse==0.4.0
 build123d==0.13.0
-cachetools==7.2.7
+cachetools==8.0.1
 cadquery-ocp-novtk==8.0.1.1.0
 cadquery-ocp-proxy==8.0.1.1.0
 certifi==2026.10.23
