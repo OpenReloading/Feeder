@@ -14,8 +14,8 @@ Python packages (top-level pins in `pyproject.toml`, full lock in `pylock.toml`)
 | build123d | 0.13.0 |
 | bd_warehouse | 0.4.0 |
 | cadquery-ocp-novtk | 8.0.1.1.0 |
-| trimesh | 5.2.0 |
-| manifold3d | 3.5.4 |
+| trimesh | 5.2.1 |
+| manifold3d | 3.5.5 |
 | networkx | 3.7 |
 | shapely | 2.2.0 |
 | rtree | 1.4.1 |
