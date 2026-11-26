@@ -10,6 +10,8 @@ hide:
 # Configurator
 
 Pick the options of your feeder. Print files are not published until a first feeder is built and tested. The page lists the parts to print and the parts to buy for that choice, and packs the print files into one zip, only on a site you build yourself after `build.py --configurator` (see docs/development.md in the repository).
+
+[Source code](https://github.com/OpenReloading/Feeder)
 </div>
 
 !!! warning "Untested design"

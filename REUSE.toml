@@ -1,0 +1,25 @@
+version = 1
+
+# Everything else: the part generator, scripts, tests, the simulation, the configurator and the site templates (LICENSE).
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "2026 the RangeFoundry contributors"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
+# Documentation, guide text and the logos.
+[[annotations]]
+path = ["**/*.md", "guide/**"]
+SPDX-FileCopyrightText = "2026 the RangeFoundry contributors"
+SPDX-License-Identifier = "MIT"
+
+# Guide scripts and styles.
+[[annotations]]
+path = ["guide/javascripts/**", "guide/stylesheets/**"]
+SPDX-FileCopyrightText = "2026 the RangeFoundry contributors"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
+# Hardware: the renders of the generated parts and the BOM (the CAD source is the code in feeder/).
+[[annotations]]
+path = ["guide/assets/feeder-*.png", "bom/**"]
+SPDX-FileCopyrightText = "2026 the RangeFoundry contributors"
+SPDX-License-Identifier = "AGPL-3.0-only"
