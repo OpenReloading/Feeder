@@ -37,7 +37,9 @@ Print files are not published until a first feeder is built and tested, so this 
 
 ## License
 
-- Code (the part generator in `feeder/`, scripts, tests, the simulation, the configurator and site templates) and the parts it generates, the renders and the BOM (`bom/`): AGPL-3.0-only, see [LICENSE](LICENSE).
-- Documentation, guide text and the logos: MIT, see [LICENSES/MIT.txt](LICENSES/MIT.txt).
+- Code (the part generator in `feeder/`, scripts, tests, the simulation, the configurator and site templates): AGPL-3.0-only, see [LICENSE](LICENSE).
+- The parts it generates (STL, STEP), their renders and the BOM (`bom/`): CERN-OHL-S-2.0, see [LICENSES/CERN-OHL-S-2.0.txt](LICENSES/CERN-OHL-S-2.0.txt). The configurator's zip and release archive carry it as `LICENSE.txt`.
+- Documentation and guide text: MIT, see [LICENSES/MIT.txt](LICENSES/MIT.txt).
+- The Feeder name and logos: no open license, see [LICENSES/LicenseRef-Brand.txt](LICENSES/LicenseRef-Brand.txt).
 
-A changed configurator links its own source: the "Source code" link is in `guide/configurator.md`.
+The configurator page links the source of the commit the site is built from (`hooks/source_link.py`). A changed configurator links its own source: the repository address is in `guide/configurator.md`.

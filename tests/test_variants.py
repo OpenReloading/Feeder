@@ -47,6 +47,11 @@ def test_every_referenced_file_exists_and_is_named_by_its_content(built):
         assert hashlib.sha256((out / f"{h}.stl").read_bytes()).hexdigest().startswith(h)
 
 
+def test_print_files_ship_with_their_license(built):
+    out, _ = built
+    assert (out / "LICENSE.txt").read_text(encoding="utf-8").startswith("CERN Open Hardware Licence Version 2 - Strongly Reciprocal")
+
+
 def test_identical_parts_share_one_file(built):
     out, manifest = built
     files = manifest["parts"]["body_track_gate"]["files"]

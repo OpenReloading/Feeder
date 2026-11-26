@@ -41,7 +41,7 @@
     if (current !== c) return; // the options changed meanwhile
     const unique = new Set(names.map((n) => parts[n]));
     const total = [...unique].reduce((sum, h) => sum + bytes[names.findIndex((n) => parts[n] === h)], 0);
-    $("configurator-summary").textContent = `${names.length} files in the zip${total ? `, ${mb(total)}` : ""}.`;
+    $("configurator-summary").textContent = `${names.length} print files and their license in the zip${total ? `, ${mb(total)}` : ""}.`;
     $("configurator-parts").replaceChildren(...names.map((n, i) => {
       const row = document.createElement("tr");
       row.insertCell().append(...n.split(/(?<=_)/).flatMap((s, j) => (j ? [document.createElement("wbr"), s] : [s]))); // wraps after an underscore
@@ -123,6 +123,10 @@
         status.textContent = `Fetched ${++done} of ${new Set(Object.values(parts)).size} files`;
       }));
       const files = Object.keys(parts).sort((a, b) => a.localeCompare(b)).map((n) => ({ name: `${n}.stl`, data: data.get(parts[n]) }));
+      // the print files ship with their license (CERN-OHL-S-2.0, variants.build_configurator)
+      const license = await fetch(`${DATA}LICENSE.txt`);
+      if (!license.ok) throw new Error(`LICENSE.txt: ${license.status}`);
+      files.push({ name: "LICENSE.txt", data: new Uint8Array(await license.arrayBuffer()) });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(zip(files));
       a.download = `feeder-${Object.values(c).join("-")}.zip`;

@@ -15,7 +15,7 @@ def on_post_build(config):
         return
     dest = Path(config.site_dir) / "configurator" / "data"
     dest.mkdir(parents=True, exist_ok=True)
-    files = [*src.glob("*.stl"), src / "manifest.json"]
+    files = [*src.glob("*.stl"), src / "manifest.json", src / "LICENSE.txt"]
     for f in files:
         shutil.copy2(f, dest / f.name)
     log.info("copied %d variant files to %s", len(files), dest)
