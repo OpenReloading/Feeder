@@ -36,4 +36,11 @@ Print files are not published until a first feeder is built and tested, so this 
 - [docs/design.md](docs/design.md): every option in `feeder/config.py`, the parts with their hardware, plate sets and the tilt mount.
 - [Issues](https://github.com/OpenReloading/Feeder/issues): [#3](https://github.com/OpenReloading/Feeder/issues/3) lists what a first print has to test.
 
-ISC license, see `LICENSE`.
+## License
+
+- Code (the part generator in `feeder/`, scripts, tests, the simulation, the configurator and site templates): AGPL-3.0-only, see [LICENSE](LICENSE).
+- The parts it generates (STL, STEP), their renders and the BOM (`bom/`): CERN-OHL-S-2.0, see [LICENSES/CERN-OHL-S-2.0.txt](LICENSES/CERN-OHL-S-2.0.txt). The configurator's zip and release archive carry it as `LICENSE.txt`.
+- Documentation and guide text: MIT, see [LICENSES/MIT.txt](LICENSES/MIT.txt).
+- The Feeder name and logos: no open license, see [LICENSES/LicenseRef-Brand.txt](LICENSES/LicenseRef-Brand.txt).
+
+The configurator page links the source of the commit the site is built from (`hooks/source_link.py`). A changed configurator links its own source: the repository address is in `guide/configurator.md`.

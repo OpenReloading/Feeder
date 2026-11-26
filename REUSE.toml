@@ -1,0 +1,31 @@
+version = 1
+
+# Everything else: the part generator, scripts, tests, the simulation, the configurator and the site templates (LICENSE).
+[[annotations]]
+path = "**"
+SPDX-FileCopyrightText = "2026 the RangeFoundry contributors"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
+# Documentation and guide text.
+[[annotations]]
+path = ["**/*.md", "guide/**"]
+SPDX-FileCopyrightText = "2026 the RangeFoundry contributors"
+SPDX-License-Identifier = "MIT"
+
+# Names and logos: no open license (LICENSES/LicenseRef-Brand.txt).
+[[annotations]]
+path = ["guide/assets/favicon.svg", "guide/assets/logo*.svg", "guide/assets/mark-*.svg", "guide/assets/social-card.png"]
+SPDX-FileCopyrightText = "2026 the RangeFoundry contributors"
+SPDX-License-Identifier = "LicenseRef-Brand"
+
+# Guide scripts and styles.
+[[annotations]]
+path = ["guide/javascripts/**", "guide/stylesheets/**"]
+SPDX-FileCopyrightText = "2026 the RangeFoundry contributors"
+SPDX-License-Identifier = "AGPL-3.0-only"
+
+# Hardware: the renders of the generated parts and the BOM (the part generator in feeder/ is code).
+[[annotations]]
+path = ["guide/assets/feeder-*.png", "bom/**"]
+SPDX-FileCopyrightText = "2026 the RangeFoundry contributors"
+SPDX-License-Identifier = "CERN-OHL-S-2.0"

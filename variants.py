@@ -14,6 +14,7 @@ orientation they go on the print bed.
 import hashlib
 import itertools
 import json
+import shutil
 from dataclasses import replace
 from pathlib import Path
 
@@ -146,6 +147,8 @@ def build_configurator(out: Path = build.BUILD / "configurator", options: dict =
     plates = {p: plate_rows(config({**combinations(options)[0], "plate": p})) for p in options["plate"]}
     manifest = {"options": {k: list(v) for k, v in options.items()}, "parts": parts, "bom": {"depends": list(BOM_DEPENDS), "rows": bom, "plate_rows": plates}}
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1), encoding="utf-8")
+    # the release archive and the configurator's zip ship the print files with their license
+    shutil.copyfile(build.ROOT / "LICENSES" / "CERN-OHL-S-2.0.txt", out / "LICENSE.txt")
     return manifest
 
 
