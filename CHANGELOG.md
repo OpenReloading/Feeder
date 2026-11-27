@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.4.0](https://github.com/OpenReloading/Feeder/compare/v0.3.0...v0.4.0) (2026-11-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* license the code under AGPL-3.0-only ([#190](https://github.com/OpenReloading/Feeder/issues/190))
+
+### Features
+
+* **clutch:** plate gap trial fit ([#174](https://github.com/OpenReloading/Feeder/issues/174)) ([5919dcc](https://github.com/OpenReloading/Feeder/commit/5919dccea2cee4df1f598bef995ff06ed6572826))
+* **plates:** start tilt per plate set ([#173](https://github.com/OpenReloading/Feeder/issues/173)) ([7195b42](https://github.com/OpenReloading/Feeder/commit/7195b4269c07cd988088dd9f4e991c1af0336ff2))
+
+
+### Bug Fixes
+
+* **drop:** hose size per plate set ([#177](https://github.com/OpenReloading/Feeder/issues/177)) ([c314d0e](https://github.com/OpenReloading/Feeder/commit/c314d0e484cc31f51cb2c3b02969426867bb2a17))
+* **wiring:** sensor check by voltage, direction check, relay delay ([#175](https://github.com/OpenReloading/Feeder/issues/175)) ([f03fb70](https://github.com/OpenReloading/Feeder/commit/f03fb70aa107a5bfe33b9aab3cc0f68ddf9864ba))
+
+
+### Documentation
+
+* add the sponsor badge ([#189](https://github.com/OpenReloading/Feeder/issues/189)) ([a5974ca](https://github.com/OpenReloading/Feeder/commit/a5974ca30077800d1e55b1e070006ff983b68299))
+* **bom:** stand base for the 25 mm tube ([#171](https://github.com/OpenReloading/Feeder/issues/171)) ([7a5898e](https://github.com/OpenReloading/Feeder/commit/7a5898e3ff1bdedfcedf856e819eb9a361944981))
+* correct the badges ([#191](https://github.com/OpenReloading/Feeder/issues/191)) ([2edb4c7](https://github.com/OpenReloading/Feeder/commit/2edb4c731eaf26871b1ae686557db5211ba78b8d))
+* **guide:** introduction side view drawn from the CAD model ([#178](https://github.com/OpenReloading/Feeder/issues/178)) ([a75e7bb](https://github.com/OpenReloading/Feeder/commit/a75e7bba7d140da8244bda91044297aa461c8ddc))
+* **guide:** safety and first run ([#170](https://github.com/OpenReloading/Feeder/issues/170)) ([233871c](https://github.com/OpenReloading/Feeder/commit/233871cb4668908c34bc0e4102d0fe5a9093ed3f))
+* neutral wording without decision history ([#179](https://github.com/OpenReloading/Feeder/issues/179)) ([52c84c5](https://github.com/OpenReloading/Feeder/commit/52c84c54502f2574a97c8cd3967a196200561a59))
+
+
+### Miscellaneous Chores
+
+* license the code under AGPL-3.0-only ([#190](https://github.com/OpenReloading/Feeder/issues/190)) ([dd88f6a](https://github.com/OpenReloading/Feeder/commit/dd88f6ad2adc57d65b580481d396825df674c0fd))
+
 ## [0.3.0](https://github.com/OpenReloading/Feeder/compare/v0.2.0...v0.3.0) (2026-11-12)
 
 
