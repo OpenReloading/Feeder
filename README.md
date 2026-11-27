@@ -3,6 +3,9 @@
 # Feeder
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-eikelandin-db61a2?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/eikelandin)
+[![CI](https://github.com/OpenReloading/Feeder/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/OpenReloading/Feeder/actions/workflows/ci.yml)
+[![License: AGPL-3.0-only code, CERN-OHL-S-2.0 hardware](https://img.shields.io/badge/license-AGPL--3.0--only%20code%20%2B%20CERN--OHL--S--2.0%20hardware-blue)](REUSE.toml)
+[![Release](https://img.shields.io/github/v/release/OpenReloading/Feeder?sort=semver)](https://github.com/OpenReloading/Feeder/releases/latest)
 [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/hUCSjDYNaa)
 
 <picture>
